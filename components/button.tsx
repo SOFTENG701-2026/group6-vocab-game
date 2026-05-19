@@ -16,9 +16,9 @@ export default function Button({
   onClick
 }: ButtonProps) {
   const sizeClasses = {
-    large: "px-3 py-1.5 text-xl gap-3 border-2",
+    large: "px-3 py-1.5 text-3xl gap-3 border-2",
     medium: "px-2 py-1 text-lg gap-2 border-2 ",
-    small: "px-1 py-1 text-[8px] gap-1 border-1"
+    small: "px-1 py-1 text-sm gap-1 border"
   };
 
   return (
