@@ -18,7 +18,11 @@ export default function DifficultyModal({
 
   const activeCardId = hoveredCardId ?? selectedCardId;
 
-  function handleDifficultySelect(difficultyId: string) {
+  function handleDifficultyCardSelect(difficultyId: string) {
+    setSelectedCardId(difficultyId);
+  }
+
+  function handleDifficultyConfirm(difficultyId: string) {
     setSelectedCardId(difficultyId);
     onSelectDifficulty(difficultyId);
   }
@@ -61,7 +65,7 @@ export default function DifficultyModal({
             title='Easy'
             logo={
               <Image
-                src='/matching-easy.png'
+                src='/difficulty/matching-easy.png'
                 alt='Mix and Match Colors and Shape of given ingredient'
                 width={500}
                 height={500}
@@ -72,7 +76,8 @@ export default function DifficultyModal({
             isSelected={selectedCardId === "easy"}
             isHovered={hoveredCardId === "easy"}
             shouldBlur={activeCardId !== null && activeCardId !== "easy"}
-            onSelect={handleDifficultySelect}
+            onSelect={handleDifficultyCardSelect}
+            onButtonClick={handleDifficultyConfirm}
             onHoverStart={setHoveredCardId}
             onHoverEnd={() => setHoveredCardId(null)}
           />
@@ -82,7 +87,7 @@ export default function DifficultyModal({
             title='Hard'
             logo={
               <Image
-                src='/abc-hard.png'
+                src='/difficulty/abc-hard.png'
                 alt='Arrange lettered blocks to spell an ingredient'
                 width={200}
                 height={200}
@@ -93,7 +98,8 @@ export default function DifficultyModal({
             isSelected={selectedCardId === "hard"}
             isHovered={hoveredCardId === "hard"}
             shouldBlur={activeCardId !== null && activeCardId !== "hard"}
-            onSelect={handleDifficultySelect}
+            onSelect={handleDifficultyCardSelect}
+            onButtonClick={handleDifficultyConfirm}
             onHoverStart={setHoveredCardId}
             onHoverEnd={() => setHoveredCardId(null)}
           />

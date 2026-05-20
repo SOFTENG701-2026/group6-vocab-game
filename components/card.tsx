@@ -54,6 +54,7 @@ type CardProps = {
   shouldBlur?: boolean;
 
   onSelect?: (id: string) => void;
+  onButtonClick?: (id: string) => void;
   onHoverStart?: (id: string) => void;
   onHoverEnd?: () => void;
 };
@@ -77,6 +78,7 @@ export default function Card({
   shouldBlur = false,
 
   onSelect,
+  onButtonClick,
   onHoverStart,
   onHoverEnd
 }: CardProps) {
@@ -136,6 +138,10 @@ export default function Card({
     onSelect?.(id);
   }
 
+  function handleButtonClick() {
+    if (disabled) return;
+    onButtonClick?.(id);
+  }
   function renderTitle() {
     if (!title) return null;
 
@@ -188,18 +194,21 @@ export default function Card({
 
     return (
       <div
+        onClick={(event) => event.stopPropagation()}
         className={`
-          flex items-center justify-center px-8
-          ${getButtonSpacingClasses()}
-        `}
+      flex items-center justify-center px-8
+      ${isCompact ? "pt-2 pb-8" : "py-8"}
+    `}
       >
         <div
           className={`
-            transition-opacity duration-300
-            ${getButtonVisibilityClasses()}
-          `}
+        transition-opacity duration-300
+        ${isClear ? "opacity-100" : "opacity-45"}
+      `}
         >
-          <Button size='medium'>{buttonText}</Button>
+          <Button size='medium' onClick={handleButtonClick}>
+            {buttonText}
+          </Button>
         </div>
       </div>
     );

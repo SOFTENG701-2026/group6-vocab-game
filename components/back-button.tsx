@@ -12,7 +12,12 @@ export default function BackButton() {
       size='small'
       iconPosition='left'
       icon={<ArrowLeft className='w-5 h-5' />}
-      onClick={() => router.back()}
+      /**TODO:
+       * router.push("/") to home when there is no gameplay going on.
+       * router.push("/path to gameplay when the player has started a gameplay")
+       *
+       */
+      onClick={() => router.push("/")}
     >
       Back
     </Button>
