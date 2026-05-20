@@ -6,7 +6,7 @@ import Button from "@/components/button";
 import DifficultyModal from "@/components/modals/difficulty-modal";
 import { UserRound, UsersRound } from "lucide-react";
 
-type PlayMode = "single" | "friend";
+import { PlayMode } from "@/domain/game-setup/game-setup-types";
 
 export default function HomePlayActions() {
   const router = useRouter();
