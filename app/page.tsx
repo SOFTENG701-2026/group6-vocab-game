@@ -15,6 +15,7 @@ export default function Home() {
       <Button size='large' icon={<UserRound className='w-6 h-6' />}>
         Play
       </Button>
+      <h1 className='text-black text-2xl font-bold'> OR </h1>
       <Button size='large' icon={<UsersRound className='w-6 h-6' />}>
         Play with a Friend
       </Button>
