@@ -1,6 +1,5 @@
 import Image from "next/image";
-import Button from "@/components/button";
-import { UserRound, UsersRound, Star, ShoppingCart } from "lucide-react";
+import HomePlayActions from "@/components/home/home-play-actions";
 
 export default function Home() {
   return (
@@ -12,13 +11,8 @@ export default function Home() {
         height={400}
         priority
       />
-      <Button size='large' icon={<UserRound className='w-6 h-6' />}>
-        Play
-      </Button>
-      <h1 className='text-black text-2xl font-bold'> OR </h1>
-      <Button size='large' icon={<UsersRound className='w-6 h-6' />}>
-        Play with a Friend
-      </Button>
+
+      <HomePlayActions />
     </main>
   );
 }
