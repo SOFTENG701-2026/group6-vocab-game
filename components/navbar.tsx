@@ -13,7 +13,7 @@ export default function Navbar({ gems = 0 }: NavbarProps) {
       className=' w-full h-fit py-1
         bg-orange-400
         backdrop-blur-md
-        border-b border-white/40
+        border-b border-orange-500/40
         shadow-sm
         flex items-center justify-between
         px-4 gap-1.5'
