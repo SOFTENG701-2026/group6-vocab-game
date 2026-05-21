@@ -1,10 +1,11 @@
 "use client";
 
+import { Suspense } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import Button from "@/components/button";
 
-export default function BackButton() {
+function BackButtonInner() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -18,7 +19,15 @@ export default function BackButton() {
     router.push(`/home?theme=${theme}`);
   }
 
-  if (pathname === "/") return null;
+  if (pathname === "/") {
+    return (
+      <span className="invisible pointer-events-none">
+        <Button size='small' iconPosition='left' icon={<ArrowLeft className='w-5 h-5' />}>
+          Back
+        </Button>
+      </span>
+    );
+  }
 
   return (
     <Button
@@ -29,5 +38,13 @@ export default function BackButton() {
     >
       Back
     </Button>
+  );
+}
+
+export default function BackButton() {
+  return (
+    <Suspense fallback={null}>
+      <BackButtonInner />
+    </Suspense>
   );
 }
