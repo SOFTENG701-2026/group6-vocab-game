@@ -4,10 +4,11 @@ import Image from "next/image";
 import BaseSelectionModal, {
   SelectionModalItem
 } from "@/components/modals/base-selection-modal";
+import { Difficulty } from "@/domain/game-setup/game-setup-types";
 
 type DifficultyModalProps = {
   isOpen: boolean;
-  onSelectDifficulty: (difficultyId: string) => void;
+  onSelectDifficulty: (difficulty: Difficulty) => void;
 };
 
 const difficultyItems: SelectionModalItem[] = [
@@ -52,7 +53,8 @@ export default function DifficultyModal({
       titleId='difficulty-modal-title'
       items={difficultyItems}
       buttonText="Let's Begin"
-      onConfirm={onSelectDifficulty}
+      //TODO: area for refactor make onConfirm more generic or closer to design context instead of string type.
+      onConfirm={(itemId) => onSelectDifficulty(itemId as Difficulty)}
     />
   );
 }

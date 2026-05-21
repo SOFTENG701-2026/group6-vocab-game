@@ -5,29 +5,28 @@ import { useRouter } from "next/navigation";
 import Button from "@/components/button";
 import DifficultyModal from "@/components/modals/difficulty-selection-modal";
 import { UserRound, UsersRound } from "lucide-react";
-
-import { PlayMode } from "@/domain/game-setup/game-setup-types";
+import { useGameSetup } from "@/context/game-setup-context";
+import { Difficulty, PlayMode } from "@/domain/game-setup/game-setup-types";
 
 export default function HomePlayActions() {
   const router = useRouter();
-
+  const { setDifficulty } = useGameSetup();
   const [isDifficultyModalOpen, setIsDifficultyModalOpen] = useState(false);
-  const [selectedPlayMode, setSelectedPlayMode] = useState<PlayMode | null>(
-    null
-  );
+  const [playMode, setPlayMode] = useState<PlayMode | null>(null);
 
   function openDifficultyModal(playMode: PlayMode) {
-    setSelectedPlayMode(playMode);
+    /**TODO: if single player allow user to create only one avatar and automatically create avatar for buddy-bot.
+     * else allow user to create two avatars
+     */
+    setPlayMode(playMode);
     setIsDifficultyModalOpen(true);
   }
 
-  function handleDifficultySelect(difficultyId: string) {
-    if (!selectedPlayMode) return;
-
+  function handleDifficultySelect(difficulty: Difficulty) {
+    if (!playMode) return;
+    setDifficulty(difficulty);
     setIsDifficultyModalOpen(false);
-
-    // Future progression:
-    // This can later route to avatar/name setup before gameplay.
+    console.log(difficulty);
     router.push("/game");
   }
 
