@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import Image from "next/image";
 import IngredientModal from "@/components/modals/ingredient-selection-modal";
 import Button from "@/components/button";
-import MinigameFallback from "@/components/minigames/minigame-fallback";
+import MinigameFallback from "@/components/minigames/minigame-fallback-ui";
 import { ingredients } from "@/data/ingredients";
 
 export default function GamePage() {
