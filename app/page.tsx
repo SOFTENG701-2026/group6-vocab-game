@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import ThemeSelector from "@/components/home/theme-selector";
+import ThemeSelector from "@/components/theme/theme-selector";
 
 export default function HomePage() {
   return (

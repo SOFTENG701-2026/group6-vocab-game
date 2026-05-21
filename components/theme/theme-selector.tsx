@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Star } from "lucide-react";
-import ThemeCard from "@/components/home/theme-card";
+import ThemeCard from "@/components/theme/theme-card";
 import { gameThemes } from "@/domain/themes/theme-options";
 
 const DEFAULT_INDEX = gameThemes.findIndex(
