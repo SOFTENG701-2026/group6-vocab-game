@@ -79,7 +79,7 @@ export default function GamePage() {
       //TODO: Implement Spelling Minigame
       case "letter-spelling":
         return (
-          <div className='flex h-full items-center justify-center rounded-4xl bg-white/90 p-8 text-center shadow'>
+          <div className='flex h-full items-center justify-center rounded-4xl p-8 text-center shadow'>
             <div>
               <h2 className='text-2xl font-extrabold text-(--color-primary-hover)'>Letter Spelling Minigame</h2>
 
