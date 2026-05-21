@@ -120,11 +120,11 @@ export default function Card({
   }
 
   function getDescriptionTitleSizeClasses() {
-    return isCompact ? "text-2xl" : "text-4xl";
+    return isCompact ? "text-xl" : "text-2xl";
   }
 
   function getDescriptionContentSizeClasses() {
-    return isCompact ? "mt-2 text-lg" : "mt-3 text-2xl";
+    return isCompact ? "mt-1 text-sm" : "mt-2 text-lg";
   }
 
   function getButtonSpacingClasses() {
