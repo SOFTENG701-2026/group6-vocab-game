@@ -120,11 +120,11 @@ export default function Card({
   }
 
   function getDescriptionTitleSizeClasses() {
-    return isCompact ? "text-xl" : "text-2xl";
+    return isCompact ? "text-2xl" : "text-4xl";
   }
 
   function getDescriptionContentSizeClasses() {
-    return isCompact ? "mt-1 text-sm" : "mt-2 text-lg";
+    return isCompact ? "mt-2 text-lg" : "mt-3 text-2xl";
   }
 
   function getButtonSpacingClasses() {
@@ -144,13 +144,6 @@ export default function Card({
     if (disabled) return;
     onButtonClick?.(id);
   }
-
-  function getDisabledClasses() {
-    return disabled
-      ? "opacity-50 grayscale cursor-not-allowed pointer-events-none hover:translate-y-0 hover:border-transparent"
-      : "";
-  }
-
   function renderTitle() {
     if (!title) return null;
 
@@ -242,7 +235,6 @@ export default function Card({
         hover:border-(--color-primary-hover)
         hover:shadow-[0_24px_45px_rgba(0,0,0,0.2)]
         ${getCardSizeClasses()}
-        ${getDisabledClasses()}
       `}
     >
       <div
