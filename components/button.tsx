@@ -72,9 +72,8 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
 
     ingredientTarget: `
       flex h-44 w-44 items-center justify-center
-      rounded-4xl border-4 border-white
+      rounded-4xl 
       bg-white
-      shadow-lg
       hover:scale-105
       active:scale-95
     `
@@ -102,7 +101,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
     >
       {icon && iconPosition === "left" && icon}
 
-      {children && <span>{children}</span>}
+      {children}
 
       {icon && iconPosition === "right" && icon}
     </button>

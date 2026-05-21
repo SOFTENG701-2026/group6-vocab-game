@@ -55,6 +55,8 @@ export default function IngredientMatchMinigame({
           ingredient={ingredient}
           ingredientRef={ingredientRef}
           feedbackMessage={feedbackMessage}
+          isColorMatched={isColorMatched}
+          isShapeMatched={isShapeMatched}
           onClick={handleIngredientClick}
         />
 
