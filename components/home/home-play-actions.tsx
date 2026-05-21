@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Button from "@/components/button";
 import DifficultyModal from "@/components/modals/difficulty-selection-modal";
 import { UserRound, UsersRound } from "lucide-react";
