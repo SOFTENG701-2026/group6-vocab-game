@@ -31,6 +31,8 @@
 import type { ReactNode } from "react";
 import Button from "@/components/button";
 
+export type CardVariant = "default" | "compact";
+
 type CardProps = {
   //id to select for removing and adding blur effects
   id: string;
@@ -44,7 +46,7 @@ type CardProps = {
   descriptionContent?: string;
 
   //Sizing default = difficulty selection, compact = ingredient selection
-  size?: "default" | "compact";
+  size?: CardVariant;
 
   blurEffect?: boolean;
 
@@ -247,11 +249,7 @@ export default function Card({
         {renderTitle()}
 
         <div
-          className={`
-            flex items-center justify-center
-            transition-all duration-300
-            ${getLogoVisibilityClasses()}
-          `}
+          className={`flex items-center justify-center transition-all duration-300 ${getLogoVisibilityClasses()}`}
         >
           {logo}
         </div>
