@@ -4,7 +4,7 @@ import HomePlayActions from "@/components/home/home-play-actions";
 
 export default function PlayHomePage() {
   return (
-    <main className="bg-orange-300 min-h-screen flex flex-col items-center gap-4 py-6">
+    <main className="bg-orange-300 h-full overflow-hidden flex flex-col items-center gap-4 py-6">
       <Image
         src="/logo-title.png"
         alt="Magic Soup Buddies logo"
