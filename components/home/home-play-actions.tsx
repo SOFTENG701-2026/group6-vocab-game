@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Button from "@/components/button";
-import DifficultyModal from "@/components/modals/difficulty-modal";
+import DifficultyModal from "@/components/modals/difficulty-selection-modal";
 import { UserRound, UsersRound } from "lucide-react";
 
 import { PlayMode } from "@/domain/game-setup/game-setup-types";
@@ -28,7 +28,7 @@ export default function HomePlayActions() {
 
     // Future progression:
     // This can later route to avatar/name setup before gameplay.
-    router.push(`/setup?mode=${selectedPlayMode}&difficulty=${difficultyId}`);
+    router.push("/game");
   }
 
   return (
