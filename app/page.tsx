@@ -3,7 +3,7 @@ import ThemeSelector from "@/components/theme/theme-selector";
 
 export default function HomePage() {
   return (
-    <main className="relative flex-1 overflow-hidden bg-orange-300">
+    <main className="relative flex-1 overflow-hidden ">
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 overflow-hidden"

@@ -25,8 +25,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang='en' className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
-      <body className='min-h-full flex flex-col bg-orange-300'>
+    <html lang='en' className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body className='min-h-screen flex flex-col bg-gradient-to-b from-cyan-300 via-emerald-200 to-yellow-200'>
         <GameSetupProvider>
           <Navbar gems={0} />
           {children}
