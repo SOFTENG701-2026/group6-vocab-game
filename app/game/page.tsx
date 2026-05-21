@@ -1,56 +1,56 @@
 "use client";
 
 import Image from "next/image";
-import { useMemo, useState } from "react";
-import IngredientModal from "@/components/modals/ingredient-selection-modal";
+import { useEffect, useState } from "react";
 import Button from "@/components/button";
 import MinigameFallback from "@/components/minigames/minigame-fallback-ui";
 import IngredientMatchMinigame from "@/components/minigames/ingredient-match-minigame";
 import { ingredients } from "@/data/ingredients";
 import { minigamesByDifficulty, type MinigameId } from "@/domain/minigame-type";
 import { useGameSetup } from "@/context/game-setup-context";
+import FutureIngredientStack from "@/components/game/future-ingredient-stack";
 
 export default function GamePage() {
-  const [isIngredientModalOpen, setIsIngredientModalOpen] = useState(false);
-  const [chosenIngredientIds, setChosenIngredientIds] = useState<string[]>([]);
-  const [activeIngredientId, setActiveIngredientId] = useState<string | null>(null);
-
+  const [activeIngredientIndex, setActiveIngredientIndex] = useState(0);
+  const activeIngredient = ingredients[activeIngredientIndex] ?? null;
+  const futureIngredients = ingredients.slice(activeIngredientIndex + 1);
   const [activeMinigameIndex, setActiveMinigameIndex] = useState(0);
-  const [isIngredientComplete, setIsIngredientComplete] = useState(false);
-
-  //derived data
-
+  const isIngredientListEmpty = activeIngredientIndex === ingredients.length;
+  const [isShowingCompletion, setIsShowingCompletion] = useState(false);
+  //derived state
   const { difficulty } = useGameSetup();
   const activeMinigames = minigamesByDifficulty[difficulty];
   const activeMinigameId = activeMinigames[activeMinigameIndex];
   const isLastMinigame = activeMinigameIndex === activeMinigames.length - 1;
-  const activeIngredient = useMemo(() => {
-    if (!activeIngredientId) return null;
+  //constants
+  const COMPLETION_DELAY_MS = 1500;
 
-    return ingredients.find((ingredient) => ingredient.id === activeIngredientId) ?? null;
-  }, [activeIngredientId]);
+  //Automatically advance after 1.5s when a minigame is complete
+  useEffect(() => {
+    if (!isShowingCompletion) return;
 
-  function handleSelectIngredient(ingredientId: string) {
-    setChosenIngredientIds((previousIds) => [...previousIds, ingredientId]);
-    setActiveIngredientId(ingredientId);
-    setActiveMinigameIndex(0);
-    setIsIngredientComplete(false);
-    setIsIngredientModalOpen(false);
-  }
+    const timeoutId = window.setTimeout(() => {
+      if (!isLastMinigame) {
+        setActiveMinigameIndex((previousIndex) => previousIndex + 1);
+      } else {
+        skipCurrentIngredient();
+      }
+
+      setIsShowingCompletion(false);
+    }, COMPLETION_DELAY_MS);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [isShowingCompletion, isLastMinigame]);
 
   function handleMinigameComplete() {
-    if (!isLastMinigame) {
-      setActiveMinigameIndex((previousIndex) => previousIndex + 1);
-      return;
-    }
-
-    setIsIngredientComplete(true);
+    if (isShowingCompletion) return;
+    setIsShowingCompletion(true);
   }
 
-  function handleIngredientFinished(): void {
-    setActiveIngredientId(null);
+  //Utilised on finished and when optionally skipping ingredients
+  function skipCurrentIngredient(): void {
+    setActiveIngredientIndex((prev) => prev + 1);
     setActiveMinigameIndex(0);
-    setIsIngredientComplete(false);
   }
 
   function renderActiveMinigame(minigameId: MinigameId) {
@@ -58,15 +58,14 @@ export default function GamePage() {
       return <MinigameFallback />;
     }
 
-    if (isIngredientComplete) {
+    if (isIngredientListEmpty) {
+      //TODO: PLACEHOLDER for monster dialogue
       return (
         <div className='flex h-full items-center justify-center rounded-4xl bg-white/90 p-8 text-center shadow'>
           <div>
             <h2 className='text-3xl font-extrabold text-(--color-primary-hover)'>Well done!</h2>
 
-            <p className='mt-3 text-lg font-bold text-gray-700'>
-              You completed all minigames for {activeIngredient.name}.
-            </p>
+            <p className='mt-3 text-lg font-bold text-gray-700'>You've ran out of ingredients.</p>
           </div>
         </div>
       );
@@ -74,7 +73,13 @@ export default function GamePage() {
 
     switch (minigameId) {
       case "ingredient-match":
-        return <IngredientMatchMinigame ingredient={activeIngredient} onComplete={handleMinigameComplete} />;
+        return (
+          <IngredientMatchMinigame
+            key={`${activeIngredient.id}-${activeMinigameIndex}`}
+            ingredient={activeIngredient}
+            onComplete={handleMinigameComplete}
+          />
+        );
 
       //TODO: Implement Spelling Minigame
       case "letter-spelling":
@@ -125,7 +130,7 @@ export default function GamePage() {
           {/* Active ingredient / button / status area */}
           <aside
             className='
-            flex min-h-105 flex-col items-center justify-center
+            flex min-h-105 flex-col items-center 
             rounded-4xl bg-white/90 p-5 text-black shadow
           '
           >
@@ -136,7 +141,7 @@ export default function GamePage() {
                 {activeMinigames.length}
               </p>
             )}
-            <div className='mt-6 flex flex-1 items-center justify-center text-center'>
+            <div className='my-4 flex flex-col items-center  text-center'>
               {activeIngredient ? (
                 <div
                   className='
@@ -156,6 +161,8 @@ export default function GamePage() {
                   <p className='mt-4 text-center text-base font-bold text-gray-700'>
                     A {activeIngredient.color}, {activeIngredient.shape} ingredient
                   </p>
+
+                  <FutureIngredientStack ingredients={futureIngredients} />
                 </div>
               ) : (
                 <div>
@@ -164,21 +171,10 @@ export default function GamePage() {
                 </div>
               )}
             </div>
-
-            {!activeIngredient && <Button onClick={() => setIsIngredientModalOpen(true)}>Choose Ingredient</Button>}
-
-            {activeIngredient && isIngredientComplete && (
-              <Button onClick={handleIngredientFinished}>Finish Ingredient</Button>
-            )}
+            <Button onClick={skipCurrentIngredient}>Skip Ingredient</Button>
           </aside>
         </section>
       </div>
-
-      <IngredientModal
-        isOpen={isIngredientModalOpen}
-        chosenIngredientIds={chosenIngredientIds}
-        onSelectIngredient={handleSelectIngredient}
-      />
     </main>
   );
 }
