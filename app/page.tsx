@@ -1,18 +1,12 @@
-import Image from "next/image";
-import HomePlayActions from "@/components/home/home-play-actions";
+import { Suspense } from "react";
+import ThemeSelector from "@/components/home/theme-selector";
 
-export default function Home() {
+export default function HomePage() {
   return (
-    <main className='bg-orange-300 min-h-screen flex flex-col items-center gap-4'>
-      <Image
-        src='/logo-title.png'
-        alt='Magic Soup Buddies logo'
-        width={400}
-        height={400}
-        priority
-      />
-
-      <HomePlayActions />
+    <main className="bg-orange-300 flex-1 flex w-full flex-col items-center justify-center gap-4 px-4">
+      <Suspense fallback={<p className="text-black font-bold">Loading themes...</p>}>
+        <ThemeSelector />
+      </Suspense>
     </main>
   );
 }
