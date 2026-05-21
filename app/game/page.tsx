@@ -15,10 +15,10 @@ export default function GamePage() {
   const activeIngredient = ingredients[activeIngredientIndex] ?? null;
   const futureIngredients = ingredients.slice(activeIngredientIndex + 1);
   const [activeMinigameIndex, setActiveMinigameIndex] = useState(0);
-  const isIngredientListEmpty = activeIngredientIndex === ingredients.length;
   const [isShowingCompletion, setIsShowingCompletion] = useState(false);
   //derived state
   const { difficulty } = useGameSetup();
+  const isIngredientListEmpty = activeIngredientIndex === ingredients.length;
   const activeMinigames = minigamesByDifficulty[difficulty];
   const activeMinigameId = activeMinigames[activeMinigameIndex];
   const isLastMinigame = activeMinigameIndex === activeMinigames.length - 1;
@@ -171,7 +171,9 @@ export default function GamePage() {
                 </div>
               )}
             </div>
-            <Button onClick={skipCurrentIngredient}>Skip Ingredient</Button>
+            <Button onClick={skipCurrentIngredient} disabled={isIngredientListEmpty}>
+              Skip Ingredient
+            </Button>
           </aside>
         </section>
       </div>
