@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1254" height="1254" viewBox="0 0 1254 1254">
+  <title>Magic Transport Logo</title>
+  <defs>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="14" result="blur"/>
+      <feOffset in="blur" dx="0" dy="18" result="offsetBlur"/>
+      <feFlood flood-color="#1d2b53" flood-opacity="0.22" result="shadowColor"/>
+      <feComposite in="shadowColor" in2="offsetBlur" operator="in" result="shadow"/>
+      <feMerge>
+        <feMergeNode in="shadow"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="smallShadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="6" result="blur"/>
+      <feOffset in="blur" dx="0" dy="8" result="offsetBlur"/>
+      <feFlood flood-color="#1d2b53" flood-opacity="0.24" result="shadowColor"/>
+      <feComposite in="shadowColor" in2="offsetBlur" operator="in" result="shadow"/>
+      <feMerge>
+        <feMergeNode in="shadow"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <linearGradient id="purpleText" x1="0" y1="560" x2="0" y2="835" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffd5ff"/>
+      <stop offset="0.48" stop-color="#c78cff"/>
+      <stop offset="1" stop-color="#8b47df"/>
+    </linearGradient>
+    <linearGradient id="blueText" x1="0" y1="820" x2="0" y2="1040" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#dffcff"/>
+      <stop offset="0.45" stop-color="#85e9ff"/>
+      <stop offset="1" stop-color="#3aa9f5"/>
+    </linearGradient>
+    <linearGradient id="roadGrad" x1="0" y1="735" x2="0" y2="1085" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#3dd0d7"/>
+      <stop offset="0.65" stop-color="#0c8da5"/>
+      <stop offset="1" stop-color="#086b82"/>
+    </linearGradient>
+    <linearGradient id="carGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ff8ec4"/>
+      <stop offset="1" stop-color="#f84691"/>
+    </linearGradient>
+    <linearGradient id="busGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffe877"/>
+      <stop offset="1" stop-color="#ffb72a"/>
+    </linearGradient>
+    <linearGradient id="trainGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#9ef6ff"/>
+      <stop offset="1" stop-color="#35b8f1"/>
+    </linearGradient>
+    <linearGradient id="planeGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#e9f4ff"/>
+      <stop offset="1" stop-color="#a2c9ff"/>
+    </linearGradient>
+    <radialGradient id="shine" cx="35%" cy="25%" r="65%">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.78"/>
+      <stop offset="0.35" stop-color="#ffffff" stop-opacity="0.28"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <style><![CDATA[
+      .roundFont{font-family:'Arial Rounded MT Bold','Trebuchet MS','Arial Black',sans-serif;font-weight:900;}
+      .darkStroke{stroke:#4a2391;stroke-width:46;paint-order:stroke fill;stroke-linejoin:round;}
+      .whiteStroke{stroke:#ffffff;stroke-width:22;paint-order:stroke fill;stroke-linejoin:round;}
+      .blueDarkStroke{stroke:#00606f;stroke-width:42;paint-order:stroke fill;stroke-linejoin:round;}
+      .blueWhiteStroke{stroke:#ffffff;stroke-width:18;paint-order:stroke fill;stroke-linejoin:round;}
+      .cuteStroke{stroke:#4a3d65;stroke-width:7;stroke-linecap:round;stroke-linejoin:round;}
+      .highlight{fill:#fff;opacity:.55}
+    ]]></style>
+  </defs>
+
+  <!-- Sticker cloud outline, following the original logo-like silhouette -->
+  <g>
+    <path d="M116 728C101 650 123 579 185 524C168 438 236 369 320 382C344 280 456 255 541 306C605 232 731 235 792 312C887 267 993 320 994 421C1085 430 1138 508 1122 596C1197 666 1180 785 1102 832C1127 928 1041 1011 940 993C888 1080 764 1092 689 1032C609 1102 480 1084 435 998C329 1027 221 967 220 864C150 852 110 798 116 728Z" fill="#fff" stroke="#e9e9e9" stroke-width="12"/>
+  </g>
+
+  <!-- Soft sky circles -->
+  <circle cx="350" cy="340" r="128" fill="#eaf9ff" opacity="0.8"/>
+  <circle cx="770" cy="320" r="155" fill="#f1efff" opacity="0.85"/>
+  <circle cx="980" cy="505" r="112" fill="#eaf9ff" opacity="0.75"/>
+
+  <!-- Decorative road/base behind title -->
+  <g>
+    <path d="M160 835C178 751 269 712 360 744C417 676 532 695 570 771C628 723 735 716 796 770C860 716 971 725 1017 790C1101 781 1155 841 1139 922C1124 1002 1035 1034 954 1006C894 1080 775 1078 706 1018C620 1091 478 1066 429 983C326 1032 197 985 164 892C158 873 156 853 160 835Z" fill="url(#roadGrad)" stroke="#0a6575" stroke-width="10"/>
+    <path d="M188 845C228 806 297 792 359 815C410 756 511 772 545 835C611 790 708 789 769 838C829 787 925 797 970 850C1034 839 1091 870 1112 925" fill="none" stroke="#8ff5ff" stroke-width="8" opacity="0.35" stroke-linecap="round" stroke-dasharray="38 26"/>
+    <path d="M250 1015C320 970 390 980 459 1036" fill="none" stroke="#9fffff" stroke-width="7" opacity="0.45" stroke-linecap="round"/>
+    <path d="M757 1042C837 984 924 982 1002 1026" fill="none" stroke="#9fffff" stroke-width="7" opacity="0.45" stroke-linecap="round"/>
+  </g>
+
+  <!-- Left train -->
+  <g transform="translate(155 432) rotate(-9)">
+    <rect x="0" y="45" width="235" height="128" rx="35" fill="url(#trainGrad)" class="cuteStroke"/>
+    <rect x="32" y="16" width="138" height="70" rx="28" fill="#7be9ff" class="cuteStroke"/>
+    <rect x="49" y="34" width="44" height="38" rx="11" fill="#e7fbff" stroke="#4a3d65" stroke-width="5"/>
+    <rect x="107" y="34" width="44" height="38" rx="11" fill="#e7fbff" stroke="#4a3d65" stroke-width="5"/>
+    <rect x="31" y="91" width="168" height="54" rx="19" fill="#dffbff" opacity="0.7"/>
+    <circle cx="60" cy="177" r="25" fill="#2d4566" stroke="#fff" stroke-width="7"/>
+    <circle cx="176" cy="177" r="25" fill="#2d4566" stroke="#fff" stroke-width="7"/>
+    <circle cx="83" cy="116" r="10" fill="#211832"/>
+    <circle cx="148" cy="116" r="10" fill="#211832"/>
+    <path d="M101 135C116 150 139 150 154 135" fill="none" stroke="#211832" stroke-width="7" stroke-linecap="round"/>
+    <circle cx="45" cy="135" r="14" fill="#ff83b1" opacity="0.75"/>
+    <circle cx="189" cy="135" r="14" fill="#ff83b1" opacity="0.75"/>
+    <circle cx="55" cy="63" r="15" fill="#fff" opacity="0.45"/>
+  </g>
+
+  <!-- Center car -->
+  <g transform="translate(392 345) rotate(2)">
+    <path d="M53 111C75 54 126 21 205 21H305C369 21 420 55 448 112L481 122C511 132 529 159 526 190L518 238C515 266 491 287 463 287H55C28 287 6 267 3 240L0 197C-3 163 19 133 52 124L53 111Z" fill="url(#carGrad)" class="cuteStroke"/>
+    <path d="M107 108C127 63 165 45 215 45H292C339 45 375 64 398 108H107Z" fill="#ffe6f3" class="cuteStroke"/>
+    <line x1="255" y1="47" x2="255" y2="109" stroke="#4a3d65" stroke-width="6"/>
+    <rect x="54" y="151" width="421" height="72" rx="30" fill="#ff74ae" opacity="0.95"/>
+    <circle cx="99" cy="278" r="43" fill="#263450" stroke="#ffffff" stroke-width="11"/>
+    <circle cx="99" cy="278" r="18" fill="#83e9ff"/>
+    <circle cx="424" cy="278" r="43" fill="#263450" stroke="#ffffff" stroke-width="11"/>
+    <circle cx="424" cy="278" r="18" fill="#83e9ff"/>
+    <circle cx="210" cy="177" r="14" fill="#211832"/>
+    <circle cx="316" cy="177" r="14" fill="#211832"/>
+    <circle cx="205" cy="172" r="5" fill="#fff"/>
+    <circle cx="311" cy="172" r="5" fill="#fff"/>
+    <path d="M230 205C256 228 291 228 318 205" fill="none" stroke="#211832" stroke-width="9" stroke-linecap="round"/>
+    <circle cx="169" cy="204" r="19" fill="#ffbfd2" opacity="0.78"/>
+    <circle cx="358" cy="204" r="19" fill="#ffbfd2" opacity="0.78"/>
+    <ellipse cx="124" cy="59" rx="28" ry="14" fill="#fff" opacity="0.48" transform="rotate(-20 124 59)"/>
+  </g>
+
+  <!-- Yellow bus -->
+  <g transform="translate(682 287) rotate(-4)">
+    <rect x="0" y="60" width="317" height="180" rx="35" fill="url(#busGrad)" class="cuteStroke"/>
+    <rect x="32" y="21" width="253" height="82" rx="28" fill="#ffd85b" class="cuteStroke"/>
+    <rect x="32" y="91" width="70" height="62" rx="12" fill="#fff7ca" stroke="#4a3d65" stroke-width="6"/>
+    <rect x="118" y="91" width="70" height="62" rx="12" fill="#fff7ca" stroke="#4a3d65" stroke-width="6"/>
+    <rect x="204" y="91" width="70" height="62" rx="12" fill="#fff7ca" stroke="#4a3d65" stroke-width="6"/>
+    <rect x="21" y="164" width="276" height="38" rx="17" fill="#ff9c2a" opacity="0.75"/>
+    <circle cx="72" cy="245" r="35" fill="#263450" stroke="#fff" stroke-width="9"/>
+    <circle cx="245" cy="245" r="35" fill="#263450" stroke="#fff" stroke-width="9"/>
+    <circle cx="133" cy="184" r="10" fill="#211832"/>
+    <circle cx="194" cy="184" r="10" fill="#211832"/>
+    <path d="M145 206C159 220 181 220 196 206" fill="none" stroke="#211832" stroke-width="7" stroke-linecap="round"/>
+    <circle cx="100" cy="207" r="13" fill="#ff83b1" opacity="0.75"/>
+    <circle cx="226" cy="207" r="13" fill="#ff83b1" opacity="0.75"/>
+    <rect x="125" y="37" width="70" height="23" rx="11" fill="#ffffff" opacity="0.45"/>
+  </g>
+
+  <!-- Airplane on the right -->
+  <g transform="translate(850 265) rotate(20)">
+    <path d="M0 110C74 74 155 49 259 43C290 41 310 58 309 80C308 100 290 115 262 118C164 129 83 130 0 110Z" fill="url(#planeGrad)" class="cuteStroke"/>
+    <path d="M123 68L194 -8C207 -22 234 -9 226 12L196 91Z" fill="#78dfff" class="cuteStroke"/>
+    <path d="M128 105L209 171C224 184 215 211 194 203L101 130Z" fill="#55cfff" class="cuteStroke"/>
+    <path d="M45 98L7 48C-5 31 12 10 30 20L93 70Z" fill="#cfe8ff" class="cuteStroke"/>
+    <circle cx="185" cy="78" r="12" fill="#78dfff" stroke="#4a3d65" stroke-width="5"/>
+    <circle cx="225" cy="75" r="12" fill="#78dfff" stroke="#4a3d65" stroke-width="5"/>
+    <circle cx="119" cy="99" r="7" fill="#211832"/>
+    <circle cx="149" cy="96" r="7" fill="#211832"/>
+    <path d="M127 114C138 123 151 122 160 111" fill="none" stroke="#211832" stroke-width="5" stroke-linecap="round"/>
+    <ellipse cx="82" cy="88" rx="28" ry="9" fill="#fff" opacity="0.55" transform="rotate(-12 82 88)"/>
+  </g>
+
+  <!-- Small transport signs / decorations -->
+  <g>
+    <g transform="translate(267 262) rotate(-16)">
+      <rect x="0" y="82" width="24" height="86" rx="10" fill="#6d7d95"/>
+      <path d="M12 0L82 40L12 80L-58 40Z" fill="#a8f36d" stroke="#4a3d65" stroke-width="7"/>
+      <path d="M-13 40H47" stroke="#4a3d65" stroke-width="8" stroke-linecap="round"/>
+      <path d="M27 20L49 40L27 60" fill="none" stroke="#4a3d65" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+    <g transform="translate(1014 632) rotate(12)">
+      <circle cx="0" cy="0" r="56" fill="#ff5b6e" stroke="#fff" stroke-width="12"/>
+      <rect x="-12" y="-76" width="24" height="33" rx="10" fill="#ff5b6e" stroke="#fff" stroke-width="7"/>
+      <rect x="-12" y="43" width="24" height="94" rx="11" fill="#6d7d95"/>
+      <path d="M-28 0H28" stroke="#fff" stroke-width="13" stroke-linecap="round"/>
+    </g>
+    <path d="M106 682C140 658 167 676 156 710C198 697 210 736 175 755C194 788 159 811 132 781C104 814 71 789 93 755C56 743 67 703 106 713C94 699 94 689 106 682Z" fill="#ffc0e1" stroke="#e55ca0" stroke-width="7"/>
+    <path d="M1043 348L1063 405L1121 425L1064 445L1044 503L1024 446L966 426L1023 406Z" fill="#fff38a" stroke="#ffc12f" stroke-width="8"/>
+    <path d="M715 221L731 264L775 280L732 296L716 340L700 297L656 281L699 265Z" fill="#fff38a" stroke="#ffc12f" stroke-width="7"/>
+    <circle cx="1113" cy="710" r="19" fill="#9befff" stroke="#50bce5" stroke-width="6"/>
+    <circle cx="1138" cy="772" r="15" fill="#9befff" stroke="#50bce5" stroke-width="5"/>
+    <circle cx="159" cy="596" r="18" fill="#ffd95b" stroke="#ffb72a" stroke-width="6"/>
+    <path d="M392 1064L414 1122L474 1144L416 1164L394 1224L373 1166L313 1145L371 1124Z" fill="#d6b2ff" stroke="#9b68f2" stroke-width="8" transform="scale(.68) translate(140 470)"/>
+    <path d="M931 1040L955 1104L1020 1127L957 1150L933 1215L910 1152L845 1129L908 1106Z" fill="#d6b2ff" stroke="#9b68f2" stroke-width="8" transform="scale(.63) translate(435 515)"/>
+  </g>
+
+  <!-- Main title: Magic -->
+  <g>
+    <text x="627" y="779" text-anchor="middle" class="roundFont darkStroke" font-size="230" letter-spacing="-8" fill="url(#purpleText)">Magic</text>
+    <text x="627" y="779" text-anchor="middle" class="roundFont whiteStroke" font-size="230" letter-spacing="-8" fill="url(#purpleText)">Magic</text>
+    <text x="365" y="640" text-anchor="middle" class="roundFont" font-size="58" fill="#ffffff" opacity="0.7" transform="rotate(-8 365 640)">●</text>
+    <text x="794" y="650" text-anchor="middle" class="roundFont" font-size="60" fill="#ffffff" opacity="0.55" transform="rotate(10 794 650)">●</text>
+    <path d="M843 584L861 633L912 651L863 670L845 720L827 671L776 653L825 634Z" fill="#ffd84a" stroke="#ffffff" stroke-width="8"/>
+    <path d="M843 584L861 633L912 651L863 670L845 720L827 671L776 653L825 634Z" fill="none" stroke="#6e38c8" stroke-width="7" opacity="0.65"/>
+  </g>
+
+  <!-- Main title: Transport -->
+  <g>
+    <text x="627" y="1005" text-anchor="middle" class="roundFont blueDarkStroke" font-size="142" letter-spacing="-7" fill="url(#blueText)">Transport</text>
+    <text x="627" y="1005" text-anchor="middle" class="roundFont blueWhiteStroke" font-size="142" letter-spacing="-7" fill="url(#blueText)">Transport</text>
+    <path d="M214 916C340 882 467 879 589 918C711 959 837 956 1038 908" fill="none" stroke="#ffffff" stroke-width="9" opacity="0.45" stroke-linecap="round" stroke-dasharray="44 26"/>
+  </g>
+
+  <!-- Bottom icons -->
+  <g>
+    <g transform="translate(596 1059)">
+      <path d="M35 14C58 -12 101 0 104 39C111 4 155 -10 177 19C207 57 172 102 107 141C41 104 2 57 35 14Z" fill="#ff7fb1" stroke="#ffffff" stroke-width="9"/>
+      <path d="M35 14C58 -12 101 0 104 39C111 4 155 -10 177 19C207 57 172 102 107 141C41 104 2 57 35 14Z" fill="none" stroke="#d63f8c" stroke-width="7" opacity="0.65"/>
+      <ellipse cx="64" cy="22" rx="23" ry="10" fill="#fff" opacity="0.5" transform="rotate(-25 64 22)"/>
+    </g>
+    <path d="M309 1060C270 1045 251 1074 282 1096C244 1105 251 1143 290 1138C291 1174 331 1178 340 1143C370 1168 401 1144 379 1113C414 1098 399 1062 363 1073C350 1038 313 1027 309 1060Z" fill="#a8f36d" stroke="#5dbb35" stroke-width="8"/>
+    <path d="M935 1065C895 1048 875 1077 906 1100C868 1109 876 1147 915 1142C916 1178 956 1182 965 1147C995 1172 1026 1148 1004 1117C1039 1102 1024 1066 988 1077C975 1041 939 1032 935 1065Z" fill="#a8f36d" stroke="#5dbb35" stroke-width="8"/>
+    <path d="M518 1062L531 1097L568 1110L532 1124L519 1161L505 1125L469 1112L504 1098Z" fill="#ffffff" opacity="0.9"/>
+    <path d="M1080 1015L1094 1053L1133 1067L1095 1081L1081 1121L1067 1083L1028 1069L1066 1055Z" fill="#ffffff" opacity="0.88"/>
+  </g>
+</svg>
