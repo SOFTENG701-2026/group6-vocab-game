@@ -12,21 +12,21 @@ export const gameThemes: GameTheme[] = [
   {
     id: "transport",
     label: "Transport",
-    description: "Buses, trains, and more",
+    description: "Choose the vehicle, and start the journey!",
     image: "/assets/transport/transport.svg",
     available: false
   },
   {
     id: "garden",
     label: "Garden",
-    description: "Flowers, plants, and nature",
+    description: "Grow the plants, and watch them grow!",
     image: "/assets/garden/garden.png",
     available: false
   },
   {
     id: "fruits-vegetables",
     label: "Fruits & Vegetables",
-    description: "Fruits, vegetables",
+    description: "Add the ingredient, and make a magic soup!",
     image: "/assets/ingredients/ingredients.png",
     available: true
   }
