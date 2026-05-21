@@ -129,7 +129,6 @@ export function useIngredientMatchGame({
         return;
       }
 
-      setFeedbackMessage("Choose a colour or shape first.");
       return;
     }
 

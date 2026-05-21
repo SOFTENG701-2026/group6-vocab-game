@@ -40,6 +40,7 @@ export default function MatchOptionColumn({
             ? "border-blue-500 opacity-100"
             : "border-white";
 
+        //Adjust styling of buttons if it's a color or shape
         if (type === "color" && "value" in option) {
           return (
             <Button
