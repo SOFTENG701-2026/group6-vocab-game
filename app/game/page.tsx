@@ -5,6 +5,7 @@ import Image from "next/image";
 import IngredientModal from "@/components/modals/ingredient-selection-modal";
 import Button from "@/components/button";
 import MinigameFallback from "@/components/minigames/minigame-fallback-ui";
+import IngredientMatchMinigame from "@/components/minigames/ingredient-match-minigame";
 import { ingredients } from "@/data/ingredients";
 
 export default function GamePage() {
@@ -13,6 +14,7 @@ export default function GamePage() {
   const [activeIngredientId, setActiveIngredientId] = useState<string | null>(
     null
   );
+  const [isMinigameComplete, setIsMinigameComplete] = useState(false);
 
   const activeIngredient = useMemo(() => {
     if (!activeIngredientId) return null;
@@ -26,16 +28,17 @@ export default function GamePage() {
   function handleSelectIngredient(ingredientId: string) {
     setChosenIngredientIds((previousIds) => [...previousIds, ingredientId]);
     setActiveIngredientId(ingredientId);
+    setIsMinigameComplete(false);
     setIsIngredientModalOpen(false);
   }
 
+  function handleMinigameComplete() {
+    setIsMinigameComplete(true);
+  }
+
   function handleIngredientFinished(): void {
-    /**TODO: currently a dummy implementation
-     * It should
-     * 1) only activate the button when the minigame is finished
-     * 2) prevent the opening of modal when there is no more ingredients
-     */
-    throw new Error("Function not implemented.");
+    setActiveIngredientId(null);
+    setIsMinigameComplete(false);
   }
 
   return (
@@ -63,7 +66,10 @@ export default function GamePage() {
           {/* Minigame area */}
           <section className='h-full'>
             {activeIngredient ? (
-              <MinigameArea activeIngredientId={activeIngredient.id} />
+              <IngredientMatchMinigame
+                ingredient={activeIngredient}
+                onComplete={handleMinigameComplete}
+              />
             ) : (
               <MinigameFallback />
             )}
@@ -120,7 +126,7 @@ export default function GamePage() {
               </Button>
             )}
 
-            {activeIngredient && (
+            {activeIngredient && isMinigameComplete && (
               <Button onClick={handleIngredientFinished}>
                 Finish Ingredient
               </Button>
@@ -135,27 +141,5 @@ export default function GamePage() {
         onSelectIngredient={handleSelectIngredient}
       />
     </main>
-  );
-}
-
-type MinigameAreaProps = {
-  activeIngredientId: string;
-};
-
-function MinigameArea({ activeIngredientId }: MinigameAreaProps) {
-  return (
-    <div
-      className='
-        flex h-full min-h-105 w-full items-center justify-center
-        rounded-4xl bg-sky-200/50 p-8 text-center
-      '
-    >
-      <div>
-        <h2 className='text-2xl font-extrabold text-white'>Minigame Area</h2>
-        <p className='mt-2 text-white/70'>
-          Current ingredient: {activeIngredientId}
-        </p>
-      </div>
-    </div>
   );
 }

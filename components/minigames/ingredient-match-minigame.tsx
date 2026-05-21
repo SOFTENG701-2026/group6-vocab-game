@@ -1,47 +1,23 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
-import Image from "next/image";
-import type { Ingredient } from "@/data/ingredients";
+import { Ingredient } from "@/data/ingredients";
+import { colorOptions, shapeOptions } from "@/domain/ingredients-match-options";
+import {
+  PendingSelection,
+  CompletedArrow,
+  OptionType,
+  ColorOption,
+  ShapeOption
+} from "@/domain/ingredients-match-type";
+import { useRef, useState, useMemo } from "react";
+import ArrowLayer from "./ingredient-match-ui/arrow-layer";
+import IngredientTarget from "./ingredient-match-ui/ingredient-target";
+import MatchOptionColumn from "./ingredient-match-ui/match-option-column";
 
 type IngredientMatchMinigameProps = {
   ingredient: Ingredient;
   onComplete?: () => void;
 };
-
-type OptionType = "color" | "shape";
-
-type PendingSelection = {
-  type: OptionType;
-  id: string;
-  startX: number;
-  startY: number;
-} | null;
-
-type CompletedArrow = {
-  id: string;
-  type: OptionType;
-  sourceId: string;
-  startX: number;
-  startY: number;
-  endX: number;
-  endY: number;
-  isCorrect: boolean;
-};
-
-const colorOptions = [
-  { id: "red", label: "Red", value: "#EF4444" },
-  { id: "yellow", label: "Yellow", value: "#FACC15" },
-  { id: "orange", label: "Orange", value: "#FB923C" }
-];
-
-const shapeOptions = [
-  { id: "circle", label: "Circle" },
-  { id: "crescent", label: "Crescent" },
-  { id: "triangle", label: "Triangle" },
-  { id: "heart", label: "Heart" },
-  { id: "cone", label: "Cone" }
-];
 
 export default function IngredientMatchMinigame({
   ingredient,
@@ -56,21 +32,13 @@ export default function IngredientMatchMinigame({
   const [completedArrows, setCompletedArrows] = useState<CompletedArrow[]>([]);
   const [matchedColorId, setMatchedColorId] = useState<string | null>(null);
   const [matchedShapeId, setMatchedShapeId] = useState<string | null>(null);
+
   const [feedbackMessage, setFeedbackMessage] = useState(
     "Choose the matching colour or shape, then tap the ingredient."
   );
 
-  const visibleShapeOptions = useMemo(() => {
-    const correctShape = shapeOptions.find(
-      (shape) => shape.id === ingredient.shapeId
-    );
-
-    const incorrectShapes = shapeOptions.filter(
-      (shape) => shape.id !== ingredient.shapeId
-    );
-
-    return [correctShape, ...incorrectShapes].filter(Boolean).slice(0, 3);
-  }, [ingredient.shapeId]);
+  const isColorMatched = matchedColorId === ingredient.colorId;
+  const isShapeMatched = matchedShapeId === ingredient.shapeId;
 
   const visibleColorOptions = useMemo(() => {
     const correctColor = colorOptions.find(
@@ -81,8 +49,46 @@ export default function IngredientMatchMinigame({
       (color) => color.id !== ingredient.colorId
     );
 
-    return [correctColor, ...incorrectColors].filter(Boolean).slice(0, 3);
+    return [correctColor, ...incorrectColors]
+      .filter((color): color is ColorOption => Boolean(color))
+      .slice(0, 3);
   }, [ingredient.colorId]);
+
+  const visibleShapeOptions = useMemo(() => {
+    const correctShape = shapeOptions.find(
+      (shape) => shape.id === ingredient.shapeId
+    );
+
+    const incorrectShapes = shapeOptions.filter(
+      (shape) => shape.id !== ingredient.shapeId
+    );
+
+    return [correctShape, ...incorrectShapes]
+      .filter((shape): shape is ShapeOption => Boolean(shape))
+      .slice(0, 3);
+  }, [ingredient.shapeId]);
+
+  function getNextPrompt(
+    nextMatchedColorId: string | null,
+    nextMatchedShapeId: string | null
+  ) {
+    const hasCorrectColor = nextMatchedColorId === ingredient.colorId;
+    const hasCorrectShape = nextMatchedShapeId === ingredient.shapeId;
+
+    if (hasCorrectColor && hasCorrectShape) {
+      return `Great job! You matched the ${ingredient.name}.`;
+    }
+
+    if (hasCorrectColor && !hasCorrectShape) {
+      return "Nice! Now match the shape.";
+    }
+
+    if (!hasCorrectColor && hasCorrectShape) {
+      return "Nice! Now match the colour.";
+    }
+
+    return "Choose the matching colour or shape, then tap the ingredient.";
+  }
 
   function handleOptionClick(
     event: React.MouseEvent<HTMLButtonElement>,
@@ -90,6 +96,14 @@ export default function IngredientMatchMinigame({
     id: string
   ) {
     if (!containerRef.current) return;
+
+    if (type === "color" && isColorMatched && id !== matchedColorId) {
+      return;
+    }
+
+    if (type === "shape" && isShapeMatched && id !== matchedShapeId) {
+      return;
+    }
 
     const optionRect = event.currentTarget.getBoundingClientRect();
     const containerRect = containerRef.current.getBoundingClientRect();
@@ -109,6 +123,16 @@ export default function IngredientMatchMinigame({
 
   function handleIngredientClick() {
     if (!pendingSelection || !containerRef.current || !ingredientRef.current) {
+      if (isColorMatched && !isShapeMatched) {
+        setFeedbackMessage("Choose a shape, then tap the ingredient.");
+        return;
+      }
+
+      if (!isColorMatched && isShapeMatched) {
+        setFeedbackMessage("Choose a colour, then tap the ingredient.");
+        return;
+      }
+
       setFeedbackMessage("Choose a colour or shape first.");
       return;
     }
@@ -158,19 +182,25 @@ export default function IngredientMatchMinigame({
     }
 
     if (!isCorrect) {
-      setFeedbackMessage("Almost! Try another one.");
-    } else {
-      setFeedbackMessage("Nice match!");
+      setFeedbackMessage(
+        pendingSelection.type === "color"
+          ? "Almost! Try another colour."
+          : "Almost! Try another shape."
+      );
+
+      setPendingSelection(null);
+      return;
     }
 
     setPendingSelection(null);
+
+    setFeedbackMessage(getNextPrompt(nextMatchedColorId, nextMatchedShapeId));
 
     const isMinigameComplete =
       nextMatchedColorId === ingredient.colorId &&
       nextMatchedShapeId === ingredient.shapeId;
 
     if (isMinigameComplete) {
-      setFeedbackMessage(`Great job! You matched the ${ingredient.name}.`);
       onComplete?.();
     }
   }
@@ -183,120 +213,33 @@ export default function IngredientMatchMinigame({
         rounded-4xl bg-sky-200/50 p-8 text-black
       '
     >
-      <svg className='pointer-events-none absolute inset-0 h-full w-full'>
-        <defs>
-          <marker
-            id='arrowhead'
-            markerWidth='10'
-            markerHeight='10'
-            refX='8'
-            refY='3'
-            orient='auto'
-          >
-            <path d='M0,0 L0,6 L9,3 z' fill='currentColor' />
-          </marker>
-        </defs>
-
-        {completedArrows.map((arrow) => (
-          <line
-            key={arrow.id}
-            x1={arrow.startX}
-            y1={arrow.startY}
-            x2={arrow.endX}
-            y2={arrow.endY}
-            stroke={arrow.isCorrect ? "#22C55E" : "#FB923C"}
-            strokeWidth='5'
-            strokeLinecap='round'
-            markerEnd='url(#arrowhead)'
-          />
-        ))}
-      </svg>
+      <ArrowLayer arrows={completedArrows} />
 
       <div className='relative z-10 flex h-full min-h-105 items-center justify-between gap-8'>
-        <div className='flex flex-col gap-4'>
-          {visibleColorOptions.map((color) => {
-            if (!color) return null;
+        <MatchOptionColumn
+          type='color'
+          options={visibleColorOptions}
+          pendingSelection={pendingSelection}
+          matchedOptionId={matchedColorId}
+          isTypeMatched={isColorMatched}
+          onOptionClick={handleOptionClick}
+        />
 
-            const isSelected =
-              pendingSelection?.type === "color" &&
-              pendingSelection.id === color.id;
+        <IngredientTarget
+          ingredient={ingredient}
+          ingredientRef={ingredientRef}
+          feedbackMessage={feedbackMessage}
+          onClick={handleIngredientClick}
+        />
 
-            const isMatched = matchedColorId === color.id;
-
-            return (
-              <button
-                key={color.id}
-                type='button'
-                onClick={(event) => handleOptionClick(event, "color", color.id)}
-                className={`
-                  h-20 w-20 rounded-full border-4 shadow
-                  transition-transform hover:scale-105
-                  ${
-                    isSelected || isMatched ? "border-blue-500" : "border-white"
-                  }
-                `}
-                style={{ backgroundColor: color.value }}
-                aria-label={color.label}
-              />
-            );
-          })}
-        </div>
-
-        <div className='flex flex-col items-center gap-4'>
-          <button
-            ref={ingredientRef}
-            type='button'
-            onClick={handleIngredientClick}
-            className='
-              flex h-44 w-44 items-center justify-center
-              rounded-4xl bg-white shadow-lg
-              transition-transform hover:scale-105
-            '
-          >
-            <Image
-              src={ingredient.imageSrc}
-              alt={ingredient.imageAlt}
-              width={150}
-              height={150}
-              className='h-36 w-36 object-contain'
-              draggable={false}
-            />
-          </button>
-
-          <p className='max-w-xs rounded-2xl bg-white/90 px-4 py-3 text-center text-sm font-bold text-gray-700 shadow'>
-            {feedbackMessage}
-          </p>
-        </div>
-
-        <div className='flex flex-col gap-4'>
-          {visibleShapeOptions.map((shape) => {
-            if (!shape) return null;
-
-            const isSelected =
-              pendingSelection?.type === "shape" &&
-              pendingSelection.id === shape.id;
-
-            const isMatched = matchedShapeId === shape.id;
-
-            return (
-              <button
-                key={shape.id}
-                type='button'
-                onClick={(event) => handleOptionClick(event, "shape", shape.id)}
-                className={`
-                  h-20 w-28 rounded-3xl border-4 bg-white
-                  text-base font-extrabold shadow
-                  transition-transform hover:scale-105
-                  ${
-                    isSelected || isMatched ? "border-blue-500" : "border-white"
-                  }
-                `}
-              >
-                {shape.label}
-              </button>
-            );
-          })}
-        </div>
+        <MatchOptionColumn
+          type='shape'
+          options={visibleShapeOptions}
+          pendingSelection={pendingSelection}
+          matchedOptionId={matchedShapeId}
+          isTypeMatched={isShapeMatched}
+          onOptionClick={handleOptionClick}
+        />
       </div>
     </div>
   );
