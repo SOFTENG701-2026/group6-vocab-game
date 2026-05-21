@@ -1,19 +1,21 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import Button from "@/components/button";
 
 export default function BackButton() {
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   function handleBack() {
     if (pathname.startsWith("/home")) {
       router.push("/");
       return;
     }
-    router.push("/");
+    const theme = searchParams.get("theme") ?? "fruits-vegetables";
+    router.push(`/home?theme=${theme}`);
   }
 
   if (pathname === "/") return null;
