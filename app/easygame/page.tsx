@@ -44,6 +44,7 @@ export default function EasyGamePage() {
   const [isRoundComplete, setIsRoundComplete] = useState(false);
   const [isWrongColor, setIsWrongColor] = useState(false);
   const [clearSignal, setClearSignal] = useState(0);
+  const [isDragOver, setIsDragOver] = useState(false);
 
   const totalRounds = ingredients.length;
   const isGameComplete = roundIndex >= totalRounds;
@@ -62,9 +63,29 @@ export default function EasyGamePage() {
     );
   }, [activeIngredient, roundIndex]);
 
-  function handleAddAndSay() {
-    if (!selectedColorId || !activeIngredient || isRoundComplete) return;
+  function handleDrop() {
+    if (isRoundComplete || !activeIngredient) return;
+    setIsRoundComplete(true);
+    speak(`Great job! ${activeIngredient.name}!`);
+    setTimeout(() => {
+      setRoundIndex((prev) => prev + 1);
+      setSelectedColorId(null);
+      setIsRoundComplete(false);
+      setClearSignal((prev) => prev + 1);
+    }, 2500);
+  }
 
+  function handleAddAndSay() {
+    // 1. 本轮已完成，不重复处理
+    if (isRoundComplete || !activeIngredient) return;
+
+    // 2. 还没选颜色，提示玩家先选颜色
+    if (!selectedColorId) {
+      speak("Pick a color first!");
+      return;
+    }
+
+    // 3. 选了颜色但颜色不对，提示错误
     if (selectedColorId !== activeIngredient.colorId) {
       setIsWrongColor(true);
       speak(`Oops! Try again. ${activeIngredient.name} is ${activeIngredient.color}!`);
@@ -150,17 +171,22 @@ export default function EasyGamePage() {
             </h1>
           </div>
 
-          <div className="relative">
+          <div
+            className={`relative transition-all duration-200 ${isDragOver ? "scale-110" : ""}`}
+            onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
+            onDragLeave={() => setIsDragOver(false)}
+            onDrop={(e) => { e.preventDefault(); setIsDragOver(false); handleDrop(); }}
+          >
             <Image
               src="/assets/pot/pot.svg"
               alt="Magic soup pot"
               width={300}
               height={300}
-              className="h-[50vh] w-auto drop-shadow-xl"
+              className={`h-[50vh] w-auto drop-shadow-xl transition-all ${isDragOver ? "drop-shadow-2xl brightness-110" : ""}`}
               draggable={false}
             />
             {isRoundComplete && (
-              <div className="absolute inset-0 flex items-center justify-center">
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <span className="text-5xl animate-bounce">✨</span>
               </div>
             )}
@@ -184,7 +210,13 @@ export default function EasyGamePage() {
         {/* Right: Ingredient info + Drawing canvas */}
         <div className="flex flex-col gap-3 py-4 min-h-0 items-center">
           {/* Ingredient info card */}
-          <div className="flex items-center gap-3 bg-white rounded-2xl px-4 pr-10 py-3 shadow w-fit">
+          <div
+            draggable={!isRoundComplete}
+            onDragStart={(e) => { e.dataTransfer.setData("text/plain", "ingredient"); e.dataTransfer.effectAllowed = "move"; }}
+            className={`flex items-center gap-3 bg-white rounded-2xl px-4 pr-10 py-3 shadow w-fit select-none transition-all ${
+              !isRoundComplete ? "cursor-grab active:cursor-grabbing hover:shadow-lg hover:scale-105" : "opacity-50"
+            }`}
+          >
             <Image
               src={activeIngredient?.imageSrc ?? ""}
               alt={activeIngredient?.name ?? ""}
