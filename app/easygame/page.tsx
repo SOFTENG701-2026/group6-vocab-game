@@ -14,10 +14,8 @@ const COLOR_OPTIONS = [
   { colorId: "orange", label: "Orange" },
 ];
 
-function getBtnClass(isRoundComplete: boolean, isWrongColor: boolean, selectedColorId: string | null): string {
+function getBtnClass(isRoundComplete: boolean): string {
   if (isRoundComplete) return "bg-green-500 scale-105";
-  if (isWrongColor) return "bg-red-500";
-  if (selectedColorId) return "bg-pink-500 hover:bg-pink-600 hover:scale-105 active:scale-95";
   return "bg-gray-300 cursor-not-allowed";
 }
 
@@ -28,9 +26,8 @@ export default function EasyGamePage() {
     activeIngredient,
     shapeOptions,
     selectedColorId,
-    setSelectedColorId,
+    handlePickColor,
     isRoundComplete,
-    isWrongColor,
     isDragOver,
     setIsDragOver,
     isDropped,
@@ -128,7 +125,7 @@ export default function EasyGamePage() {
             className={`
               flex items-center gap-2 px-8 py-4 rounded-full
               font-extrabold text-xl text-white transition-all shadow-lg
-              ${getBtnClass(isRoundComplete, isWrongColor, selectedColorId)}
+              ${getBtnClass(isRoundComplete)}
             `}
           >
             <Mic className="w-5 h-5" />
@@ -170,7 +167,12 @@ export default function EasyGamePage() {
       {/* Bottom section: shown only after ingredient is dropped */}
       <div className={`grid grid-cols-2 gap-4 px-6 pb-4 transition-all duration-500 ${isDropped ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 translate-y-4 pointer-events-none"}`}>
         {/* Player color picker */}
-        <div className="bg-white/70 rounded-3xl px-6 py-4">
+        <div className="bg-white/70 rounded-3xl px-6 py-4 relative">
+          {isDropped && !isRoundComplete && !selectedColorId && (
+            <div className="absolute -top-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-0.5">
+              <span className="text-7xl animate-bounce">👇</span>
+            </div>
+          )}
           <div className="flex items-center gap-2 mb-3">
             <span className="text-xl">👑</span>
             <div>
@@ -184,7 +186,7 @@ export default function EasyGamePage() {
                 key={opt.colorId}
                 {...opt}
                 isSelected={selectedColorId === opt.colorId}
-                onSelect={setSelectedColorId}
+                onSelect={handlePickColor}
               />
             ))}
           </div>
