@@ -11,7 +11,7 @@ export default function Navbar({ gems = 0 }: NavbarProps) {
   return (
     <nav
       className=' w-full h-fit py-1
-        bg-orange-400
+        bg-gray-300
         backdrop-blur-md
         border-b border-orange-500/40
         shadow-sm
