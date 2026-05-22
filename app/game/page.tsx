@@ -78,6 +78,11 @@ export default function GamePage() {
             key={`${activeIngredient.id}-${activeMinigameIndex}`}
             ingredient={activeIngredient}
             onComplete={handleMinigameComplete}
+            onDropToPot={(ing) => {
+              // when the pot receives the dropped ingredient, advance to next ingredient
+              setIsShowingCompletion(false);
+              skipCurrentIngredient();
+            }}
           />
         );
 
