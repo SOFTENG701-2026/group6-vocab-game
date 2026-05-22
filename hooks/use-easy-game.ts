@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { ingredients } from "@/data/ingredients";
 import { speak } from "@/lib/speak";
@@ -13,19 +13,35 @@ export function useEasyGame() {
   const router = useRouter();
   const [roundIndex, setRoundIndex] = useState(0);
   const [selectedColorId, setSelectedColorId] = useState<string | null>(null);
+  const [isWrongColor, setIsWrongColor] = useState(false);
   const [isRoundComplete, setIsRoundComplete] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
   const [isDropped, setIsDropped] = useState(false);
   const [currentSpeech, setCurrentSpeech] = useState("");
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isVoiceListening, setIsVoiceListening] = useState(false);
+  const [isWaitingForVoiceToFinish, setIsWaitingForVoiceToFinish] = useState(false);
+  const listenTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const isGameComplete = roundIndex >= ingredients.length;
   const activeIngredient = ingredients[roundIndex] ?? null;
 
-  const say = useCallback((text: string) => {
+  const say = useCallback((text: string, onDone?: () => void) => {
     setCurrentSpeech(text);
     setIsSpeaking(true);
-    speak(text, () => setIsSpeaking(false));
+    speak(text, () => {
+      setIsSpeaking(false);
+      onDone?.();
+    });
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (listenTimeoutRef.current) {
+        clearTimeout(listenTimeoutRef.current);
+        listenTimeoutRef.current = null;
+      }
+    };
   }, []);
 
   useEffect(() => {
@@ -48,8 +64,11 @@ export function useEasyGame() {
     setTimeout(() => {
       setRoundIndex((prev) => prev + 1);
       setSelectedColorId(null);
+      setIsWrongColor(false);
       setIsRoundComplete(false);
       setIsDropped(false);
+      setIsVoiceListening(false);
+      setIsWaitingForVoiceToFinish(false);
     }, 2500);
   }
 
@@ -63,17 +82,18 @@ export function useEasyGame() {
     if (isRoundComplete || !isDropped || !activeIngredient) return;
 
     setSelectedColorId(colorId);
+    const isCorrectColor = colorId === activeIngredient.colorId;
+    setIsWrongColor(!isCorrectColor);
 
-    if (colorId !== activeIngredient.colorId) {
-      say(`Almost there! Let’s find ${activeIngredient.name} together!`);
-      setTimeout(() => setSelectedColorId(null), 1800);
+    if (!isCorrectColor) {
+      say(`Almost there! Let’s find ${activeIngredient.name} together!`, () => {
+        setIsWrongColor(false);
+        setSelectedColorId(null);
+      });
       return;
     }
 
-    // Correct!
-    setIsRoundComplete(true);
     say(`Amazing! ${activeIngredient.name} is ${activeIngredient.color}!`);
-    advanceRound();
   }
 
   function handleAddAndSay() {
@@ -90,13 +110,30 @@ export function useEasyGame() {
     }
 
     if (selectedColorId !== activeIngredient.colorId) {
-      say(`Oops! Try again. ${activeIngredient.name} is ${activeIngredient.color}!`);
+      setIsWrongColor(true);
+      say(`Oops! Try again. ${activeIngredient.name} is ${activeIngredient.color}!`, () => {
+        setIsWrongColor(false);
+        setSelectedColorId(null);
+      });
       return;
     }
 
-    setIsRoundComplete(true);
-    say(`Great job! ${activeIngredient.name}! ${toSpelling(activeIngredient.name)}!`);
-    advanceRound();
+    setIsWaitingForVoiceToFinish(true);
+    setIsVoiceListening(true);
+
+    if (listenTimeoutRef.current) clearTimeout(listenTimeoutRef.current);
+    listenTimeoutRef.current = setTimeout(() => {
+      setIsVoiceListening(false);
+      setIsWaitingForVoiceToFinish(false);
+      setIsRoundComplete(true);
+      setCurrentSpeech(`Great job! ${activeIngredient.name}! ${toSpelling(activeIngredient.name)}!`);
+      setIsSpeaking(true);
+      speak(`Great job! ${activeIngredient.name}! ${toSpelling(activeIngredient.name)}!`, () => {
+        setIsSpeaking(false);
+        advanceRound();
+      });
+      listenTimeoutRef.current = null;
+    }, 3000);
   }
 
   function goHome() {
@@ -115,6 +152,9 @@ export function useEasyGame() {
     isDropped,
     currentSpeech,
     isSpeaking,
+    isVoiceListening,
+    isWaitingForVoiceToFinish,
+    isWrongColor,
     handleDrop,
     handlePickColor,
     goHome,

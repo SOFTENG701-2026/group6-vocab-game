@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { Mic } from "lucide-react";
+import { Mic, Ear, XCircle } from "lucide-react";
 import { ingredients } from "@/data/ingredients";
 import MonsterBubble from "@/components/easygame/monster-bubble";
 import ColorOptionCard from "@/components/easygame/color-option-card";
@@ -14,9 +14,95 @@ const COLOR_OPTIONS = [
   { colorId: "orange", label: "Orange" },
 ];
 
-function getBtnClass(isRoundComplete: boolean): string {
+function getBtnClass(isRoundComplete: boolean, isWrongColor: boolean, selectedColorId: string | null): string {
   if (isRoundComplete) return "bg-green-500 scale-105";
+  if (isWrongColor) return "bg-red-500";
+  if (selectedColorId) return "bg-purple-600";
   return "bg-gray-300 cursor-not-allowed";
+}
+
+function getProgressDotClass(idx: number, roundIndex: number): string {
+  if (idx < roundIndex) return "border-green-400 opacity-100";
+  if (idx === roundIndex) return "border-purple-500 ring-2 ring-purple-300 scale-110";
+  return "border-gray-300 opacity-30 grayscale";
+}
+
+function getVoiceButtonText(
+  isRoundComplete: boolean,
+  isWrongColor: boolean,
+  isVoiceListening: boolean,
+  isWaitingForVoiceToFinish: boolean,
+  selectedColorId: string | null,
+): string {
+  if (isRoundComplete) return "Well done! ✨";
+  if (isWrongColor) return "Try again";
+  if (isVoiceListening || isWaitingForVoiceToFinish) return "";
+  return "say it";
+}
+
+function VoiceActionButton({
+  selectedColorId,
+  isRoundComplete,
+  isWrongColor,
+  isVoiceListening,
+  isWaitingForVoiceToFinish,
+  onClick,
+}: Readonly<{
+  selectedColorId: string | null;
+  isRoundComplete: boolean;
+  isWrongColor: boolean;
+  isVoiceListening: boolean;
+  isWaitingForVoiceToFinish: boolean;
+  onClick: () => void;
+}>) {
+  const isCorrectSelection = Boolean(selectedColorId && !isWrongColor);
+  const isAnimated = Boolean(isCorrectSelection && !isVoiceListening && !isWaitingForVoiceToFinish);
+  const isListening = isVoiceListening || isWaitingForVoiceToFinish;
+  let buttonIcon = <Mic className="w-8 h-8 text-white stroke-2" />;
+  if (isWrongColor) {
+    buttonIcon = <XCircle className="w-8 h-8 text-white stroke-2" />;
+  } else if (isListening) {
+    buttonIcon = (
+      <div className="flex items-center justify-center gap-2 w-full">
+        <Ear className="w-8 h-8 text-white stroke-2 animate-pulse" />
+        <div className="flex items-end gap-1 h-6">
+          <span className="w-1 bg-white/90 animate-pulse" style={{ height: 6, animationDelay: "0ms" }} />
+          <span className="w-1 bg-white/90 animate-pulse" style={{ height: 10, animationDelay: "120ms" }} />
+          <span className="w-1 bg-white/90 animate-pulse" style={{ height: 8, animationDelay: "240ms" }} />
+          <span className="w-1 bg-white/90 animate-pulse" style={{ height: 12, animationDelay: "360ms" }} />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-3">
+      {isAnimated && <span className="text-xl -translate-y-1 animate-bounce">✨</span>}
+
+      <button
+        type="button"
+        onClick={onClick}
+        disabled={!isCorrectSelection || isRoundComplete || isVoiceListening || isWaitingForVoiceToFinish || isWrongColor}
+        className={`
+          flex items-center gap-2 px-8 py-4 rounded-full
+          font-extrabold text-xl text-white transition-all shadow-lg
+          ${getBtnClass(isRoundComplete, isWrongColor, selectedColorId)}
+          ${isAnimated ? "animate-bounce" : ""}
+        `}
+      >
+        <span className={`flex items-center justify-center h-14 w-14 rounded-full ${isAnimated || isListening ? "animate-pulse" : ""}`}>
+          {buttonIcon}
+        </span>
+        {!isListening && (
+          <span className={`text-lg font-extrabold text-white ${isAnimated ? "animate-pulse" : ""}`}>
+            {getVoiceButtonText(isRoundComplete, isWrongColor, isVoiceListening, isWaitingForVoiceToFinish, selectedColorId)}
+          </span>
+        )}
+      </button>
+
+      {isAnimated && <span className="text-xl -translate-y-1 animate-bounce">✨</span>}
+    </div>
+  );
 }
 
 export default function EasyGamePage() {
@@ -33,6 +119,9 @@ export default function EasyGamePage() {
     isDropped,
     currentSpeech,
     isSpeaking,
+    isVoiceListening,
+    isWaitingForVoiceToFinish,
+    isWrongColor,
     handleDrop,
     handleAddAndSay,
     goHome,
@@ -74,13 +163,7 @@ export default function EasyGamePage() {
               {ingredients.map((ing, idx) => (
                 <div
                   key={ing.id}
-                  className={`w-8 h-8 rounded-full border-2 overflow-hidden transition-all ${
-                    idx < roundIndex
-                      ? "border-green-400 opacity-100"
-                      : idx === roundIndex
-                      ? "border-purple-500 ring-2 ring-purple-300 scale-110"
-                      : "border-gray-300 opacity-30 grayscale"
-                  }`}
+                  className={`w-8 h-8 rounded-full border-2 overflow-hidden transition-all ${getProgressDotClass(idx, roundIndex)}`}
                 >
                   <Image
                     src={ing.imageSrc}
@@ -96,11 +179,13 @@ export default function EasyGamePage() {
           </div>
 
           {/* Pot (drop target) */}
-          <div
+          <button
+            type="button"
             className={`relative transition-all duration-200 ${isDragOver ? "scale-110" : ""}`}
             onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
             onDragLeave={() => setIsDragOver(false)}
             onDrop={(e) => { e.preventDefault(); setIsDragOver(false); handleDrop(); }}
+            aria-label="Magic soup pot"
           >
             <Image
               src="/assets/pot/pot.svg"
@@ -111,26 +196,21 @@ export default function EasyGamePage() {
               draggable={false}
             />
             {isRoundComplete && (
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <span className="text-5xl animate-bounce">✨</span>
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/4 pointer-events-none -z-10">
+                <span className="text-4xl md:text-5xl opacity-90 animate-bounce drop-shadow-lg">✨</span>
               </div>
             )}
-          </div>
+          </button>
 
           {/* Submit button */}
-          <button
-            type="button"
+          <VoiceActionButton
+            selectedColorId={selectedColorId}
+            isRoundComplete={isRoundComplete}
+            isWrongColor={isWrongColor}
+            isVoiceListening={isVoiceListening}
+            isWaitingForVoiceToFinish={isWaitingForVoiceToFinish}
             onClick={handleAddAndSay}
-            disabled={isRoundComplete}
-            className={`
-              flex items-center gap-2 px-8 py-4 rounded-full
-              font-extrabold text-xl text-white transition-all shadow-lg
-              ${getBtnClass(isRoundComplete)}
-            `}
-          >
-            <Mic className="w-5 h-5" />
-            {isRoundComplete ? "Well done! ✨" : "Add and Say it"}
-          </button>
+          />
         </div>
 
         {/* Right: Draggable ingredient card */}
@@ -139,27 +219,29 @@ export default function EasyGamePage() {
             {!isDropped && !isRoundComplete && (
               <span className="text-7xl animate-bounce">👉</span>
             )}
-            <div
+            <button
+              type="button"
               draggable={true}
               onDragStart={(e) => { e.dataTransfer.setData("text/plain", "ingredient"); e.dataTransfer.effectAllowed = "move"; }}
-              className={`flex items-center gap-3 bg-white rounded-2xl px-4 pr-10 py-3 shadow w-fit select-none transition-all ${
+              className={`flex items-center gap-3 bg-white rounded-2xl px-4 pr-10 py-3 shadow w-fit select-none transition-all text-left ${
                 !isRoundComplete && !isDropped
                   ? "cursor-grab active:cursor-grabbing hover:shadow-lg hover:scale-105"
                   : "cursor-default"
               }`}
+              aria-label={activeIngredient?.name ?? "Ingredient"}
             >
-            <Image
-              src={activeIngredient?.imageSrc ?? ""}
-              alt={activeIngredient?.name ?? ""}
-              width={60}
-              height={60}
-              className="w-14 h-14 object-contain"
-              draggable={false}
-            />
-            <div>
-              <p className="text-3xl font-extrabold text-gray-800">{activeIngredient?.name}</p>
-            </div>
-            </div>
+              <Image
+                src={activeIngredient?.imageSrc ?? ""}
+                alt={activeIngredient?.name ?? ""}
+                width={60}
+                height={60}
+                className="w-14 h-14 object-contain"
+                draggable={false}
+              />
+              <div>
+                <p className="text-3xl font-extrabold text-gray-800">{activeIngredient?.name}</p>
+              </div>
+            </button>
           </div>
         </div>
       </div>
