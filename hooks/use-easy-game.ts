@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ingredients } from "@/data/ingredients";
 import { speak } from "@/lib/speak";
@@ -22,6 +22,12 @@ export function useEasyGame() {
   const totalRounds = ingredients.length;
   const isGameComplete = roundIndex >= totalRounds;
   const activeIngredient = ingredients[roundIndex] ?? null;
+
+  useEffect(() => {
+    if (activeIngredient) {
+      speak(`Find ${activeIngredient.name}!`);
+    }
+  }, [activeIngredient]);
 
   const shapeOptions = useMemo(() => {
     if (!activeIngredient) return [];

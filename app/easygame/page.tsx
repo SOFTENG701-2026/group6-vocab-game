@@ -98,9 +98,6 @@ export default function EasyGamePage() {
                 </div>
               ))}
             </div>
-            <h1 className="text-4xl font-extrabold text-purple-900 mt-1">
-              Find {activeIngredient?.name}
-            </h1>
           </div>
 
           {/* Pot (drop target) */}
@@ -143,15 +140,19 @@ export default function EasyGamePage() {
 
         {/* Right: Draggable ingredient card */}
         <div className="flex flex-col gap-3 py-4 min-h-0 items-center">
-          <div
-            draggable={true}
-            onDragStart={(e) => { e.dataTransfer.setData("text/plain", "ingredient"); e.dataTransfer.effectAllowed = "move"; }}
-            className={`flex items-center gap-3 bg-white rounded-2xl px-4 pr-10 py-3 shadow w-fit select-none transition-all ${
-              !isRoundComplete && !isDropped
-                ? "cursor-grab active:cursor-grabbing hover:shadow-lg hover:scale-105"
-                : "cursor-default"
-            }`}
-          >
+          <div className="flex items-center gap-5">
+            {!isDropped && !isRoundComplete && (
+              <span className="text-7xl animate-bounce">👉</span>
+            )}
+            <div
+              draggable={true}
+              onDragStart={(e) => { e.dataTransfer.setData("text/plain", "ingredient"); e.dataTransfer.effectAllowed = "move"; }}
+              className={`flex items-center gap-3 bg-white rounded-2xl px-4 pr-10 py-3 shadow w-fit select-none transition-all ${
+                !isRoundComplete && !isDropped
+                  ? "cursor-grab active:cursor-grabbing hover:shadow-lg hover:scale-105"
+                  : "cursor-default"
+              }`}
+            >
             <Image
               src={activeIngredient?.imageSrc ?? ""}
               alt={activeIngredient?.name ?? ""}
@@ -162,6 +163,7 @@ export default function EasyGamePage() {
             />
             <div>
               <p className="text-3xl font-extrabold text-gray-800">{activeIngredient?.name}</p>
+            </div>
             </div>
           </div>
         </div>
