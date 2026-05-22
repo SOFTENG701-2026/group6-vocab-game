@@ -2,7 +2,6 @@ import Image from "next/image";
 import Button from "@/components/button";
 import type { Ingredient } from "@/data/ingredients";
 import FeedbackMessage from "./feedback-match";
-import MagicPot from "@/components/game/magic-pot";
 
 type IngredientTargetProps = {
   ingredient: Ingredient;
@@ -72,16 +71,6 @@ export default function IngredientTarget({
 
       <FeedbackMessage message={feedbackMessage} />
     </div>
-
-      {/* MagicPot */}
-      <div className="w-full mt-3">
-        <MagicPot
-          className="w-full h-32"
-          onDrop={(ing) => {
-            onDropToPot?.(ing);
-          }}
-        />
-      </div>
-    </div>
+  </div>
   );
 }
