@@ -58,7 +58,7 @@ export default function BaseSelectionModal({
       <div
         className='
           w-full
-          max-w-5xl min-h-140
+          max-w-6xl min-h-140
           rounded-4xl bg-(--card-body-bg)
           px-6 py-8 sm:px-10 sm:py-10
           shadow-[0_24px_60px_rgba(0,0,0,0.3)]
