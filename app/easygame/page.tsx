@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import { Mic } from "lucide-react";
 import { ingredients } from "@/data/ingredients";
 import MonsterBubble from "@/components/easygame/monster-bubble";
-import DrawingCanvas from "@/components/easygame/drawing-canvas";
 import ColorOptionCard from "@/components/easygame/color-option-card";
 import ShapeOptionCard from "@/components/easygame/shape-option-card";
 
