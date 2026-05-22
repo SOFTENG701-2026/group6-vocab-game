@@ -85,12 +85,13 @@ export default function MagicPot({ className, onDrop }: { className?: string; on
 
     setFalling(prev => [...prev, { id: itemId, ingredient, x: xPos }]);
 
+    setDropped(prev => {
+      const next = [...prev, ingredient];
+      setSoup(blendColors(next.map(i => i.colorId)));
+      return next;
+    });
+
     setTimeout(() => {
-      setDropped(prev => {
-        const next = [...prev, ingredient];
-        setSoup(blendColors(next.map(i => i.colorId)));
-        return next;
-      });
       setSplashing(true);
       setFalling(prev => prev.filter(f => f.id !== itemId));
       setTimeout(() => setSplashing(false), 600);
@@ -112,17 +113,17 @@ export default function MagicPot({ className, onDrop }: { className?: string; on
     const ingredient = ingredients.find(i => i.id === id);
     if (ingredient) {
       dropIngredient(ingredient);
-      onDrop?.(ingredient);
+      if (onDrop) {
+        window.setTimeout(() => onDrop(ingredient), 700);
+      }
     }
     setIsDragOver(false);
   }
 
-  // Build SVG gradient stop markup as a string (for dangerouslySetInnerHTML)
-  const gradStops = soup.colors
-    .map((c, i) =>
-      `<stop offset="${Math.round((i / Math.max(soup.colors.length - 1, 1)) * 100)}%" stop-color="${c}"/>`
-    )
-    .join("");
+  const gradStops = soup.colors.map((c, i) => {
+    const offset = Math.round((i / Math.max(soup.colors.length - 1, 1)) * 100);
+    return <stop key={`${c}-${offset}`} offset={`${offset}%`} stopColor={c} />;
+  });
 
   return (
     <div className={`${className ?? ""} flex flex-col items-center px-4 py-2`}>
@@ -143,10 +144,9 @@ export default function MagicPot({ className, onDrop }: { className?: string; on
             className="w-full h-auto drop-shadow-2xl"
           >
             <defs>
-              <radialGradient
-                id="soupGrad" cx="50%" cy="50%" r="55%"
-                dangerouslySetInnerHTML={{ __html: gradStops }}
-              />
+              <radialGradient id="soupGrad" cx="50%" cy="50%" r="55%">
+                {gradStops}
+              </radialGradient>
               <radialGradient id="soupShimmer" cx="28%" cy="35%" r="45%">
                 <stop offset="0%" stopColor="white" stopOpacity="0.25" />
                 <stop offset="100%" stopColor="white" stopOpacity="0" />
