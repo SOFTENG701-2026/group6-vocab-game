@@ -14,6 +14,16 @@ const COLOR_OPTIONS = [
   { colorId: "orange", label: "Orange" },
 ];
 
+const AMAZING_STARS = [
+  { left: "18%", delay: "0ms", duration: "900ms" },
+  { left: "26%", delay: "120ms", duration: "1100ms" },
+  { left: "34%", delay: "220ms", duration: "1000ms" },
+  { left: "50%", delay: "60ms", duration: "1200ms" },
+  { left: "62%", delay: "180ms", duration: "980ms" },
+  { left: "74%", delay: "260ms", duration: "1080ms" },
+  { left: "82%", delay: "140ms", duration: "950ms" },
+];
+
 function getBtnClass(isRoundComplete: boolean, isWrongColor: boolean, selectedColorId: string | null): string {
   if (isRoundComplete) return "bg-green-500 scale-105";
   if (isWrongColor) return "bg-red-500";
@@ -56,8 +66,15 @@ function VoiceActionButton({
   onClick: () => void;
 }>) {
   const isCorrectSelection = Boolean(selectedColorId && !isWrongColor);
-  const isAnimated = Boolean(isCorrectSelection && !isVoiceListening && !isWaitingForVoiceToFinish);
+  const isWellDone = isRoundComplete;
+  const isAnimated = Boolean(isCorrectSelection && !isVoiceListening && !isWaitingForVoiceToFinish && !isRoundComplete);
   const isListening = isVoiceListening || isWaitingForVoiceToFinish;
+  let buttonMotionClass = "";
+  if (isWellDone) {
+    buttonMotionClass = "animate-well-done-bounce";
+  } else if (isAnimated) {
+    buttonMotionClass = "animate-bounce";
+  }
   let buttonIcon = <Mic className="w-8 h-8 text-white stroke-2" />;
   if (isWrongColor) {
     buttonIcon = <XCircle className="w-8 h-8 text-white stroke-2" />;
@@ -65,11 +82,11 @@ function VoiceActionButton({
     buttonIcon = (
       <div className="flex items-center justify-center gap-2 w-full">
         <Ear className="w-8 h-8 text-white stroke-2 animate-pulse" />
-        <div className="flex items-end gap-1 h-6">
-          <span className="w-1 bg-white/90 animate-pulse" style={{ height: 6, animationDelay: "0ms" }} />
-          <span className="w-1 bg-white/90 animate-pulse" style={{ height: 10, animationDelay: "120ms" }} />
-          <span className="w-1 bg-white/90 animate-pulse" style={{ height: 8, animationDelay: "240ms" }} />
-          <span className="w-1 bg-white/90 animate-pulse" style={{ height: 12, animationDelay: "360ms" }} />
+        <div className="flex items-end gap-1 h-7">
+          <span className="w-1 bg-white/90 rounded-full animate-listening-wave" style={{ height: 8, animationDelay: "0ms" }} />
+          <span className="w-1 bg-white/90 rounded-full animate-listening-wave" style={{ height: 14, animationDelay: "120ms" }} />
+          <span className="w-1 bg-white/90 rounded-full animate-listening-wave" style={{ height: 10, animationDelay: "240ms" }} />
+          <span className="w-1 bg-white/90 rounded-full animate-listening-wave" style={{ height: 16, animationDelay: "360ms" }} />
         </div>
       </div>
     );
@@ -87,7 +104,8 @@ function VoiceActionButton({
           flex items-center gap-2 px-8 py-4 rounded-full
           font-extrabold text-xl text-white transition-all shadow-lg
           ${getBtnClass(isRoundComplete, isWrongColor, selectedColorId)}
-          ${isAnimated ? "animate-bounce" : ""}
+          ${buttonMotionClass}
+          ${isWrongColor ? "animate-shake" : ""}
         `}
       >
         <span className={`flex items-center justify-center h-14 w-14 rounded-full ${isAnimated || isListening ? "animate-pulse" : ""}`}>
@@ -101,6 +119,47 @@ function VoiceActionButton({
       </button>
 
       {isAnimated && <span className="text-xl -translate-y-1 animate-bounce">✨</span>}
+
+      <style jsx>{`
+        @keyframes listeningWave {
+          0%,
+          100% {
+            transform: translateY(0) scaleY(0.7);
+            opacity: 0.75;
+          }
+          25% {
+            transform: translateY(-8px) scaleY(1.2);
+            opacity: 1;
+          }
+          50% {
+            transform: translateY(-3px) scaleY(0.9);
+            opacity: 0.9;
+          }
+          75% {
+            transform: translateY(-10px) scaleY(1.1);
+            opacity: 1;
+          }
+        }
+
+        :global(.animate-listening-wave) {
+          animation: listeningWave 1.35s ease-in-out infinite;
+          transform-origin: center bottom;
+        }
+
+        @keyframes wellDoneBounce {
+          0%,
+          100% {
+            transform: translateY(0);
+          }
+          50% {
+            transform: translateY(-8px);
+          }
+        }
+
+        :global(.animate-well-done-bounce) {
+          animation: wellDoneBounce 0.5s ease-in-out 4;
+        }
+      `}</style>
     </div>
   );
 }
@@ -116,13 +175,17 @@ export default function EasyGamePage() {
     isRoundComplete,
     isDragOver,
     setIsDragOver,
+    isDraggingIngredient,
     isDropped,
     currentSpeech,
     isSpeaking,
     isVoiceListening,
     isWaitingForVoiceToFinish,
+    isAmazingEffect,
     isWrongColor,
     handleDrop,
+    handleIngredientDragStart,
+    handleIngredientDragEnd,
     handleAddAndSay,
     goHome,
   } = useEasyGame();
@@ -146,7 +209,28 @@ export default function EasyGamePage() {
   }
 
   return (
-    <main className="flex-1 min-h-0 grid grid-rows-[1fr_auto] bg-gradient-to-b from-teal-300 to-yellow-200 overflow-hidden">
+    <main className="relative flex-1 min-h-0 grid grid-rows-[1fr_auto] bg-gradient-to-b from-teal-300 to-yellow-200 overflow-hidden">
+      {isAmazingEffect && (
+        <div className="pointer-events-none absolute inset-0 z-30 overflow-hidden">
+          {AMAZING_STARS.map((star) => (
+            <span
+              key={`${star.left}-${star.delay}`}
+              className="absolute top-[16%] text-3xl animate-star-fall"
+              style={{ left: star.left, animationDelay: star.delay, animationDuration: star.duration }}
+            >
+              ✨
+            </span>
+          ))}
+
+          <span className="absolute left-[40%] top-[22%] text-5xl animate-firework-pop" style={{ animationDelay: "80ms" }}>
+            🎆
+          </span>
+          <span className="absolute left-[57%] top-[24%] text-4xl animate-firework-pop" style={{ animationDelay: "220ms" }}>
+            🎇
+          </span>
+        </div>
+      )}
+
       {/* Top section */}
       <div className="grid grid-cols-[1fr_auto_1fr] gap-4 px-6 pt-4 min-h-0">
 
@@ -179,28 +263,36 @@ export default function EasyGamePage() {
           </div>
 
           {/* Pot (drop target) */}
-          <button
-            type="button"
-            className={`relative transition-all duration-200 ${isDragOver ? "scale-110" : ""}`}
-            onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
-            onDragLeave={() => setIsDragOver(false)}
-            onDrop={(e) => { e.preventDefault(); setIsDragOver(false); handleDrop(); }}
-            aria-label="Magic soup pot"
-          >
-            <Image
-              src="/assets/pot/pot.svg"
-              alt="Magic soup pot"
-              width={300}
-              height={300}
-              className={`h-[50vh] w-auto drop-shadow-xl transition-all ${isDragOver ? "drop-shadow-2xl brightness-110" : ""}`}
-              draggable={false}
-            />
-            {isRoundComplete && (
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/4 pointer-events-none -z-10">
-                <span className="text-4xl md:text-5xl opacity-90 animate-bounce drop-shadow-lg">✨</span>
+          <div className="relative flex items-center justify-center">
+            {isDraggingIngredient && !isDropped && !isRoundComplete && (
+              <div className="absolute left-[-4.5rem] top-1/2 -translate-y-1/2 pointer-events-none animate-bounce">
+                <span className="text-7xl drop-shadow-lg">👉</span>
               </div>
             )}
-          </button>
+
+            <button
+              type="button"
+              className={`relative transition-all duration-200 ${isDragOver || isDraggingIngredient ? "scale-110 animate-bounce" : ""}`}
+              onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
+              onDragLeave={() => setIsDragOver(false)}
+              onDrop={(e) => { e.preventDefault(); setIsDragOver(false); handleDrop(); }}
+              aria-label="Magic soup pot"
+            >
+              <Image
+                src="/assets/pot/pot.svg"
+                alt="Magic soup pot"
+                width={300}
+                height={300}
+                className={`relative z-10 h-[50vh] w-auto drop-shadow-xl transition-all ${isDragOver ? "drop-shadow-2xl brightness-110" : ""} ${isDropped ? "saturate-150" : ""}`}
+                draggable={false}
+              />
+              {isRoundComplete && (
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/4 pointer-events-none -z-10">
+                  <span className="text-4xl md:text-5xl opacity-90 animate-bounce drop-shadow-lg">✨</span>
+                </div>
+              )}
+            </button>
+          </div>
 
           {/* Submit button */}
           <VoiceActionButton
@@ -216,30 +308,31 @@ export default function EasyGamePage() {
         {/* Right: Draggable ingredient card */}
         <div className="flex flex-col gap-3 py-4 min-h-0 items-center">
           <div className="flex items-center gap-5">
-            {!isDropped && !isRoundComplete && (
+            {!isDraggingIngredient && !isDropped && !isRoundComplete && (
               <span className="text-7xl animate-bounce">👉</span>
             )}
             <button
               type="button"
               draggable={true}
-              onDragStart={(e) => { e.dataTransfer.setData("text/plain", "ingredient"); e.dataTransfer.effectAllowed = "move"; }}
-              className={`flex items-center gap-3 bg-white rounded-2xl px-4 pr-10 py-3 shadow w-fit select-none transition-all text-left ${
+              onDragStart={(e) => { e.dataTransfer.setData("text/plain", "ingredient"); e.dataTransfer.effectAllowed = "move"; handleIngredientDragStart(); }}
+              onDragEnd={handleIngredientDragEnd}
+              className={`flex items-center gap-4 bg-white rounded-2xl px-5 pr-12 py-4 shadow w-fit select-none transition-all text-left ${
                 !isRoundComplete && !isDropped
                   ? "cursor-grab active:cursor-grabbing hover:shadow-lg hover:scale-105"
                   : "cursor-default"
-              }`}
+              } ${isWrongColor ? "animate-shake" : ""}`}
               aria-label={activeIngredient?.name ?? "Ingredient"}
             >
               <Image
                 src={activeIngredient?.imageSrc ?? ""}
                 alt={activeIngredient?.name ?? ""}
-                width={60}
-                height={60}
-                className="w-14 h-14 object-contain"
+                width={112}
+                height={112}
+                className="w-28 h-28 object-contain"
                 draggable={false}
               />
               <div>
-                <p className="text-3xl font-extrabold text-gray-800">{activeIngredient?.name}</p>
+                <p className="text-base font-extrabold text-gray-800">{activeIngredient?.name}</p>
               </div>
             </button>
           </div>
@@ -249,7 +342,7 @@ export default function EasyGamePage() {
       {/* Bottom section: shown only after ingredient is dropped */}
       <div className={`grid grid-cols-2 gap-4 px-6 pb-4 transition-all duration-500 ${isDropped ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 translate-y-4 pointer-events-none"}`}>
         {/* Player color picker */}
-        <div className="bg-white/70 rounded-3xl px-6 py-4 relative">
+        <div className={`bg-white/70 rounded-3xl px-6 py-4 relative ${isWrongColor ? "animate-shake" : ""}`}>
           {isDropped && !isRoundComplete && !selectedColorId && (
             <div className="absolute -top-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-0.5">
               <span className="text-7xl animate-bounce">👇</span>
@@ -268,6 +361,7 @@ export default function EasyGamePage() {
                 key={opt.colorId}
                 {...opt}
                 isSelected={selectedColorId === opt.colorId}
+                isWrong={isWrongColor && selectedColorId === opt.colorId}
                 onSelect={handlePickColor}
               />
             ))}
@@ -295,6 +389,47 @@ export default function EasyGamePage() {
           </div>
         </div>
       </div>
+
+      <style jsx>{`
+        @keyframes starFall {
+          0% {
+            transform: translateY(-20px) scale(0.6) rotate(0deg);
+            opacity: 0;
+          }
+          20% {
+            opacity: 1;
+          }
+          100% {
+            transform: translateY(130px) scale(1) rotate(120deg);
+            opacity: 0;
+          }
+        }
+
+        @keyframes fireworkPop {
+          0% {
+            transform: scale(0.4);
+            opacity: 0;
+          }
+          40% {
+            transform: scale(1.15);
+            opacity: 1;
+          }
+          100% {
+            transform: scale(0.8);
+            opacity: 0;
+          }
+        }
+
+        :global(.animate-star-fall) {
+          animation-name: starFall;
+          animation-timing-function: ease-out;
+          animation-fill-mode: both;
+        }
+
+        :global(.animate-firework-pop) {
+          animation: fireworkPop 900ms ease-out both;
+        }
+      `}</style>
     </main>
   );
 }

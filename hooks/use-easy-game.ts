@@ -16,12 +16,17 @@ export function useEasyGame() {
   const [isWrongColor, setIsWrongColor] = useState(false);
   const [isRoundComplete, setIsRoundComplete] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [isDraggingIngredient, setIsDraggingIngredient] = useState(false);
   const [isDropped, setIsDropped] = useState(false);
   const [currentSpeech, setCurrentSpeech] = useState("");
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isVoiceListening, setIsVoiceListening] = useState(false);
   const [isWaitingForVoiceToFinish, setIsWaitingForVoiceToFinish] = useState(false);
+  const [isPotGuideVisible, setIsPotGuideVisible] = useState(false);
+  const [isAmazingEffect, setIsAmazingEffect] = useState(false);
   const listenTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const potGuideTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const amazingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const isGameComplete = roundIndex >= ingredients.length;
   const activeIngredient = ingredients[roundIndex] ?? null;
@@ -40,6 +45,16 @@ export function useEasyGame() {
       if (listenTimeoutRef.current) {
         clearTimeout(listenTimeoutRef.current);
         listenTimeoutRef.current = null;
+      }
+
+      if (potGuideTimeoutRef.current) {
+        clearTimeout(potGuideTimeoutRef.current);
+        potGuideTimeoutRef.current = null;
+      }
+
+      if (amazingTimeoutRef.current) {
+        clearTimeout(amazingTimeoutRef.current);
+        amazingTimeoutRef.current = null;
       }
     };
   }, []);
@@ -60,7 +75,7 @@ export function useEasyGame() {
     );
   }, [activeIngredient, roundIndex]);
 
-  function advanceRound() {
+  function advanceRound(delayMs = 2500) {
     setTimeout(() => {
       setRoundIndex((prev) => prev + 1);
       setSelectedColorId(null);
@@ -69,13 +84,38 @@ export function useEasyGame() {
       setIsDropped(false);
       setIsVoiceListening(false);
       setIsWaitingForVoiceToFinish(false);
-    }, 2500);
+      setIsDraggingIngredient(false);
+      setIsAmazingEffect(false);
+    }, delayMs);
   }
 
   function handleDrop() {
     if (isRoundComplete || isDropped || !activeIngredient) return;
     setIsDropped(true);
+    setIsPotGuideVisible(false);
+    setIsDraggingIngredient(false);
     say(`Good! Now pick the right color for ${activeIngredient.name}!`);
+  }
+
+  function handleIngredientDragStart() {
+    if (isRoundComplete || isDropped || !activeIngredient) return;
+    setIsDraggingIngredient(true);
+  }
+
+  function handleIngredientDragEnd() {
+    setIsDraggingIngredient(false);
+  }
+
+  function handleIngredientClick() {
+    if (isRoundComplete || isDropped || !activeIngredient) return;
+
+    setIsPotGuideVisible(true);
+
+    if (potGuideTimeoutRef.current) clearTimeout(potGuideTimeoutRef.current);
+    potGuideTimeoutRef.current = setTimeout(() => {
+      setIsPotGuideVisible(false);
+      potGuideTimeoutRef.current = null;
+    }, 2200);
   }
 
   function handlePickColor(colorId: string) {
@@ -86,14 +126,21 @@ export function useEasyGame() {
     setIsWrongColor(!isCorrectColor);
 
     if (!isCorrectColor) {
-      say(`Almost there! Let’s find ${activeIngredient.name} together!`, () => {
+      say(`Almost there! ${activeIngredient.name} is ${activeIngredient.color}!`, () => {
         setIsWrongColor(false);
         setSelectedColorId(null);
       });
       return;
     }
 
-    say(`Amazing! ${activeIngredient.name} is ${activeIngredient.color}!`);
+    setIsAmazingEffect(true);
+    if (amazingTimeoutRef.current) clearTimeout(amazingTimeoutRef.current);
+    amazingTimeoutRef.current = setTimeout(() => {
+      setIsAmazingEffect(false);
+      amazingTimeoutRef.current = null;
+    }, 2000);
+
+    say(`Amazing! Let's say it together: ${activeIngredient.name} !`);
   }
 
   function handleAddAndSay() {
@@ -126,14 +173,17 @@ export function useEasyGame() {
       setIsVoiceListening(false);
       setIsWaitingForVoiceToFinish(false);
       setIsRoundComplete(true);
+      setIsPotGuideVisible(false);
+      setIsDraggingIngredient(false);
+      setIsAmazingEffect(false);
       setCurrentSpeech(`Great job! ${activeIngredient.name}! ${toSpelling(activeIngredient.name)}!`);
       setIsSpeaking(true);
       speak(`Great job! ${activeIngredient.name}! ${toSpelling(activeIngredient.name)}!`, () => {
         setIsSpeaking(false);
-        advanceRound();
+        advanceRound(500);
       });
       listenTimeoutRef.current = null;
-    }, 3000);
+    }, 2500);
   }
 
   function goHome() {
@@ -149,13 +199,19 @@ export function useEasyGame() {
     isRoundComplete,
     isDragOver,
     setIsDragOver,
+    isDraggingIngredient,
     isDropped,
     currentSpeech,
     isSpeaking,
     isVoiceListening,
     isWaitingForVoiceToFinish,
+    isPotGuideVisible,
+    isAmazingEffect,
     isWrongColor,
     handleDrop,
+    handleIngredientDragStart,
+    handleIngredientDragEnd,
+    handleIngredientClick,
     handlePickColor,
     goHome,
     handleAddAndSay,
