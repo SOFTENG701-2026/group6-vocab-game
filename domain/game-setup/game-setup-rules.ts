@@ -66,5 +66,5 @@ export function isValidPlayMode(value: string | null): value is PlayMode {
 }
 
 export function isValidDifficulty(value: string | null): value is Difficulty {
-  return value === "easy" || value === "hard";
+  return value === "easy" || value === "medium" || value === "hard";
 }

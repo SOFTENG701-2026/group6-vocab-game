@@ -26,8 +26,14 @@ export default function HomePlayActions() {
     if (!playMode) return;
     setDifficulty(difficulty);
     setIsDifficultyModalOpen(false);
-    console.log(difficulty);
-    router.push("/game");
+    if (difficulty === "easy") {
+      router.push("/easygame");
+    } else if (difficulty === "medium") {
+      // TODO: route to dedicated medium game page when ready
+      router.push("/game");
+    } else {
+      router.push("/game");
+    }
   }
 
   return (

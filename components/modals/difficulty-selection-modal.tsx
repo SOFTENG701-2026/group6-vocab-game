@@ -27,11 +27,25 @@ const difficultyItems: SelectionModalItem[] = [
     )
   },
   {
+    id: "medium",
+    title: "Medium",
+    logo: (
+      <Image
+        src='/difficulty/abc-hard.png'
+        alt='Mix and match colors and shapes of a given ingredient'
+        width={500}
+        height={500}
+        className='w-full h-full object-contain'
+        draggable={false}
+      />
+    )
+  },
+  {
     id: "hard",
     title: "Hard",
     logo: (
       <Image
-        src='/difficulty/abc-hard.png'
+        src='/difficulty/spelling.svg'
         alt='Arrange lettered blocks to spell an ingredient'
         width={200}
         height={200}

@@ -2,7 +2,7 @@ import type { AvatarId } from "@/domain/avatars/avatar-types";
 
 export type PlayMode = "single" | "friend";
 
-export type Difficulty = "easy" | "hard";
+export type Difficulty = "easy" | "medium" | "hard";
 
 export type PlayerType = "human" | "bot";
 
