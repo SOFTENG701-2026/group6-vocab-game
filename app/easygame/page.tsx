@@ -1,34 +1,18 @@
 "use client";
 
 import Image from "next/image";
-import { useState, useMemo } from "react";
-import { useRouter } from "next/navigation";
 import { Mic } from "lucide-react";
 import { ingredients } from "@/data/ingredients";
 import MonsterBubble from "@/components/easygame/monster-bubble";
 import ColorOptionCard from "@/components/easygame/color-option-card";
 import ShapeOptionCard from "@/components/easygame/shape-option-card";
+import { useEasyGame } from "@/hooks/use-easy-game";
 
-// Fixed color options: one ingredient image per unique color
 const COLOR_OPTIONS = [
-  { colorId: "red", label: "Red", imageSrc: "/ingredients/apple.png" },
-  { colorId: "yellow", label: "Yellow", imageSrc: "/ingredients/banana.png" },
-  { colorId: "orange", label: "Orange", imageSrc: "/ingredients/carrot.png" },
+  { colorId: "red", label: "Red" },
+  { colorId: "yellow", label: "Yellow" },
+  { colorId: "orange", label: "Orange" },
 ];
-
-function toSpelling(name: string) {
-  return name.toUpperCase().split("").join("-");
-}
-
-function speak(text: string) {
-  if (typeof globalThis.window === "undefined" || !globalThis.speechSynthesis) return;
-  globalThis.speechSynthesis.cancel();
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = "en-US";
-  utterance.rate = 0.85;
-  utterance.pitch = 1.2;
-  globalThis.speechSynthesis.speak(utterance);
-}
 
 function getBtnClass(isRoundComplete: boolean, isWrongColor: boolean, selectedColorId: string | null): string {
   if (isRoundComplete) return "bg-green-500 scale-105";
@@ -38,76 +22,27 @@ function getBtnClass(isRoundComplete: boolean, isWrongColor: boolean, selectedCo
 }
 
 export default function EasyGamePage() {
-  const router = useRouter();
-  const [roundIndex, setRoundIndex] = useState(0);
-  const [selectedColorId, setSelectedColorId] = useState<string | null>(null);
-  const [isRoundComplete, setIsRoundComplete] = useState(false);
-  const [isWrongColor, setIsWrongColor] = useState(false);
-  const [clearSignal, setClearSignal] = useState(0);
-  const [isDragOver, setIsDragOver] = useState(false);
+  const {
+    roundIndex,
+    isGameComplete,
+    activeIngredient,
+    shapeOptions,
+    selectedColorId,
+    setSelectedColorId,
+    isRoundComplete,
+    isWrongColor,
+    isDragOver,
+    setIsDragOver,
+    isDropped,
+    handleDrop,
+    handleAddAndSay,
+    goHome,
+  } = useEasyGame();
 
-  const totalRounds = ingredients.length;
-  const isGameComplete = roundIndex >= totalRounds;
-  const activeIngredient = ingredients[roundIndex] ?? null;
+  const monsterMessage = isRoundComplete
+    ? `Well done! You found ${activeIngredient?.name}!`
+    : `Let's make magic soup! Find ${activeIngredient?.name?.toLowerCase()}!`;
 
-  // 3 shape options: current ingredient + 2 others (stable per round)
-  const shapeOptions = useMemo(() => {
-    if (!activeIngredient) return [];
-    const others = ingredients
-      .filter((i) => i.id !== activeIngredient.id)
-      .slice(0, 2);
-    const all = [activeIngredient, ...others];
-    // stable shuffle seeded by roundIndex
-    return [...all].sort((a, b) =>
-      (a.id + roundIndex).localeCompare(b.id + roundIndex)
-    );
-  }, [activeIngredient, roundIndex]);
-
-  function handleDrop() {
-    if (isRoundComplete || !activeIngredient) return;
-    setIsRoundComplete(true);
-    speak(`Great job! ${activeIngredient.name}!`);
-    setTimeout(() => {
-      setRoundIndex((prev) => prev + 1);
-      setSelectedColorId(null);
-      setIsRoundComplete(false);
-      setClearSignal((prev) => prev + 1);
-    }, 2500);
-  }
-
-  function handleAddAndSay() {
-    // 1. 本轮已完成，不重复处理
-    if (isRoundComplete || !activeIngredient) return;
-
-    // 2. 还没选颜色，提示玩家先选颜色
-    if (!selectedColorId) {
-      speak("Pick a color first!");
-      return;
-    }
-
-    // 3. 选了颜色但颜色不对，提示错误
-    if (selectedColorId !== activeIngredient.colorId) {
-      setIsWrongColor(true);
-      speak(`Oops! Try again. ${activeIngredient.name} is ${activeIngredient.color}!`);
-      setTimeout(() => setIsWrongColor(false), 1500);
-      return;
-    }
-
-    // Correct!
-    setIsRoundComplete(true);
-    speak(
-      `Great job! ${activeIngredient.name}! ${toSpelling(activeIngredient.name).replaceAll("-", " ")}!`
-    );
-
-    setTimeout(() => {
-      setRoundIndex((prev) => prev + 1);
-      setSelectedColorId(null);
-      setIsRoundComplete(false);
-      setClearSignal((prev) => prev + 1);
-    }, 2500);
-  }
-
-  // Game complete screen
   if (isGameComplete) {
     return (
       <main className="h-full flex items-center justify-center bg-gradient-to-b from-teal-300 to-yellow-200">
@@ -116,7 +51,7 @@ export default function EasyGamePage() {
           <p className="text-xl font-bold text-gray-700 mb-8">You found all the ingredients!</p>
           <button
             type="button"
-            onClick={() => router.push("/home")}
+            onClick={goHome}
             className="px-8 py-4 rounded-2xl bg-purple-600 text-white font-extrabold text-xl hover:bg-purple-700 transition-all"
           >
             Play Again
@@ -125,10 +60,6 @@ export default function EasyGamePage() {
       </main>
     );
   }
-
-  const monsterMessage = isRoundComplete
-    ? `Well done! You found ${activeIngredient?.name}!`
-    : `Let's make magic soup! Find ${activeIngredient?.name?.toLowerCase()}!`;
 
   return (
     <main className="flex-1 min-h-0 grid grid-rows-[1fr_auto] bg-gradient-to-b from-teal-300 to-yellow-200 overflow-hidden">
@@ -140,8 +71,9 @@ export default function EasyGamePage() {
           <MonsterBubble message={monsterMessage} />
         </div>
 
-        {/* Center: Pot + title + button */}
+        {/* Center: Progress + Pot + Button */}
         <div className="flex flex-col items-center justify-between py-4">
+          {/* Progress indicator */}
           <div className="text-center">
             <div className="flex items-center gap-1 justify-center flex-wrap">
               {ingredients.map((ing, idx) => (
@@ -171,6 +103,7 @@ export default function EasyGamePage() {
             </h1>
           </div>
 
+          {/* Pot (drop target) */}
           <div
             className={`relative transition-all duration-200 ${isDragOver ? "scale-110" : ""}`}
             onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
@@ -192,10 +125,11 @@ export default function EasyGamePage() {
             )}
           </div>
 
+          {/* Submit button */}
           <button
             type="button"
             onClick={handleAddAndSay}
-            disabled={!selectedColorId || isRoundComplete}
+            disabled={isRoundComplete}
             className={`
               flex items-center gap-2 px-8 py-4 rounded-full
               font-extrabold text-xl text-white transition-all shadow-lg
@@ -207,14 +141,15 @@ export default function EasyGamePage() {
           </button>
         </div>
 
-        {/* Right: Ingredient info + Drawing canvas */}
+        {/* Right: Draggable ingredient card */}
         <div className="flex flex-col gap-3 py-4 min-h-0 items-center">
-          {/* Ingredient info card */}
           <div
-            draggable={!isRoundComplete}
+            draggable={true}
             onDragStart={(e) => { e.dataTransfer.setData("text/plain", "ingredient"); e.dataTransfer.effectAllowed = "move"; }}
             className={`flex items-center gap-3 bg-white rounded-2xl px-4 pr-10 py-3 shadow w-fit select-none transition-all ${
-              !isRoundComplete ? "cursor-grab active:cursor-grabbing hover:shadow-lg hover:scale-105" : "opacity-50"
+              !isRoundComplete && !isDropped
+                ? "cursor-grab active:cursor-grabbing hover:shadow-lg hover:scale-105"
+                : "cursor-default"
             }`}
           >
             <Image
@@ -229,12 +164,11 @@ export default function EasyGamePage() {
               <p className="text-3xl font-extrabold text-gray-800">{activeIngredient?.name}</p>
             </div>
           </div>
-
         </div>
       </div>
 
-      {/* Bottom section */}
-      <div className="grid grid-cols-2 gap-4 px-6 pb-4">
+      {/* Bottom section: shown only after ingredient is dropped */}
+      <div className={`grid grid-cols-2 gap-4 px-6 pb-4 transition-all duration-500 ${isDropped ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 translate-y-4 pointer-events-none"}`}>
         {/* Player color picker */}
         <div className="bg-white/70 rounded-3xl px-6 py-4">
           <div className="flex items-center gap-2 mb-3">
