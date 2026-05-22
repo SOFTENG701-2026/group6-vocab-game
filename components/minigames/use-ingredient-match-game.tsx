@@ -46,7 +46,7 @@ export function useIngredientMatchGame({ ingredient, onComplete }: UseIngredient
 
     const incorrectShapes = shapeOptions.filter((shape) => shape.id !== ingredient.shapeId);
 
-    return [correctShape, ...incorrectShapes].filter((shape): shape is ShapeOption => Boolean(shape)).slice(0, 3);
+    return [correctShape, ...incorrectShapes].filter((shape): shape is ShapeOption => shape !== undefined).slice(0, 3);
   }, [ingredient.shapeId]);
 
   function getNextPrompt(nextMatchedColorId: string | null, nextMatchedShapeId: string | null) {
