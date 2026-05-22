@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Button from "@/components/button";
 import MinigameFallback from "@/components/minigames/minigame-fallback-ui";
 import IngredientMatchMinigame from "@/components/minigames/ingredient-match-minigame";
@@ -9,6 +9,7 @@ import { ingredients } from "@/data/ingredients";
 import { minigamesByDifficulty, type MinigameId } from "@/domain/minigame-type";
 import { useGameSetup } from "@/context/game-setup-context";
 import FutureIngredientStack from "@/components/game/future-ingredient-stack";
+import MagicPot from "@/components/game/magic-pot";
 
 export default function GamePage() {
   const [activeIngredientIndex, setActiveIngredientIndex] = useState(0);
@@ -21,26 +22,6 @@ export default function GamePage() {
   const isIngredientListEmpty = activeIngredientIndex === ingredients.length;
   const activeMinigames = minigamesByDifficulty[difficulty];
   const activeMinigameId = activeMinigames[activeMinigameIndex];
-  const isLastMinigame = activeMinigameIndex === activeMinigames.length - 1;
-  //constants
-  const COMPLETION_DELAY_MS = 1500;
-
-  //Automatically advance after 1.5s when a minigame is complete
-  useEffect(() => {
-    if (!isShowingCompletion) return;
-
-    const timeoutId = window.setTimeout(() => {
-      if (!isLastMinigame) {
-        setActiveMinigameIndex((previousIndex) => previousIndex + 1);
-      } else {
-        skipCurrentIngredient();
-      }
-
-      setIsShowingCompletion(false);
-    }, COMPLETION_DELAY_MS);
-
-    return () => window.clearTimeout(timeoutId);
-  }, [isShowingCompletion, isLastMinigame]);
 
   function handleMinigameComplete() {
     if (isShowingCompletion) return;
@@ -78,6 +59,11 @@ export default function GamePage() {
             key={`${activeIngredient.id}-${activeMinigameIndex}`}
             ingredient={activeIngredient}
             onComplete={handleMinigameComplete}
+            onDropToPot={(ing) => {
+              // when the pot receives the dropped ingredient, advance to next ingredient
+              setIsShowingCompletion(false);
+              skipCurrentIngredient();
+            }}
           />
         );
 
@@ -123,8 +109,19 @@ export default function GamePage() {
       '
         >
           {/* Minigame area */}
-          <section className='h-full'>
-            {activeIngredient ? renderActiveMinigame(activeMinigameId) : <MinigameFallback />}
+          <section className='h-full flex flex-col gap-3 overflow-hidden'>
+            <div className='flex-1 min-h-auto overflow-hidden'>
+              {activeIngredient ? renderActiveMinigame(activeMinigameId) : <MinigameFallback />}
+            </div>
+            <div className='w-full h-72 max-h-auto overflow-hidden rounded-4xl border border-white/20 bg-white/10 shadow-inner'>
+              <MagicPot
+                className='w-full h-full'
+                onDrop={() => {
+                  setIsShowingCompletion(false);
+                  skipCurrentIngredient();
+                }}
+              />
+            </div>
           </section>
 
           {/* Active ingredient / button / status area */}

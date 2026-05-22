@@ -10,6 +10,7 @@ type IngredientTargetProps = {
   isShapeMatched: boolean;
   onClick: () => void;
   ingredientRef: React.RefObject<HTMLButtonElement | null>;
+  onDropToPot?: (ingredient: Ingredient) => void;
 };
 
 export default function IngredientTarget({
@@ -19,8 +20,10 @@ export default function IngredientTarget({
   isShapeMatched,
   onClick,
   ingredientRef
+  , onDropToPot
 }: IngredientTargetProps) {
   return (
+  <div>
     <div className='flex flex-col items-center gap-4'>
       <Button
         ref={ingredientRef}
@@ -34,7 +37,11 @@ export default function IngredientTarget({
           width={150}
           height={150}
           className='relative z-10 h-36 w-36 object-contain'
-          draggable={false}
+          draggable={isColorMatched && isShapeMatched}
+          onDragStart={(e) => {
+            if (!(isColorMatched && isShapeMatched)) return;
+            e.dataTransfer.setData("text/plain", ingredient.id);
+          }}
         />
 
         {/* Left half border: colour matched */}
@@ -64,5 +71,6 @@ export default function IngredientTarget({
 
       <FeedbackMessage message={feedbackMessage} />
     </div>
+  </div>
   );
 }

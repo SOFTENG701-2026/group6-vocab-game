@@ -63,7 +63,11 @@ export default function MatchOptionColumn({
             disabled={isTypeMatched && !isMatched}
             className={buttonClassName}
           >
-            {option.label}
+            {"imageSrc" in option && option.imageSrc ? (
+              <img src={option.imageSrc} alt={option.label}/>
+            ) : (
+              option.label
+            )}
           </Button>
         );
       })}
