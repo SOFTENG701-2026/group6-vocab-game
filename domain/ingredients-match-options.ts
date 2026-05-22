@@ -5,9 +5,9 @@ export const colorOptions = [
 ];
 
 export const shapeOptions = [
-  { id: "circle", label: "Circle" },
-  { id: "crescent", label: "Crescent" },
-  { id: "triangle", label: "Triangle" },
-  { id: "heart", label: "Heart" },
-  { id: "cone", label: "Cone" }
+  { id: "circle", label: "Circle", imageSrc: "/ingredients/apple-outline.png" },
+  { id: "crescent", label: "Crescent", imageSrc: "/ingredients/banana-outline.png" },
+  { id: "triangle", label: "Triangle", imageSrc: "/ingredients/watermelon-outline.png" },
+  { id: "heart", label: "Heart", imageSrc: "/ingredients/strawberry-outline.png" },
+  { id: "cone", label: "Cone", imageSrc: "/ingredients/carrot-outline.png" }
 ];

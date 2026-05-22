@@ -36,7 +36,7 @@ export default function IngredientMatchMinigame({
       ref={containerRef}
       className='
         relative h-full min-h-105 w-full overflow-hidden
-        rounded-4xl bg-sky-200/50 p-8 text-black
+        rounded-4xl bg-emerald-400/50 p-8 text-black
       '
     >
       <ArrowLayer arrows={completedArrows} />
