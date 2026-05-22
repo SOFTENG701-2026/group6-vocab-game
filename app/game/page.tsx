@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Button from "@/components/button";
 import MinigameFallback from "@/components/minigames/minigame-fallback-ui";
 import IngredientMatchMinigame from "@/components/minigames/ingredient-match-minigame";
@@ -22,26 +22,6 @@ export default function GamePage() {
   const isIngredientListEmpty = activeIngredientIndex === ingredients.length;
   const activeMinigames = minigamesByDifficulty[difficulty];
   const activeMinigameId = activeMinigames[activeMinigameIndex];
-  const isLastMinigame = activeMinigameIndex === activeMinigames.length - 1;
-  //constants
-  const COMPLETION_DELAY_MS = 1500;
-
-  //Automatically advance after 1.5s when a minigame is complete
-  useEffect(() => {
-    if (!isShowingCompletion) return;
-
-    const timeoutId = window.setTimeout(() => {
-      if (!isLastMinigame) {
-        setActiveMinigameIndex((previousIndex) => previousIndex + 1);
-      } else {
-        skipCurrentIngredient();
-      }
-
-      setIsShowingCompletion(false);
-    }, COMPLETION_DELAY_MS);
-
-    return () => window.clearTimeout(timeoutId);
-  }, [isShowingCompletion, isLastMinigame]);
 
   function handleMinigameComplete() {
     if (isShowingCompletion) return;

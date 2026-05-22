@@ -13,7 +13,7 @@ export default function Navbar({ gems = 0 }: NavbarProps) {
       className=' w-full h-fit py-1
         bg-gray-300
         backdrop-blur-md
-        border-b border-orange-500/40
+        border-b border-gray-500/40
         shadow-sm
         flex items-center justify-between
         px-4 gap-1.5'
@@ -37,21 +37,13 @@ export default function Navbar({ gems = 0 }: NavbarProps) {
 
         {/* Buttons */}
         <Link href='/achievements'>
-          <Button
-            size='small'
-            iconPosition='left'
-            icon={<Star className='w-5 h-5 fill-white' />}
-          >
+          <Button size='small' iconPosition='left' icon={<Star className='w-5 h-5 fill-white' />}>
             Achievements
           </Button>
         </Link>
 
         <Link href='/shop'>
-          <Button
-            size='small'
-            iconPosition='left'
-            icon={<ShoppingCart className='w-5 h-5 fill-white' />}
-          >
+          <Button size='small' iconPosition='left' icon={<ShoppingCart className='w-5 h-5 fill-white' />}>
             Shop
           </Button>
         </Link>
@@ -68,10 +60,7 @@ export default function Navbar({ gems = 0 }: NavbarProps) {
           font-bold
         '
         >
-          <Circle
-            className='h-3 w-3 fill-yellow-400 text-white'
-            strokeWidth={2}
-          />
+          <Circle className='h-3 w-3 fill-yellow-400 text-white' strokeWidth={2} />
           <span>{gems} gems</span>
         </div>
       </div>
