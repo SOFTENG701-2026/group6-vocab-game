@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { ingredients } from "@/data/ingredients";
 import { speak } from "@/lib/speak";
@@ -14,28 +14,32 @@ export function useEasyGame() {
   const [roundIndex, setRoundIndex] = useState(0);
   const [selectedColorId, setSelectedColorId] = useState<string | null>(null);
   const [isRoundComplete, setIsRoundComplete] = useState(false);
-  const [isWrongColor, setIsWrongColor] = useState(false);
-  const [clearSignal, setClearSignal] = useState(0);
   const [isDragOver, setIsDragOver] = useState(false);
   const [isDropped, setIsDropped] = useState(false);
+  const [currentSpeech, setCurrentSpeech] = useState("");
+  const [isSpeaking, setIsSpeaking] = useState(false);
 
-  const totalRounds = ingredients.length;
-  const isGameComplete = roundIndex >= totalRounds;
+  const isGameComplete = roundIndex >= ingredients.length;
   const activeIngredient = ingredients[roundIndex] ?? null;
+
+  const say = useCallback((text: string) => {
+    setCurrentSpeech(text);
+    setIsSpeaking(true);
+    speak(text, () => setIsSpeaking(false));
+  }, []);
 
   useEffect(() => {
     if (activeIngredient) {
-      speak(`Find ${activeIngredient.name}!`);
+      say(`Let's put ${activeIngredient.name} into the pot!`);
     }
-  }, [activeIngredient]);
+  }, [activeIngredient, say]);
 
   const shapeOptions = useMemo(() => {
     if (!activeIngredient) return [];
     const others = ingredients
       .filter((i) => i.id !== activeIngredient.id)
       .slice(0, 2);
-    const all = [activeIngredient, ...others];
-    return [...all].sort((a, b) =>
+    return [activeIngredient, ...others].sort((a, b) =>
       (a.id + roundIndex).localeCompare(b.id + roundIndex)
     );
   }, [activeIngredient, roundIndex]);
@@ -46,38 +50,52 @@ export function useEasyGame() {
       setSelectedColorId(null);
       setIsRoundComplete(false);
       setIsDropped(false);
-      setClearSignal((prev) => prev + 1);
     }, 2500);
   }
 
   function handleDrop() {
     if (isRoundComplete || isDropped || !activeIngredient) return;
     setIsDropped(true);
-    speak(`Good! Now pick the right color for ${activeIngredient.name}!`);
+    say(`Good! Now pick the right color for ${activeIngredient.name}!`);
+  }
+
+  function handlePickColor(colorId: string) {
+    if (isRoundComplete || !isDropped || !activeIngredient) return;
+
+    setSelectedColorId(colorId);
+
+    if (colorId !== activeIngredient.colorId) {
+      say(`Almost there! Let’s find ${activeIngredient.name} together!`);
+      setTimeout(() => setSelectedColorId(null), 1800);
+      return;
+    }
+
+    // Correct!
+    setIsRoundComplete(true);
+    say(`Amazing! ${activeIngredient.name} is ${activeIngredient.color}!`);
+    advanceRound();
   }
 
   function handleAddAndSay() {
     if (isRoundComplete || !activeIngredient) return;
 
     if (!isDropped) {
-      speak("Drag the ingredient into the pot first!");
+      say("Drag the ingredient into the pot first!");
       return;
     }
 
     if (!selectedColorId) {
-      speak("Pick a color first!");
+      say("Pick a color first!");
       return;
     }
 
     if (selectedColorId !== activeIngredient.colorId) {
-      setIsWrongColor(true);
-      speak(`Oops! Try again. ${activeIngredient.name} is ${activeIngredient.color}!`);
-      setTimeout(() => setIsWrongColor(false), 1500);
+      say(`Oops! Try again. ${activeIngredient.name} is ${activeIngredient.color}!`);
       return;
     }
 
     setIsRoundComplete(true);
-    speak(`Great job! ${activeIngredient.name}! ${toSpelling(activeIngredient.name)}!`);
+    say(`Great job! ${activeIngredient.name}! ${toSpelling(activeIngredient.name)}!`);
     advanceRound();
   }
 
@@ -87,20 +105,19 @@ export function useEasyGame() {
 
   return {
     roundIndex,
-    totalRounds,
     isGameComplete,
     activeIngredient,
     shapeOptions,
     selectedColorId,
-    setSelectedColorId,
     isRoundComplete,
-    isWrongColor,
-    clearSignal,
     isDragOver,
     setIsDragOver,
     isDropped,
+    currentSpeech,
+    isSpeaking,
     handleDrop,
-    handleAddAndSay,
+    handlePickColor,
     goHome,
+    handleAddAndSay,
   };
 }
