@@ -34,14 +34,12 @@ export default function EasyGamePage() {
     isDragOver,
     setIsDragOver,
     isDropped,
+    currentSpeech,
+    isSpeaking,
     handleDrop,
     handleAddAndSay,
     goHome,
   } = useEasyGame();
-
-  const monsterMessage = isRoundComplete
-    ? `Well done! You found ${activeIngredient?.name}!`
-    : `Let's make magic soup! Find ${activeIngredient?.name?.toLowerCase()}!`;
 
   if (isGameComplete) {
     return (
@@ -68,7 +66,7 @@ export default function EasyGamePage() {
 
         {/* Left: Monster */}
         <div className="flex items-start justify-start pt-4">
-          <MonsterBubble message={monsterMessage} />
+          <MonsterBubble message={currentSpeech} isSpeaking={isSpeaking} />
         </div>
 
         {/* Center: Progress + Pot + Button */}
