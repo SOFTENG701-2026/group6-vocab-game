@@ -7,7 +7,7 @@ import {
   ShapeOption,
   CompletedArrow,
   OptionType,
-  PendingSelection
+  PendingSelection,
 } from "@/domain/ingredients-match-type";
 
 type UseIngredientMatchGameProps = {
@@ -15,22 +15,18 @@ type UseIngredientMatchGameProps = {
   onComplete?: () => void;
 };
 
-export function useIngredientMatchGame({
-  ingredient,
-  onComplete
-}: UseIngredientMatchGameProps) {
+export function useIngredientMatchGame({ ingredient, onComplete }: UseIngredientMatchGameProps) {
   //State for making connection lines between color/shape - ingredient
   const containerRef = useRef<HTMLDivElement | null>(null);
   const ingredientRef = useRef<HTMLButtonElement | null>(null);
-  const [pendingSelection, setPendingSelection] =
-    useState<PendingSelection>(null);
+  const [pendingSelection, setPendingSelection] = useState<PendingSelection>(null);
   const [completedArrows, setCompletedArrows] = useState<CompletedArrow[]>([]);
   const [matchedColorId, setMatchedColorId] = useState<string | null>(null);
   const [matchedShapeId, setMatchedShapeId] = useState<string | null>(null);
 
   //TODO: once moster dialogue is implemented prompts involving feedbackMessage should be refactored to utilise monster dialogue with TTS
   const [feedbackMessage, setFeedbackMessage] = useState(
-    "Choose the matching colour or shape, then tap the ingredient."
+    "Choose the matching colour or shape, then tap the ingredient.",
   );
 
   //Utilised for
@@ -38,37 +34,22 @@ export function useIngredientMatchGame({
   const isShapeMatched = matchedShapeId === ingredient.shapeId;
 
   const visibleColorOptions = useMemo(() => {
-    const correctColor = colorOptions.find(
-      (color) => color.id === ingredient.colorId
-    );
+    const correctColor = colorOptions.find((color) => color.id === ingredient.colorId);
 
-    const incorrectColors = colorOptions.filter(
-      (color) => color.id !== ingredient.colorId
-    );
+    const incorrectColors = colorOptions.filter((color) => color.id !== ingredient.colorId);
 
-    return [correctColor, ...incorrectColors]
-      .filter((color): color is ColorOption => Boolean(color))
-      .slice(0, 3);
+    return [correctColor, ...incorrectColors].filter((color): color is ColorOption => Boolean(color)).slice(0, 3);
   }, [ingredient.colorId]);
 
   const visibleShapeOptions = useMemo(() => {
-    const correctShape = shapeOptions.find(
-      (shape) => shape.id === ingredient.shapeId
-    );
+    const correctShape = shapeOptions.find((shape) => shape.id === ingredient.shapeId);
 
-    const incorrectShapes = shapeOptions.filter(
-      (shape) => shape.id !== ingredient.shapeId
-    );
+    const incorrectShapes = shapeOptions.filter((shape) => shape.id !== ingredient.shapeId);
 
-    return [correctShape, ...incorrectShapes]
-      .filter((shape): shape is ShapeOption => Boolean(shape))
-      .slice(0, 3);
+    return [correctShape, ...incorrectShapes].filter((shape): shape is ShapeOption => Boolean(shape)).slice(0, 3);
   }, [ingredient.shapeId]);
 
-  function getNextPrompt(
-    nextMatchedColorId: string | null,
-    nextMatchedShapeId: string | null
-  ) {
+  function getNextPrompt(nextMatchedColorId: string | null, nextMatchedShapeId: string | null) {
     const hasCorrectColor = nextMatchedColorId === ingredient.colorId;
     const hasCorrectShape = nextMatchedShapeId === ingredient.shapeId;
 
@@ -87,11 +68,7 @@ export function useIngredientMatchGame({
     return "Choose the matching colour or shape, then tap the ingredient.";
   }
 
-  function handleOptionClick(
-    event: React.MouseEvent<HTMLButtonElement>,
-    type: OptionType,
-    id: string
-  ) {
+  function handleOptionClick(event: React.MouseEvent<HTMLButtonElement>, type: OptionType, id: string) {
     if (!containerRef.current) return;
 
     if (type === "color" && isColorMatched && id !== matchedColorId) {
@@ -112,7 +89,7 @@ export function useIngredientMatchGame({
       type,
       id,
       startX,
-      startY
+      startY,
     });
 
     setFeedbackMessage("Great! Now tap the ingredient in the middle.");
@@ -136,17 +113,13 @@ export function useIngredientMatchGame({
     const ingredientRect = ingredientRef.current.getBoundingClientRect();
     const containerRect = containerRef.current.getBoundingClientRect();
 
-    const endX =
-      ingredientRect.left + ingredientRect.width / 2 - containerRect.left;
+    const endX = ingredientRect.left + ingredientRect.width / 2 - containerRect.left;
 
-    const endY =
-      ingredientRect.top + ingredientRect.height / 2 - containerRect.top;
+    const endY = ingredientRect.top + ingredientRect.height / 2 - containerRect.top;
 
     const isCorrect =
-      (pendingSelection.type === "color" &&
-        pendingSelection.id === ingredient.colorId) ||
-      (pendingSelection.type === "shape" &&
-        pendingSelection.id === ingredient.shapeId);
+      (pendingSelection.type === "color" && pendingSelection.id === ingredient.colorId) ||
+      (pendingSelection.type === "shape" && pendingSelection.id === ingredient.shapeId);
 
     const newArrow: CompletedArrow = {
       id: crypto.randomUUID(),
@@ -156,12 +129,12 @@ export function useIngredientMatchGame({
       startY: pendingSelection.startY,
       endX,
       endY,
-      isCorrect
+      isCorrect,
     };
 
     setCompletedArrows((previousArrows) => [
       ...previousArrows.filter((arrow) => arrow.type !== pendingSelection.type),
-      newArrow
+      newArrow,
     ]);
 
     let nextMatchedColorId = matchedColorId;
@@ -179,9 +152,7 @@ export function useIngredientMatchGame({
 
     if (!isCorrect) {
       setFeedbackMessage(
-        pendingSelection.type === "color"
-          ? "Almost! Try another colour."
-          : "Almost! Try another shape."
+        pendingSelection.type === "color" ? "Almost! Try another colour." : "Almost! Try another shape.",
       );
 
       setPendingSelection(null);
@@ -192,9 +163,7 @@ export function useIngredientMatchGame({
 
     setFeedbackMessage(getNextPrompt(nextMatchedColorId, nextMatchedShapeId));
 
-    const isMinigameComplete =
-      nextMatchedColorId === ingredient.colorId &&
-      nextMatchedShapeId === ingredient.shapeId;
+    const isMinigameComplete = nextMatchedColorId === ingredient.colorId && nextMatchedShapeId === ingredient.shapeId;
 
     if (isMinigameComplete) {
       onComplete?.();
@@ -214,6 +183,6 @@ export function useIngredientMatchGame({
     visibleShapeOptions,
     feedbackMessage,
     handleOptionClick,
-    handleIngredientClick
+    handleIngredientClick,
   };
 }
