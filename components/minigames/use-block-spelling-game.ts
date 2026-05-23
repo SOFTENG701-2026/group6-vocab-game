@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useEffect, useState } from "react";
 
 export type LetterTile = {
   id: string;
@@ -81,19 +81,45 @@ function createLetterTiles(word: string): LetterTile[] {
 
 export function useBlockSpellingGame({ word, onComplete }: UseBlockSpellingGameArgs) {
   const targetWord = useMemo(() => normaliseWord(word), [word]);
-
   const targetLetters = useMemo(() => targetWord.split(""), [targetWord]);
-
   const [tiles] = useState<LetterTile[]>(() => createLetterTiles(targetWord));
-
   const [placedLetters, setPlacedLetters] = useState<(LetterTile | null)[]>(() => Array(targetWord.length).fill(null));
-
   const [draggedTileId, setDraggedTileId] = useState<string | null>(null);
   const [incorrectIndex, setIncorrectIndex] = useState<number | null>(null);
-
   const completedWord = placedLetters.map((tile) => tile?.letter ?? "").join("");
 
   const isComplete = completedWord === targetWord;
+
+  //Register keyboard listener
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      const target = event.target as HTMLElement | null;
+
+      const isTypingInInput =
+        target?.tagName === "INPUT" || target?.tagName === "TEXTAREA" || target?.isContentEditable;
+
+      if (isTypingInInput) return;
+
+      const isSingleLetter = /^[a-zA-Z]$/.test(event.key);
+
+      if (isSingleLetter) {
+        event.preventDefault();
+        handleKeyboardLetter(event.key);
+        return;
+      }
+
+      if (event.key === "Backspace") {
+        event.preventDefault();
+        removeLastPlacedLetter();
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isComplete, placedLetters, tiles, targetLetters]);
 
   /**
    * Returns how many times a letter has already been placed.
@@ -134,16 +160,31 @@ export function useBlockSpellingGame({ word, onComplete }: UseBlockSpellingGameA
 
   function handleDrop(index: number) {
     if (!draggedTileId || isComplete) return;
-    if (placedLetters[index]) return;
 
     const draggedTile = tiles.find((tile) => tile.id === draggedTileId);
     if (!draggedTile) return;
 
-    if (isTileUsed(draggedTile)) return;
+    placeTileAtIndex(draggedTile, index);
+  }
+
+  function handlePlaceholderClick(index: number) {
+    const tileToRemove = placedLetters[index];
+    if (!tileToRemove || isComplete) return;
+
+    const updatedPlacedLetters = [...placedLetters];
+    updatedPlacedLetters[index] = null;
+
+    setPlacedLetters(updatedPlacedLetters);
+  }
+
+  function placeTileAtIndex(tile: LetterTile, index: number) {
+    if (isComplete) return;
+    if (placedLetters[index]) return;
+    if (isTileUsed(tile)) return;
 
     const expectedLetter = targetLetters[index];
 
-    if (draggedTile.letter !== expectedLetter) {
+    if (tile.letter !== expectedLetter) {
       setIncorrectIndex(index);
 
       window.setTimeout(() => {
@@ -154,18 +195,40 @@ export function useBlockSpellingGame({ word, onComplete }: UseBlockSpellingGameA
     }
 
     const updatedPlacedLetters = [...placedLetters];
-    updatedPlacedLetters[index] = draggedTile;
+    updatedPlacedLetters[index] = tile;
 
     setPlacedLetters(updatedPlacedLetters);
     completeIfCorrect(updatedPlacedLetters);
   }
 
-  function handlePlaceholderClick(index: number) {
-    const tileToRemove = placedLetters[index];
-    if (!tileToRemove || isComplete) return;
+  /**Keyboard functionality: letter press */
+  function handleKeyboardLetter(letter: string) {
+    if (isComplete) return;
+
+    const normalisedLetter = letter.toLowerCase();
+
+    const matchingTile = tiles.find((tile) => tile.letter === normalisedLetter);
+    if (!matchingTile) return;
+
+    const nextEmptyIndex = placedLetters.findIndex((placedTile) => placedTile === null);
+
+    if (nextEmptyIndex === -1) return;
+
+    placeTileAtIndex(matchingTile, nextEmptyIndex);
+  }
+  /**Keyboard functioanlity: Backspace support */
+  function removeLastPlacedLetter() {
+    if (isComplete) return;
+
+    const lastPlacedIndex = placedLetters
+      .map((placedTile, index) => ({ placedTile, index }))
+      .reverse()
+      .find(({ placedTile }) => placedTile !== null)?.index;
+
+    if (lastPlacedIndex === undefined) return;
 
     const updatedPlacedLetters = [...placedLetters];
-    updatedPlacedLetters[index] = null;
+    updatedPlacedLetters[lastPlacedIndex] = null;
 
     setPlacedLetters(updatedPlacedLetters);
   }
