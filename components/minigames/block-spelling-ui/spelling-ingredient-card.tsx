@@ -36,8 +36,6 @@ export default function SpellingIngredientCard({ ingredient, isComplete }: Spell
           draggable={false}
         />
       </div>
-
-      <p className='mt-3 text-xl font-extrabold text-gray-700'>{ingredient.name}</p>
     </div>
   );
 }
