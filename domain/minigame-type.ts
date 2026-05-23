@@ -1,8 +1,9 @@
 import { Difficulty } from "./game-setup/game-setup-types";
 
-export type MinigameId = "ingredient-match" | "letter-spelling";
+export type MinigameId = "easy-game" | "ingredient-match" | "letter-spelling";
 
-export const minigamesByDifficulty: Record<Exclude<Difficulty, "easy">, MinigameId[]> = {
+export const minigamesByDifficulty: Record<Difficulty, MinigameId[]> = {
+  easy: ["easy-game"],
   medium: ["ingredient-match"],
-  hard: ["ingredient-match", "letter-spelling"]
+  hard: ["ingredient-match", "letter-spelling"],
 };

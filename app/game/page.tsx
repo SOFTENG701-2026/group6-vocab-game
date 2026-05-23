@@ -10,6 +10,8 @@ import { minigamesByDifficulty, type MinigameId } from "@/domain/minigame-type";
 import { useGameSetup } from "@/context/game-setup-context";
 import FutureIngredientStack from "@/components/game/future-ingredient-stack";
 import MagicPot from "@/components/game/magic-pot";
+import BlockSpellingMinigame from "@/components/minigames/block-spelling-minigame";
+import IngredientPotDropArea from "@/components/game/shared-pot-drop-area";
 
 export default function GamePage() {
   const [activeIngredientIndex, setActiveIngredientIndex] = useState(0);
@@ -22,9 +24,17 @@ export default function GamePage() {
   const isIngredientListEmpty = activeIngredientIndex === ingredients.length;
   const activeMinigames = minigamesByDifficulty[difficulty];
   const activeMinigameId = activeMinigames[activeMinigameIndex];
+  const isLastMinigame = activeMinigameIndex === activeMinigames.length - 1;
+  const canDropIngredientToPot = isShowingCompletion && isLastMinigame && activeIngredient !== null;
 
   function handleMinigameComplete() {
     if (isShowingCompletion) return;
+
+    if (!isLastMinigame) {
+      setActiveMinigameIndex((prev) => prev + 1);
+      return;
+    }
+
     setIsShowingCompletion(true);
   }
 
@@ -59,28 +69,17 @@ export default function GamePage() {
             key={`${activeIngredient.id}-${activeMinigameIndex}`}
             ingredient={activeIngredient}
             onComplete={handleMinigameComplete}
-            onDropToPot={() => {
-              // when the pot receives the dropped ingredient, advance to next ingredient
-              setIsShowingCompletion(false);
-              skipCurrentIngredient();
-            }}
           />
         );
 
       //TODO: Implement Spelling Minigame
       case "letter-spelling":
         return (
-          <div className='flex h-full items-center justify-center rounded-4xl p-8 text-center shadow'>
-            <div>
-              <h2 className='text-2xl font-extrabold text-(--color-primary-hover)'>Letter Spelling Minigame</h2>
-
-              <p className='mt-2 text-gray-600'>Spell the word: {activeIngredient.name}</p>
-
-              <div className='mt-6'>
-                <Button onClick={handleMinigameComplete}>Complete Placeholder</Button>
-              </div>
-            </div>
-          </div>
+          <BlockSpellingMinigame
+            key={`${activeIngredient.id}-${activeMinigameIndex}`}
+            ingredient={activeIngredient}
+            onComplete={handleMinigameComplete}
+          />
         );
     }
   }
@@ -113,15 +112,13 @@ export default function GamePage() {
             <div className='flex-1 min-h-auto overflow-hidden'>
               {activeIngredient ? renderActiveMinigame(activeMinigameId) : <MinigameFallback />}
             </div>
-            <div className='w-full h-72 max-h-auto overflow-hidden rounded-4xl border border-white/20 bg-white/10 shadow-inner'>
-              <MagicPot
-                className='w-full h-full'
-                onDrop={() => {
-                  setIsShowingCompletion(false);
-                  skipCurrentIngredient();
-                }}
-              />
-            </div>
+            <IngredientPotDropArea
+              canDrop={canDropIngredientToPot}
+              onDropToPot={() => {
+                setIsShowingCompletion(false);
+                skipCurrentIngredient();
+              }}
+            />
           </section>
 
           {/* Active ingredient / button / status area */}
@@ -133,8 +130,8 @@ export default function GamePage() {
           >
             <h2 className='text-center text-xl font-extrabold text-(--color-primary-hover)'>Active Ingredient</h2>
             {activeIngredient && (
-              <p className='mt-2 rounded-full bg-orange-100 px-4 py-2 text-sm font-bold text-orange-700'>
-                {difficulty === "hard" ? "Hard Mode" : "Easy Mode"} · Minigame {activeMinigameIndex + 1} of{" "}
+              <p className='mt-2 rounded-full  bg-orange-100 px-4 py-2 text-sm font-bold text-orange-700'>
+                {difficulty === "hard" ? "Hard" : "Medium"} · Minigame {activeMinigameIndex + 1} of{" "}
                 {activeMinigames.length}
               </p>
             )}
