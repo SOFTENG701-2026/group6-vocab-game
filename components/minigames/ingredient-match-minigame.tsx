@@ -38,7 +38,7 @@ export default function IngredientMatchMinigame({ ingredient, onComplete }: Ingr
     >
       <ArrowLayer arrows={completedArrows} />
 
-      <div className='relative z-10 flex h-full min-h-105 items-center justify-between gap-8'>
+      <div className='relative z-10 flex h-full min-h-105 items-center justify-between gap-8 select-none'>
         <MatchOptionColumn
           type='color'
           options={visibleColorOptions}

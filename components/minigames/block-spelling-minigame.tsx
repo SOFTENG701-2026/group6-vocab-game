@@ -21,7 +21,7 @@ export default function LetterSpellingMinigame({ ingredient, onComplete }: Lette
     <section
       className='
         flex h-full w-full flex-col items-center justify-between gap-8
-        rounded-4xl bg-white/90 p-8 text-center shadow
+        rounded-4xl bg-white/90 p-8 text-center shadow select-none
       '
     >
       <SpellingIngredientCard ingredient={ingredient} isComplete={spellingGame.isComplete} />
