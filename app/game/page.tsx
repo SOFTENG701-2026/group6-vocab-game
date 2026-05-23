@@ -72,7 +72,6 @@ export default function GamePage() {
           />
         );
 
-      //TODO: Implement Spelling Minigame
       case "letter-spelling":
         return (
           <BlockSpellingMinigame
@@ -112,13 +111,6 @@ export default function GamePage() {
             <div className='flex-1 min-h-auto overflow-hidden'>
               {activeIngredient ? renderActiveMinigame(activeMinigameId) : <MinigameFallback />}
             </div>
-            <IngredientPotDropArea
-              canDrop={canDropIngredientToPot}
-              onDropToPot={() => {
-                setIsShowingCompletion(false);
-                skipCurrentIngredient();
-              }}
-            />
           </section>
 
           {/* Active ingredient / button / status area */}
@@ -165,6 +157,13 @@ export default function GamePage() {
                 </div>
               )}
             </div>
+            <IngredientPotDropArea
+              canDrop={canDropIngredientToPot}
+              onDropToPot={() => {
+                setIsShowingCompletion(false);
+                skipCurrentIngredient();
+              }}
+            />
             <Button onClick={skipCurrentIngredient} disabled={isIngredientListEmpty}>
               Skip Ingredient
             </Button>
