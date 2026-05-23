@@ -1,7 +1,7 @@
 type LetterPlaceholderProps = {
   hintedLetter: string;
   placedLetter?: string;
-  isIncorrect: boolean;
+  status: "empty" | "correct" | "incorrect";
   position: number;
   onDrop: () => void;
   onClick: () => void;
@@ -10,11 +10,18 @@ type LetterPlaceholderProps = {
 export default function LetterPlaceholder({
   hintedLetter,
   placedLetter,
-  isIncorrect,
+  status,
   position,
   onDrop,
   onClick,
 }: LetterPlaceholderProps) {
+  const statusClass =
+    status === "correct"
+      ? "border-green-400 bg-green-50"
+      : status === "incorrect"
+        ? "animate-pulse border-orange-400 bg-orange-50"
+        : "border-gray-300";
+
   return (
     <button
       type='button'
@@ -29,7 +36,7 @@ export default function LetterPlaceholder({
         rounded-xl border-3 border-dashed bg-white
         text-2xl font-black uppercase shadow-inner
         transition
-        ${isIncorrect ? "animate-pulse border-red-400 bg-red-50" : "border-gray-300"}
+        ${statusClass}
       `}
       aria-label={`Letter position ${position}`}
     >
