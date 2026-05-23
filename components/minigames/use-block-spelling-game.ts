@@ -3,6 +3,11 @@ import { useMemo, useState } from "react";
 export type LetterTile = {
   id: string;
   letter: string;
+
+  /**
+   * Number of times this letter is needed in the target word.
+   * Decoy letters have a requiredCount of 0.
+   */
   requiredCount: number;
 };
 
@@ -13,14 +18,27 @@ type UseBlockSpellingGameArgs = {
 
 const ALPHABET = "abcdefghijklmnopqrstuvwxyz".split("");
 
+/**
+ * Converts an ingredient name into a clean spelling target.
+ *
+ * Example:
+ * "Red Apple!" -> "redapple"
+ */
 function normaliseWord(word: string) {
   return word.toLowerCase().replace(/[^a-z]/g, "");
 }
 
+/**
+ * Returns a shuffled copy of an array without mutating the original array.
+ * Used to randomise letter tile order and decoy letters.
+ */
 function shuffleArray<T>(array: T[]) {
   return [...array].sort(() => Math.random() - 0.5);
 }
 
+/**
+ * Selects random decoy letters that are not part of the target word.
+ */
 function getRandomDecoyLetters(wordLetters: string[], count: number) {
   const wordLetterSet = new Set(wordLetters);
 
@@ -36,6 +54,13 @@ function countLetters(letters: string[]) {
   }, {});
 }
 
+/**
+ * Creates the letter tiles shown to the player.
+ *
+ * Only one tile is created per unique letter in the word. For repeated letters,
+ * requiredCount stores how many times that letter must be placed.
+ *
+ */
 function createLetterTiles(word: string): LetterTile[] {
   const wordLetters = word.split("");
   const letterCounts = countLetters(wordLetters);
@@ -70,10 +95,21 @@ export function useBlockSpellingGame({ word, onComplete }: UseBlockSpellingGameA
 
   const isComplete = completedWord === targetWord;
 
+  /**
+   * Returns how many times a letter has already been placed.
+   * Used to decide whether a repeated-letter tile should remain draggable.
+   */
   function getTileUsedCount(letter: string) {
     return placedLetters.filter((placedTile) => placedTile?.letter === letter).length;
   }
 
+  /**
+   * Checks whether a tile has been used for all required positions.
+   *
+   * Example:
+   * In "apple", the "p" tile remains usable after one placement,
+   * but becomes used after two placements.
+   */
   function isTileUsed(tile: LetterTile) {
     return tile.requiredCount > 0 && getTileUsedCount(tile.letter) >= tile.requiredCount;
   }
