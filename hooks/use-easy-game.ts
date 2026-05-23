@@ -21,6 +21,7 @@ export function useEasyGame() {
   const [isRecallComplete, setIsRecallComplete] = useState(false);
   const [recallWrongId, setRecallWrongId] = useState<string | null>(null);
   const [recallCorrectSelected, setRecallCorrectSelected] = useState(false);
+  const [isShapeReviewing, setIsShapeReviewing] = useState(false);
   const [currentSpeech, setCurrentSpeech] = useState("");
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isVoiceListening, setIsVoiceListening] = useState(false);
@@ -88,6 +89,7 @@ export function useEasyGame() {
       setIsRecallComplete(false);
       setRecallWrongId(null);
       setRecallCorrectSelected(false);
+      setIsShapeReviewing(false);
       setIsVoiceListening(false);
       setIsWaitingForVoiceToFinish(false);
       setIsDraggingIngredient(false);
@@ -211,7 +213,21 @@ export function useEasyGame() {
       setIsSpeaking(true);
       speak(`Great job! ${activeIngredient.name}! ${toSpelling(activeIngredient.name)}!`, () => {
         setIsSpeaking(false);
-        advanceRound(500);
+        setTimeout(() => {
+          setIsShapeReviewing(true);
+          const shape = activeIngredient.shape;
+          const shapeName = activeIngredient.shapeId;
+          setCurrentSpeech(`Yay! Your buddy found the shape! It's ${shape}! ${shapeName}! ${shapeName}! Now let's try the next one!`);
+          setIsSpeaking(true);
+          speak(
+            `Yay! Your buddy found the shape! It's ${shape}! ${shapeName}! ${shapeName}! Now let's try the next one!`,
+            () => {
+              setIsSpeaking(false);
+              setIsShapeReviewing(false);
+              advanceRound(700);
+            }
+          );
+        }, 500);
       });
       listenTimeoutRef.current = null;
     }, 2500);
@@ -242,6 +258,7 @@ export function useEasyGame() {
     isRecallComplete,
     recallWrongId,
     recallCorrectSelected,
+    isShapeReviewing,
     handleDrop,
     handleRecallSelect,
     handleIngredientDragStart,
