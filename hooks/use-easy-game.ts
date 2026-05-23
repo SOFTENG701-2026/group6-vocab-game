@@ -18,6 +18,9 @@ export function useEasyGame() {
   const [isDragOver, setIsDragOver] = useState(false);
   const [isDraggingIngredient, setIsDraggingIngredient] = useState(false);
   const [isDropped, setIsDropped] = useState(false);
+  const [isRecallComplete, setIsRecallComplete] = useState(false);
+  const [recallWrongId, setRecallWrongId] = useState<string | null>(null);
+  const [recallCorrectSelected, setRecallCorrectSelected] = useState(false);
   const [currentSpeech, setCurrentSpeech] = useState("");
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isVoiceListening, setIsVoiceListening] = useState(false);
@@ -82,6 +85,9 @@ export function useEasyGame() {
       setIsWrongColor(false);
       setIsRoundComplete(false);
       setIsDropped(false);
+      setIsRecallComplete(false);
+      setRecallWrongId(null);
+      setRecallCorrectSelected(false);
       setIsVoiceListening(false);
       setIsWaitingForVoiceToFinish(false);
       setIsDraggingIngredient(false);
@@ -94,7 +100,32 @@ export function useEasyGame() {
     setIsDropped(true);
     setIsPotGuideVisible(false);
     setIsDraggingIngredient(false);
-    say(`Good! Now pick the right color for ${activeIngredient.name}!`);
+    say(`What did we put in the pot?`);
+  }
+
+  function handleRecallSelect(ingredientId: string) {
+    if (!activeIngredient || isRecallComplete) return;
+
+    if (ingredientId === activeIngredient.id) {
+      setRecallCorrectSelected(true);
+      say(
+        `Yay! We added ${activeIngredient.name}! It is ${activeIngredient.color} and ${activeIngredient.shape}.`,
+        () => setTimeout(() => {
+          setIsRecallComplete(true);
+          say(`Now let's find ${activeIngredient.name}'s color together!`);
+        }, 500)
+      );
+    } else {
+      setRecallWrongId(ingredientId);
+      say(
+        `Hmm, let's look together. We added ${activeIngredient.name}! ${activeIngredient.name}！`,
+        () => setTimeout(() => {
+          setRecallWrongId(null);
+          setIsRecallComplete(true);
+          say(`Now let's find ${activeIngredient.name}'s color together!`);
+        }, 500)
+      );
+    }
   }
 
   function handleIngredientDragStart() {
@@ -208,7 +239,11 @@ export function useEasyGame() {
     isPotGuideVisible,
     isAmazingEffect,
     isWrongColor,
+    isRecallComplete,
+    recallWrongId,
+    recallCorrectSelected,
     handleDrop,
+    handleRecallSelect,
     handleIngredientDragStart,
     handleIngredientDragEnd,
     handleIngredientClick,
