@@ -186,6 +186,7 @@ export default function EasyGamePage() {
     isRecallComplete,
     recallWrongId,
     recallCorrectSelected,
+    isShapeReviewing,
     handleDrop,
     handleRecallSelect,
     handleIngredientDragStart,
@@ -346,7 +347,7 @@ export default function EasyGamePage() {
       {/* Recall section: shown after drop, before recall complete */}
       <div className={`px-6 pb-4 transition-all duration-500 ${isDropped && !isRecallComplete ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 translate-y-4 pointer-events-none h-0 overflow-hidden"}`}>
         <div className="bg-white/80 rounded-3xl px-6 py-8">
-          <div className="flex justify-center gap-4">
+          <div className="flex justify-center gap-10">
             {shapeOptions.map((ing) => {
               const isCorrect = ing.id === activeIngredient?.id;
               const isWrong = ing.id === recallWrongId;
@@ -355,7 +356,7 @@ export default function EasyGamePage() {
                   key={ing.id}
                   type="button"
                   onClick={() => handleRecallSelect(ing.id)}
-                  className={`flex flex-col items-center gap-2 px-4 py-3 rounded-2xl border-3 transition-all duration-300 shadow
+                  className={`flex flex-col items-center gap-2 px-10 py-6 rounded-2xl border-3 transition-all duration-300 shadow
                     ${isWrong ? "border-red-400 bg-red-50" : ""}
                     ${isCorrect && (recallWrongId !== null || recallCorrectSelected) ? "border-green-400 bg-green-50 scale-110 ring-4 ring-green-300" : ""}
                     ${!isWrong && !(isCorrect && (recallWrongId !== null || recallCorrectSelected)) ? "border-transparent bg-white hover:border-purple-300 hover:scale-105" : ""}
@@ -363,7 +364,7 @@ export default function EasyGamePage() {
                 >
                   {/* <Image src={ing.imageSrc} alt={ing.name} width={64} height={64} className="w-16 h-16 object-contain" draggable={false} />
                   <span className="text-sm font-extrabold text-gray-700">{ing.name}</span> */}
-                  <span className="text-2xl font-extrabold text-gray-800">{ing.name}</span>
+                  <span className="text-2xl font-extrabold text-gray-800 tracking-wide">{ing.name}</span>
                 </button>
               );
             })}
@@ -401,7 +402,12 @@ export default function EasyGamePage() {
         </div>
 
         {/* Bot shape picker */}
-        <div className="bg-white/70 rounded-3xl px-6 py-4">
+        <div className="bg-white/70 rounded-3xl px-6 py-4 relative">
+          {isShapeReviewing && (
+            <div className="absolute -top-9 left-1/2 -translate-x-1/2 flex flex-col items-center gap-0.5 pointer-events-none">
+              <span className="text-7xl animate-bounce">👇</span>
+            </div>
+          )}
           <div className="flex items-center gap-2 mb-3">
             <span className="text-xl">🐻</span>
             <div>
