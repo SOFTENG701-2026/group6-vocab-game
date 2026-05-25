@@ -7,7 +7,7 @@ import type { CompletedArrow } from "@/domain/ingredients-match-type";
 import { shapeOptions } from "@/domain/ingredients-match-options";
 import ArrowLayer from "@/components/minigames/ingredient-match-ui/arrow-layer";
 import PreviewCursor from "./preview-cursor";
-import PreviewTutorialModalBase from "./preview-tutorial-modal-base";
+import BasePreviewTutorialModal from "./base-preview-tutorial-modal";
 import { Point, usePreviewMeasuredPoints } from "./use-preview-measured-points";
 import { usePreviewTimeline } from "./use-preview-timeline";
 
@@ -48,7 +48,7 @@ const stepOrder = [
 ] as const satisfies readonly IngredientMatchPreviewStep[];
 
 const stepDurations: Record<IngredientMatchPreviewStep, number> = {
-  idle: 500,
+  idle: 2000,
 
   "move-to-colour": 1000,
   "click-colour": 500,
@@ -105,8 +105,8 @@ export default function IngredientMatchPreviewModal({
   const hasWrongShapeAttempt = isAtOrAfter("wrong-shape-done");
 
   const shouldShowCorrectActionCheck = isBetween("click-target-after-colour", "move-to-wrong-shape");
-
   const shouldShowWrongActionX = isAtOrAfter("click-target-after-wrong-shape");
+  const shouldEmphasiseInput = step === "idle";
 
   const cursorPosition = getIngredientMatchCursorPoint(step, points);
 
@@ -123,12 +123,13 @@ export default function IngredientMatchPreviewModal({
   });
 
   return (
-    <PreviewTutorialModalBase
+    <BasePreviewTutorialModal
       isOpen={isOpen}
       onClose={onClose}
       onReplay={replay}
       title='How to play'
       description='Watch the finger choose an option, click it, then connect it to the ingredient.'
+      shouldEmphasiseInput={shouldEmphasiseInput}
       inputImageSrc={mousePanelImage}
       inputLabel={isClicking ? "Click!" : "Move"}
     >
@@ -222,7 +223,7 @@ export default function IngredientMatchPreviewModal({
 
         <PreviewCursor position={cursorPosition} imageSrc={cursorImage} speed={speed} />
       </section>
-    </PreviewTutorialModalBase>
+    </BasePreviewTutorialModal>
   );
 }
 
