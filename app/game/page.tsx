@@ -9,10 +9,10 @@ import { ingredients } from "@/data/ingredients";
 import { minigamesByDifficulty, type MinigameId } from "@/domain/minigame-type";
 import { useGameSetup } from "@/context/game-setup-context";
 import FutureIngredientStack from "@/components/game/future-ingredient-stack";
-import MagicPot from "@/components/game/magic-pot";
 import BlockSpellingMinigame from "@/components/minigames/block-spelling-minigame";
 import IngredientPotDropArea from "@/components/game/shared-pot-drop-area";
 import IngredientMatchPreviewModal from "@/components/modals/previews/ingredient-match-preview-modal";
+import BlockSpellingPreviewModal from "@/components/modals/previews/block-spelling-preview-modal";
 
 export default function GamePage() {
   const [activeIngredientIndex, setActiveIngredientIndex] = useState(0);
@@ -85,6 +85,36 @@ export default function GamePage() {
     }
   }
 
+  function renderActivePreviewModal(minigameId: MinigameId) {
+    if (!activeIngredient) return null;
+
+    switch (minigameId) {
+      case "ingredient-match":
+        return (
+          <IngredientMatchPreviewModal
+            isOpen={isPreviewOpen}
+            onClose={() => setIsPreviewOpen(false)}
+            ingredient={activeIngredient}
+          />
+        );
+
+      case "letter-spelling":
+        return (
+          <BlockSpellingPreviewModal
+            isOpen={isPreviewOpen}
+            onClose={() => setIsPreviewOpen(false)}
+            ingredient={activeIngredient}
+          />
+        );
+
+      case "easy-game":
+        return null;
+
+      default:
+        return null;
+    }
+  }
+
   return (
     <main className='min-h-screen'>
       <div className='flex min-h-screen flex-col gap-y px-6 py-4'>
@@ -115,7 +145,6 @@ export default function GamePage() {
               {activeIngredient ? renderActiveMinigame(activeMinigameId) : <MinigameFallback />}
             </div>
           </section>
-
           {/* Active ingredient / button / status area */}
           <aside
             className='
@@ -173,14 +202,7 @@ export default function GamePage() {
           </aside>
         </section>
       </div>
-      {activeIngredient && (
-        <IngredientMatchPreviewModal
-          isOpen={isPreviewOpen}
-          onClose={() => setIsPreviewOpen(false)}
-          ingredient={activeIngredient}
-          // speed={0.7}
-        />
-      )}
+      {renderActivePreviewModal(activeMinigameId)}
     </main>
   );
 }
