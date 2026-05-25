@@ -6,8 +6,20 @@ type PreviewTutorialModalBaseProps = {
   onReplay: () => void;
   title?: string;
   description?: string;
-  inputImageSrc: string;
-  inputLabel: string;
+
+  /**
+   * For simple previews with only one input image,
+   * such as a mouse icon.
+   */
+  inputImageSrc?: string;
+  inputLabel?: string;
+
+  /**
+   * For custom input previews,
+   * such as A and D keys shown side by side.
+   */
+  inputPreview?: React.ReactNode;
+
   children: React.ReactNode;
 };
 
@@ -19,6 +31,7 @@ export default function PreviewTutorialModalBase({
   description = "Watch the preview, then try it yourself.",
   inputImageSrc,
   inputLabel,
+  inputPreview,
   children,
 }: PreviewTutorialModalBaseProps) {
   if (!isOpen) return null;
@@ -36,7 +49,7 @@ export default function PreviewTutorialModalBase({
       <div
         className='
           grid w-full max-w-6xl
-          grid-cols-[1fr_240px] gap-5
+          grid-cols-[1fr_260px] gap-5
           rounded-4xl bg-white p-5 shadow-2xl
         '
       >
@@ -56,16 +69,26 @@ export default function PreviewTutorialModalBase({
           </div>
 
           <div className='flex flex-col items-center gap-4'>
-            <img src={inputImageSrc} alt='' aria-hidden='true' className='h-28 w-28 object-contain' />
+            {inputPreview ? (
+              inputPreview
+            ) : (
+              <>
+                {inputImageSrc && (
+                  <img src={inputImageSrc} alt='' aria-hidden='true' className='h-28 w-28 object-contain' />
+                )}
 
-            <p
-              className='
-                rounded-2xl bg-white px-4 py-3
-                text-sm font-bold text-slate-700 shadow
-              '
-            >
-              {inputLabel}
-            </p>
+                {inputLabel && (
+                  <p
+                    className='
+                      rounded-2xl bg-white px-4 py-3
+                      text-sm font-bold text-slate-700 shadow
+                    '
+                  >
+                    {inputLabel}
+                  </p>
+                )}
+              </>
+            )}
           </div>
 
           <div className='flex w-full gap-3'>
