@@ -6,7 +6,7 @@ type ArrowLayerProps = {
 
 export default function ArrowLayer({ arrows }: ArrowLayerProps) {
   return (
-    <svg className='pointer-events-none absolute inset-0 h-full w-full'>
+    <svg className='pointer-events-none absolute inset-0 h-full w-full z-0'>
       {arrows.map((arrow) => (
         <line
           key={arrow.id}
