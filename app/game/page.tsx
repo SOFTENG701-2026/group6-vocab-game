@@ -12,7 +12,7 @@ import FutureIngredientStack from "@/components/game/future-ingredient-stack";
 import MagicPot from "@/components/game/magic-pot";
 import BlockSpellingMinigame from "@/components/minigames/block-spelling-minigame";
 import IngredientPotDropArea from "@/components/game/shared-pot-drop-area";
-import IngredientMatchPreviewModal from "@/components/modals/ingredient-match-preview-modal";
+import IngredientMatchPreviewModal from "@/components/modals/previews/ingredient-match-preview-modal";
 
 export default function GamePage() {
   const [activeIngredientIndex, setActiveIngredientIndex] = useState(0);
