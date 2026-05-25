@@ -7,6 +7,7 @@ import { shapeOptions } from "@/domain/ingredients-match-options";
 import { useState, useRef, useLayoutEffect, useEffect } from "react";
 import type { CompletedArrow } from "@/domain/ingredients-match-type";
 import ArrowLayer from "../minigames/ingredient-match-ui/arrow-layer";
+import { Check, X } from "lucide-react";
 
 type IngredientMatchPreviewModalProps = {
   isOpen: boolean;
@@ -60,14 +61,14 @@ const stepDurations: Record<PreviewStep, number> = {
   "move-to-colour": 1000,
   "click-colour": 1000,
   "move-colour-to-target": 1200,
-  "click-target-after-colour": 1000,
+  "click-target-after-colour": 400,
   "colour-done": 1200,
 
-  "move-to-wrong-shape": 2000,
-  "click-wrong-shape": 1000,
+  "move-to-wrong-shape": 1000,
+  "click-wrong-shape": 500,
   "move-wrong-shape-to-target": 1000,
-  "click-target-after-wrong-shape": 1000,
-  "wrong-shape-done": 1800,
+  "click-target-after-wrong-shape": 400,
+  "wrong-shape-done": 1200,
 };
 
 const CURSOR_SIZE = 56;
@@ -152,6 +153,11 @@ export default function IngredientMatchPreviewModal({ isOpen, onClose, ingredien
   const hasWrongShapeAttempt = stepIndex >= stepOrder.indexOf("wrong-shape-done");
 
   const cursorPosition = getCursorPosition(step, layoutPoints);
+
+  const shouldShowCorrectActionCheck =
+    stepIndex >= stepOrder.indexOf("click-target-after-colour") && stepIndex < stepOrder.indexOf("move-to-wrong-shape");
+
+  const shouldShowWrongActionX = stepIndex >= stepOrder.indexOf("click-target-after-wrong-shape");
 
   const arrows = getPreviewArrows({
     layoutPoints,
@@ -311,10 +317,10 @@ export default function IngredientMatchPreviewModal({ isOpen, onClose, ingredien
             <div className='flex flex-col items-center gap-5'>
               <div
                 ref={targetRef}
-                className={`
-                    relative flex h-44 w-44 items-center justify-center
-                    overflow-hidden rounded-4xl bg-white shadow
-                `}
+                className='
+    relative flex h-44 w-44 items-center justify-center
+    overflow-hidden rounded-4xl bg-white shadow
+  '
               >
                 <Image
                   src={ingredient.imageSrc}
@@ -324,24 +330,54 @@ export default function IngredientMatchPreviewModal({ isOpen, onClose, ingredien
                   className='relative z-10 h-36 w-36 object-contain'
                   draggable={false}
                 />
-                {/* Orange half green border: progression */}
+
+                {shouldShowCorrectActionCheck && (
+                  <div
+                    aria-label='Correct action'
+                    className='
+        absolute right-2 top-2 z-30
+        flex h-9 w-9 items-center justify-center
+        rounded-full bg-green-500 text-white shadow-lg
+      '
+                  >
+                    <Check size={24} strokeWidth={4} />
+                  </div>
+                )}
+
+                {shouldShowWrongActionX && (
+                  <div
+                    aria-label='Incorrect action'
+                    className='
+        absolute right-2 top-2 z-30
+        flex h-9 w-9 items-center justify-center
+        rounded-full bg-red-500 text-white shadow-lg
+      '
+                  >
+                    <X size={24} strokeWidth={4} />
+                  </div>
+                )}
+
+                {/* Orange dashed missing progression */}
                 {hasWrongShapeAttempt && (
                   <span
-                    className='animate-pulse pointer-events-none absolute inset-y-0 right-0  w-1/2
-                    rounded-r-4xl
-                    border-y-4 border-r-4 border-orange-500 border-dashed
-                    transition-opacity duration-300 ease-out'
+                    className='
+        pointer-events-none absolute inset-y-0 right-0 w-1/2
+        animate-pulse rounded-r-4xl
+        border-y-4 border-r-4 border-dashed border-orange-500
+        transition-opacity duration-300 ease-out
+      '
                   />
                 )}
+
                 {/* Left half green border: colour completed */}
                 <span
                   aria-hidden='true'
                   className={`
-                        pointer-events-none absolute inset-y-0 left-0 w-1/2
-                        rounded-l-4xl border-y-4 border-l-4 border-green-500
-                        transition-opacity duration-300 ease-out
-                        ${hasCorrectColourMatch ? "opacity-100" : "opacity-0"}
-                    `}
+      pointer-events-none absolute inset-y-0 left-0 w-1/2
+      rounded-l-4xl border-y-4 border-l-4 border-green-500
+      transition-opacity duration-300 ease-out
+      ${hasCorrectColourMatch ? "opacity-100" : "opacity-0"}
+    `}
                 />
               </div>
             </div>
