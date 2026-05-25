@@ -5,6 +5,8 @@ import Button from "@/components/button";
 import type { Ingredient } from "@/data/ingredients";
 import { shapeOptions } from "@/domain/ingredients-match-options";
 import { useState, useRef, useLayoutEffect, useEffect } from "react";
+import type { CompletedArrow } from "@/domain/ingredients-match-type";
+import ArrowLayer from "../minigames/ingredient-match-ui/arrow-layer";
 
 type IngredientMatchPreviewModalProps = {
   isOpen: boolean;
@@ -56,15 +58,15 @@ const stepDurations: Record<PreviewStep, number> = {
   idle: 2000,
 
   "move-to-colour": 1000,
-  "click-colour": 500,
+  "click-colour": 1000,
   "move-colour-to-target": 1200,
-  "click-target-after-colour": 500,
+  "click-target-after-colour": 1000,
   "colour-done": 1200,
 
   "move-to-wrong-shape": 2000,
   "click-wrong-shape": 1000,
   "move-wrong-shape-to-target": 1000,
-  "click-target-after-wrong-shape": 500,
+  "click-target-after-wrong-shape": 1000,
   "wrong-shape-done": 1800,
 };
 
@@ -74,6 +76,52 @@ const fallbackCursorPosition: Point = {
   x: 80,
   y: 390,
 };
+
+function getPreviewArrows({
+  layoutPoints,
+  hasCorrectColourMatch,
+  hasWrongShapeAttempt,
+  ingredient,
+  wrongShapeId,
+}: {
+  layoutPoints: LayoutPoints | null;
+  hasCorrectColourMatch: boolean;
+  hasWrongShapeAttempt: boolean;
+  ingredient: Ingredient;
+  wrongShapeId: string;
+}) {
+  const arrows: CompletedArrow[] = [];
+
+  if (!layoutPoints) return arrows;
+
+  if (hasCorrectColourMatch) {
+    arrows.push({
+      id: "preview-correct-colour",
+      type: "color",
+      sourceId: ingredient.colorId,
+      startX: layoutPoints.colourCenter.x,
+      startY: layoutPoints.colourCenter.y,
+      endX: layoutPoints.targetCenter.x,
+      endY: layoutPoints.targetCenter.y,
+      isCorrect: true,
+    });
+  }
+
+  if (hasWrongShapeAttempt) {
+    arrows.push({
+      id: "preview-wrong-shape",
+      type: "shape",
+      sourceId: wrongShapeId,
+      startX: layoutPoints.wrongShapeCenter.x,
+      startY: layoutPoints.wrongShapeCenter.y,
+      endX: layoutPoints.targetCenter.x,
+      endY: layoutPoints.targetCenter.y,
+      isCorrect: false,
+    });
+  }
+
+  return arrows;
+}
 
 export default function IngredientMatchPreviewModal({ isOpen, onClose, ingredient }: IngredientMatchPreviewModalProps) {
   const [stepIndex, setStepIndex] = useState(0);
@@ -87,8 +135,6 @@ export default function IngredientMatchPreviewModal({ isOpen, onClose, ingredien
 
   const step = stepOrder[stepIndex];
 
-  const cursorPosition = getCursorPosition(step, layoutPoints);
-
   const isClicking =
     step === "click-colour" ||
     step === "click-wrong-shape" ||
@@ -100,6 +146,20 @@ export default function IngredientMatchPreviewModal({ isOpen, onClose, ingredien
   const mousePanelImage = isClicking ? "/assets/tutorial/mouse-left-active.svg" : "/assets/tutorial/mouse-inactive.svg";
 
   const wrongShape = shapeOptions.find((shape) => shape.id !== ingredient.shapeId);
+
+  const hasCorrectColourMatch = stepIndex >= stepOrder.indexOf("colour-done");
+
+  const hasWrongShapeAttempt = stepIndex >= stepOrder.indexOf("wrong-shape-done");
+
+  const cursorPosition = getCursorPosition(step, layoutPoints);
+
+  const arrows = getPreviewArrows({
+    layoutPoints,
+    hasCorrectColourMatch,
+    hasWrongShapeAttempt,
+    ingredient,
+    wrongShapeId: wrongShape?.id ?? "wrong-shape",
+  });
 
   function getCenterPoint(element: HTMLElement, container: HTMLElement): Point {
     const rect = element.getBoundingClientRect();
@@ -216,23 +276,15 @@ export default function IngredientMatchPreviewModal({ isOpen, onClose, ingredien
         '
       >
         {/* Left preview area */}
-        <section
-          ref={previewAreaRef}
-          className='
-            relative h-130 overflow-hidden
-            rounded-4xl bg-emerald-300
-          '
-        >
+        <section ref={previewAreaRef} className='relative h-130 overflow-hidden rounded-4xl bg-gray-300'>
+          <ArrowLayer arrows={arrows} />
           {/* Left options */}
           <div className='absolute left-10 top-30 flex flex-col gap-10'>
             {/* Correct colour option */}
             <button
               ref={colourOptionRef}
               aria-label={`${ingredient.color} colour option`}
-              className='
-                h-28 w-28 rounded-full
-                border-4 border-white shadow
-              '
+              className='h-28 w-28 rounded-full border-4 border-white shadow'
               style={{ backgroundColor: ingredient.color }}
             />
 
@@ -259,34 +311,42 @@ export default function IngredientMatchPreviewModal({ isOpen, onClose, ingredien
             <div className='flex flex-col items-center gap-5'>
               <div
                 ref={targetRef}
-                className='
-                  relative flex h-44 w-44 items-center justify-center
-                  overflow-hidden rounded-4xl bg-white shadow
-                '
+                className={`
+                    relative flex h-44 w-44 items-center justify-center
+                    overflow-hidden rounded-4xl bg-white shadow
+                `}
               >
                 <Image
                   src={ingredient.imageSrc}
                   alt={ingredient.imageAlt}
                   width={180}
                   height={180}
-                  className='h-36 w-36 object-contain'
+                  className='relative z-10 h-36 w-36 object-contain'
                   draggable={false}
                 />
-              </div>
-
-              <div
-                className='
-                  max-w-xs rounded-2xl bg-white/95
-                  px-5 py-3 text-center text-sm
-                  font-bold text-slate-800 shadow
-                '
-              >
-                Watch how to choose an option and connect it to the ingredient.
+                {/* Orange half green border: progression */}
+                {hasWrongShapeAttempt && (
+                  <span
+                    className='animate-pulse pointer-events-none absolute inset-y-0 right-0  w-1/2
+                    rounded-r-4xl
+                    border-y-4 border-r-4 border-orange-500 border-dashed
+                    transition-opacity duration-300 ease-out'
+                  />
+                )}
+                {/* Left half green border: colour completed */}
+                <span
+                  aria-hidden='true'
+                  className={`
+                        pointer-events-none absolute inset-y-0 left-0 w-1/2
+                        rounded-l-4xl border-y-4 border-l-4 border-green-500
+                        transition-opacity duration-300 ease-out
+                        ${hasCorrectColourMatch ? "opacity-100" : "opacity-0"}
+                    `}
+                />
               </div>
             </div>
           </div>
 
-          {/* Static cursor placeholder */}
           <img
             src={cursorImage}
             alt=''
