@@ -12,6 +12,7 @@ import FutureIngredientStack from "@/components/game/future-ingredient-stack";
 import MagicPot from "@/components/game/magic-pot";
 import BlockSpellingMinigame from "@/components/minigames/block-spelling-minigame";
 import IngredientPotDropArea from "@/components/game/shared-pot-drop-area";
+import IngredientMatchPreviewModal from "@/components/modals/ingredient-match-preview-modal";
 
 export default function GamePage() {
   const [activeIngredientIndex, setActiveIngredientIndex] = useState(0);
@@ -19,6 +20,7 @@ export default function GamePage() {
   const futureIngredients = ingredients.slice(activeIngredientIndex + 1);
   const [activeMinigameIndex, setActiveMinigameIndex] = useState(0);
   const [isShowingCompletion, setIsShowingCompletion] = useState(false);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   //derived state
   const { difficulty } = useGameSetup();
   const isIngredientListEmpty = activeIngredientIndex === ingredients.length;
@@ -108,6 +110,7 @@ export default function GamePage() {
         >
           {/* Minigame area */}
           <section className='h-full flex flex-col gap-3 overflow-hidden'>
+            <Button onClick={() => setIsPreviewOpen(true)}>Show Preview</Button>
             <div className='flex-1 min-h-auto overflow-hidden'>
               {activeIngredient ? renderActiveMinigame(activeMinigameId) : <MinigameFallback />}
             </div>
@@ -170,6 +173,14 @@ export default function GamePage() {
           </aside>
         </section>
       </div>
+      {activeIngredient && (
+        <IngredientMatchPreviewModal
+          isOpen={isPreviewOpen}
+          onClose={() => setIsPreviewOpen(false)}
+          ingredient={activeIngredient}
+          // speed={0.7}
+        />
+      )}
     </main>
   );
 }
