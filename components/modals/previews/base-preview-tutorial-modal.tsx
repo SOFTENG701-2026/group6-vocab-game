@@ -1,6 +1,6 @@
 import Button from "@/components/button";
 
-type PreviewTutorialModalBaseProps = {
+type BasePreviewTutorialModalProps = {
   isOpen: boolean;
   onClose: () => void;
   onReplay: () => void;
@@ -20,20 +20,25 @@ type PreviewTutorialModalBaseProps = {
    */
   inputPreview?: React.ReactNode;
 
+  /**
+   * Applies an attention seeking animation
+   */
+  shouldEmphasiseInput?: boolean;
   children: React.ReactNode;
 };
 
-export default function PreviewTutorialModalBase({
+export default function BasePreviewTutorialModal({
   isOpen,
   onClose,
   onReplay,
-  title = "How to play",
+  title = "How To Play",
   description = "Watch the preview, then try it yourself.",
   inputImageSrc,
   inputLabel,
   inputPreview,
+  shouldEmphasiseInput = false,
   children,
-}: PreviewTutorialModalBaseProps) {
+}: BasePreviewTutorialModalProps) {
   if (!isOpen) return null;
 
   return (
@@ -68,7 +73,9 @@ export default function PreviewTutorialModalBase({
             <p className='mt-3 text-sm font-semibold text-slate-600'>{description}</p>
           </div>
 
-          <div className='flex flex-col items-center gap-4'>
+          <div
+            className={`flex flex-col items-center gap-4 ${shouldEmphasiseInput ? "animate-tutorial-attention-shake" : ""}`}
+          >
             {inputPreview ? (
               inputPreview
             ) : (
