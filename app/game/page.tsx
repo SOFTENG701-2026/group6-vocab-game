@@ -13,6 +13,8 @@ import BlockSpellingMinigame from "@/components/minigames/block-spelling-minigam
 import IngredientPotDropArea from "@/components/game/shared-pot-drop-area";
 import IngredientMatchPreviewModal from "@/components/modals/previews/ingredient-match-preview-modal";
 import BlockSpellingPreviewModal from "@/components/modals/previews/block-spelling-preview-modal";
+import PreviewHelpButton from "@/components/game/preview-help-button";
+import MinigamePreviewFrame from "@/components/game/layout-minigame-preview";
 
 export default function GamePage() {
   const [activeIngredientIndex, setActiveIngredientIndex] = useState(0);
@@ -140,10 +142,12 @@ export default function GamePage() {
         >
           {/* Minigame area */}
           <section className='h-full flex flex-col gap-3 overflow-hidden'>
-            <Button onClick={() => setIsPreviewOpen(true)}>Show Preview</Button>
-            <div className='flex-1 min-h-auto overflow-hidden'>
+            <MinigamePreviewFrame
+              onPreviewClick={() => setIsPreviewOpen(true)}
+              resetKey={`$activeIngredient?.id}-${activeMinigameId}`}
+            >
               {activeIngredient ? renderActiveMinigame(activeMinigameId) : <MinigameFallback />}
-            </div>
+            </MinigamePreviewFrame>
           </section>
           {/* Active ingredient / button / status area */}
           <aside
