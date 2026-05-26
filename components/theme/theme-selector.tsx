@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Star } from "lucide-react";
 import ThemeCard from "@/components/theme/theme-card";
 import { gameThemes } from "@/domain/themes/theme-options";
+import { speak } from "@/lib/speak";
 
 const DEFAULT_INDEX = gameThemes.findIndex(
   (theme) => theme.id === "fruits-vegetables"
@@ -14,7 +15,30 @@ export default function ThemeSelector() {
   const router = useRouter();
   const carouselRef = useRef<HTMLDivElement>(null);
   const scrollSyncReadyRef = useRef(false);
+  const isFirstActiveRef = useRef(true);
   const [activeIndex, setActiveIndex] = useState(DEFAULT_INDEX);
+
+  useEffect(() => {
+    const defaultLabel = gameThemes[DEFAULT_INDEX]?.cardLabel ?? "";
+    const welcome = `Pick your favorite and start the magic! ${defaultLabel}`;
+
+    const onFirstInteraction = () => {
+      speak(welcome);
+      document.removeEventListener("pointerdown", onFirstInteraction);
+    };
+
+    document.addEventListener("pointerdown", onFirstInteraction, { once: true });
+    return () => document.removeEventListener("pointerdown", onFirstInteraction);
+  }, []);
+
+  useEffect(() => {
+    if (isFirstActiveRef.current) {
+      isFirstActiveRef.current = false;
+      return;
+    }
+    const label = gameThemes[activeIndex]?.cardLabel;
+    if (label) speak(label);
+  }, [activeIndex]);
 
   const updateActiveIndex = useCallback(() => {
     const container = carouselRef.current;
