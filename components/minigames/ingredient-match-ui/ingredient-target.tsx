@@ -10,7 +10,6 @@ type IngredientTargetProps = {
   isShapeMatched: boolean;
   onClick: () => void;
   ingredientRef: React.RefObject<HTMLButtonElement | null>;
-  onDropToPot?: () => void;
 };
 
 export default function IngredientTarget({
@@ -20,7 +19,6 @@ export default function IngredientTarget({
   isShapeMatched,
   onClick,
   ingredientRef,
-  onDropToPot,
 }: IngredientTargetProps) {
   return (
     <div>

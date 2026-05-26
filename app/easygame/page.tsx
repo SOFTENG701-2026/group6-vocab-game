@@ -42,7 +42,6 @@ function getVoiceButtonText(
   isWrongColor: boolean,
   isVoiceListening: boolean,
   isWaitingForVoiceToFinish: boolean,
-  selectedColorId: string | null,
 ): string {
   if (isRoundComplete) return "Well done! ✨";
   if (isWrongColor) return "Try again";
@@ -113,7 +112,7 @@ function VoiceActionButton({
         </span>
         {!isListening && (
           <span className={`text-lg font-extrabold text-white ${isAnimated ? "animate-pulse" : ""}`}>
-            {getVoiceButtonText(isRoundComplete, isWrongColor, isVoiceListening, isWaitingForVoiceToFinish, selectedColorId)}
+            {getVoiceButtonText(isRoundComplete, isWrongColor, isVoiceListening, isWaitingForVoiceToFinish)}
           </span>
         )}
       </button>

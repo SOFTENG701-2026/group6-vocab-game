@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Button from "@/components/button";
 import {
   OptionType,
@@ -64,7 +65,7 @@ export default function MatchOptionColumn({
             className={buttonClassName}
           >
             {"imageSrc" in option && option.imageSrc ? (
-              <img src={option.imageSrc} alt={option.label}/>
+              <Image src={option.imageSrc} alt={option.label} width={64} height={64} />
             ) : (
               option.label
             )}

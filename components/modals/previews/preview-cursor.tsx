@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 import type { Point } from "./use-preview-measured-points";
 
 type PreviewCursorProps = {
@@ -11,10 +13,12 @@ export default function PreviewCursor({ position, imageSrc, size = 56, speed = 1
   const safeSpeed = Math.max(0.25, speed);
 
   return (
-    <img
+    <Image
       src={imageSrc}
       alt=''
       aria-hidden='true'
+      width={size}
+      height={size}
       className='pointer-events-none absolute z-20 transition-all ease-in-out'
       style={{
         left: position.x,

@@ -199,13 +199,13 @@ export default function Card({
         onClick={(event) => event.stopPropagation()}
         className={`
       flex items-center justify-center px-8
-      ${isCompact ? "pt-2 pb-8" : "py-8"}
+      ${getButtonSpacingClasses()}
     `}
       >
         <div
           className={`
         transition-opacity duration-300
-        ${isClear ? "opacity-100" : "opacity-45"}
+        ${getButtonVisibilityClasses()}
       `}
         >
           <Button size='medium' onClick={handleButtonClick}>

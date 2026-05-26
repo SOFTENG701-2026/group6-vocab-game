@@ -13,7 +13,6 @@ import BlockSpellingMinigame from "@/components/minigames/block-spelling-minigam
 import IngredientPotDropArea from "@/components/game/shared-pot-drop-area";
 import IngredientMatchPreviewModal from "@/components/modals/previews/ingredient-match-preview-modal";
 import BlockSpellingPreviewModal from "@/components/modals/previews/block-spelling-preview-modal";
-import PreviewHelpButton from "@/components/game/preview-help-button";
 import MinigamePreviewFrame from "@/components/game/layout-minigame-preview";
 
 export default function GamePage() {
@@ -60,7 +59,7 @@ export default function GamePage() {
           <div>
             <h2 className='text-3xl font-extrabold text-(--color-primary-hover)'>Well done!</h2>
 
-            <p className='mt-3 text-lg font-bold text-gray-700'>You've ran out of ingredients.</p>
+            <p className='mt-3 text-lg font-bold text-gray-700'>You&apos;ve run out of ingredients.</p>
           </div>
         </div>
       );
@@ -158,9 +157,9 @@ export default function GamePage() {
           >
             <h2 className='text-center text-xl font-extrabold text-(--color-primary-hover)'>Active Ingredient</h2>
             {activeIngredient && (
-              <p className='mt-2 rounded-full  bg-orange-100 px-4 py-2 text-sm font-bold text-orange-700'>
-                {difficulty === "hard" ? "Hard" : "Medium"} · Minigame {activeMinigameIndex + 1} of{" "}
-                {activeMinigames.length}
+              <p className='mt-2 rounded-full bg-orange-100 px-4 py-2 text-sm font-bold text-orange-700'>
+                {difficulty === "hard" ? "Hard Mode" : difficulty === "medium" ? "Medium Mode" : "Easy Mode"} ·
+                Minigame {activeMinigameIndex + 1} of {activeMinigames.length}
               </p>
             )}
             <div className='my-4 flex flex-col items-center  text-center'>

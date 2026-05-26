@@ -50,12 +50,12 @@ export function useBasketSpellingGame({ word, onComplete }: UseBasketSpellingGam
   const [fallingLetters, setFallingLetters] = useState<FallingLetter[]>([]);
   const [basketX, setBasketX] = useState(50);
   const [feedbackMessage, setFeedbackMessage] = useState(`Catch the letters that belong in ${word}.`);
-  const [slowUntil, setSlowUntil] = useState<number | null>(null);
+  const [isBasketSlowed, setIsBasketSlowed] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
 
   const placedLettersRef = useRef(placedLetters);
   const basketXRef = useRef(basketX);
-  const slowUntilRef = useRef(slowUntil);
+  const slowUntilRef = useRef<number | null>(null);
   const isCompleteRef = useRef(isComplete);
 
   const pressedKeysRef = useRef({
@@ -71,10 +71,6 @@ export function useBasketSpellingGame({ word, onComplete }: UseBasketSpellingGam
   useEffect(() => {
     basketXRef.current = basketX;
   }, [basketX]);
-
-  useEffect(() => {
-    slowUntilRef.current = slowUntil;
-  }, [slowUntil]);
 
   useEffect(() => {
     isCompleteRef.current = isComplete;
@@ -117,7 +113,7 @@ export function useBasketSpellingGame({ word, onComplete }: UseBasketSpellingGam
    * The returned `speed` value controls how quickly the letter
    * falls down the play area each animation frame.
    */
-  function createFallingLetter(): FallingLetter | null {
+  const createFallingLetter = useCallback((): FallingLetter | null => {
     const neededLetters = getNeededLetters();
     const completedLetters = getCompletedLetters();
 
@@ -145,7 +141,7 @@ export function useBasketSpellingGame({ word, onComplete }: UseBasketSpellingGam
       y: 0,
       speed: 0.16 + Math.random() * 0.08,
     };
-  }
+  }, [targetLetters]);
 
   const spawnLetter = useCallback(() => {
     if (isCompleteRef.current) return;
@@ -171,7 +167,7 @@ export function useBasketSpellingGame({ word, onComplete }: UseBasketSpellingGam
 
       return [...currentLetters, nextLetter];
     });
-  }, [targetLetters]);
+  }, [createFallingLetter]);
 
   /**
    * Is called when the basket catches a letter that is not needed to:
@@ -182,12 +178,12 @@ export function useBasketSpellingGame({ word, onComplete }: UseBasketSpellingGam
     const until = Date.now() + SLOW_DURATION_MS;
 
     slowUntilRef.current = until;
-    setSlowUntil(until);
+    setIsBasketSlowed(true);
 
     window.setTimeout(() => {
       if (slowUntilRef.current === until) {
-        setSlowUntil(null);
         slowUntilRef.current = null;
+        setIsBasketSlowed(false);
       }
     }, SLOW_DURATION_MS);
   }
@@ -239,26 +235,25 @@ export function useBasketSpellingGame({ word, onComplete }: UseBasketSpellingGam
 
   /** Reset state when active ingredient changes*/
   useEffect(() => {
-    setPlacedLetters(
-      targetLetters.map((letter) => ({
-        letter,
-        isFilled: false,
-      })),
-    );
-
-    setFallingLetters([]);
-    setBasketX(50);
-    setSlowUntil(null);
-    setIsComplete(false);
-    setFeedbackMessage(`Catch the letters that belong in ${word}.`);
-
-    placedLettersRef.current = targetLetters.map((letter) => ({
+    const resetLetters = targetLetters.map((letter) => ({
       letter,
       isFilled: false,
     }));
 
-    slowUntilRef.current = null;
-    isCompleteRef.current = false;
+    const resetTimeoutId = window.setTimeout(() => {
+      setPlacedLetters(resetLetters);
+      setFallingLetters([]);
+      setBasketX(50);
+      setIsBasketSlowed(false);
+      setIsComplete(false);
+      setFeedbackMessage(`Catch the letters that belong in ${word}.`);
+
+      placedLettersRef.current = resetLetters;
+      slowUntilRef.current = null;
+      isCompleteRef.current = false;
+    }, 0);
+
+    return () => window.clearTimeout(resetTimeoutId);
   }, [targetLetters, word]);
 
   /** Spawning letter effect when the game starts or resets*/
@@ -401,8 +396,6 @@ export function useBasketSpellingGame({ word, onComplete }: UseBasketSpellingGam
 
     return () => window.cancelAnimationFrame(animationFrameId);
   }, []);
-
-  const isBasketSlowed = slowUntil !== null && Date.now() < slowUntil;
 
   return {
     targetLetters,

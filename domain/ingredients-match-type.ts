@@ -27,5 +27,6 @@ export type ColorOption = {
 export type ShapeOption = {
   id: string;
   label: string;
-  imageSrc: string;
+
+  imageSrc?: string;
 };

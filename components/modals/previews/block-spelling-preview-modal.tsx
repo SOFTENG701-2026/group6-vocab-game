@@ -231,18 +231,22 @@ function KeyboardMovementPreview({ isPressingA, isPressingD }: KeyboardMovementP
   return (
     <div className='flex flex-col items-center gap-4'>
       <div className='flex items-center justify-center gap-6'>
-        <img
+        <Image
           src={isPressingA ? "/assets/tutorial/key-a-active.svg" : "/assets/tutorial/key-a-inactive.svg"}
           alt='A key'
+          width={96}
+          height={96}
           className={`
             h-24 w-24 object-contain transition-transform duration-200
             ${isPressingA ? "scale-110" : "scale-100"}
           `}
         />
 
-        <img
+        <Image
           src={isPressingD ? "/assets/tutorial/key-d-active.svg" : "/assets/tutorial/key-d-inactive.svg"}
           alt='D key'
+          width={96}
+          height={96}
           className={`
             h-24 w-24 object-contain transition-transform duration-200
             ${isPressingD ? "scale-110" : "scale-100"}

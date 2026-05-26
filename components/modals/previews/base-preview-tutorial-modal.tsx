@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Button from "@/components/button";
 
 type BasePreviewTutorialModalProps = {
@@ -81,7 +82,14 @@ export default function BasePreviewTutorialModal({
             ) : (
               <>
                 {inputImageSrc && (
-                  <img src={inputImageSrc} alt='' aria-hidden='true' className='h-28 w-28 object-contain' />
+                  <Image
+                    src={inputImageSrc}
+                    alt=''
+                    aria-hidden='true'
+                    width={112}
+                    height={112}
+                    className='h-28 w-28 object-contain'
+                  />
                 )}
 
                 {inputLabel && (

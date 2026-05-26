@@ -51,8 +51,6 @@ export function usePreviewTimeline<Step extends string>({
   useEffect(() => {
     if (!isOpen) return;
 
-    setStepIndex(0);
-
     let timeoutId: number | undefined;
 
     function runTimeline(index: number) {
@@ -75,9 +73,16 @@ export function usePreviewTimeline<Step extends string>({
       }, duration);
     }
 
-    runTimeline(0);
+    const resetTimeoutId = window.setTimeout(() => {
+      setStepIndex(0);
+      runTimeline(0);
+    }, 0);
 
     return () => {
+      if (resetTimeoutId) {
+        window.clearTimeout(resetTimeoutId);
+      }
+
       if (timeoutId) {
         window.clearTimeout(timeoutId);
       }

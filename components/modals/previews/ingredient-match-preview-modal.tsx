@@ -92,7 +92,7 @@ export default function IngredientMatchPreviewModal({
   const { containerRef, setElementRef, points } = usePreviewMeasuredPoints<IngredientMatchTargetId>({
     isOpen,
     targetIds,
-    dependencies: [ingredient.id],
+    dependencyKey: ingredient.id,
   });
 
   const isClicking =
@@ -162,7 +162,13 @@ export default function IngredientMatchPreviewModal({
               `}
             >
               {wrongShape?.imageSrc ? (
-                <img src={wrongShape.imageSrc} alt={wrongShape.label} className='h-full w-full object-contain' />
+                <Image
+                  src={wrongShape.imageSrc}
+                  alt={wrongShape.label}
+                  width={80}
+                  height={80}
+                  className='h-full w-full object-contain'
+                />
               ) : (
                 <span className='text-sm font-bold'>{wrongShape?.label ?? "Shape"}</span>
               )}

@@ -20,7 +20,7 @@ export default function FutureIngredientStack({ ingredients, maxVisible = 4 }: F
       <p className='mb-2 text-xs font-extrabold uppercase tracking-wide text-gray-400'>Coming next</p>
 
       <div className='relative flex flex-col max-h-44 w-full  gap-y-1 items-center overflow-hidden'>
-        {visibleIngredients.map((ingredient, index) => (
+        {visibleIngredients.map((ingredient) => (
           <div
             key={ingredient.id}
             className='

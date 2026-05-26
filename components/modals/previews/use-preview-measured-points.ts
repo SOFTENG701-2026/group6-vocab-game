@@ -8,13 +8,13 @@ export type Point = {
 type UsePreviewMeasuredPointsProps<TargetId extends string> = {
   isOpen: boolean;
   targetIds: readonly TargetId[];
-  dependencies?: React.DependencyList;
+  dependencyKey?: string;
 };
 
 export function usePreviewMeasuredPoints<TargetId extends string>({
   isOpen,
   targetIds,
-  dependencies = [],
+  dependencyKey,
 }: UsePreviewMeasuredPointsProps<TargetId>) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const elementMapRef = useRef<Partial<Record<TargetId, HTMLElement | null>>>({});
@@ -54,7 +54,7 @@ export function usePreviewMeasuredPoints<TargetId extends string>({
     return () => {
       window.removeEventListener("resize", measure);
     };
-  }, [isOpen, measure, ...dependencies]);
+  }, [dependencyKey, isOpen, measure]);
 
   return {
     containerRef,

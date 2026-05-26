@@ -64,9 +64,13 @@ export function useEasyGame() {
   }, []);
 
   useEffect(() => {
-    if (activeIngredient) {
+    if (!activeIngredient) return;
+
+    const greetingTimeout = setTimeout(() => {
       say(`Let's put ${activeIngredient.name} into the pot!`);
-    }
+    }, 0);
+
+    return () => clearTimeout(greetingTimeout);
   }, [activeIngredient, say]);
 
   const shapeOptions = useMemo(() => {

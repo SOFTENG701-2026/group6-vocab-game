@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 type PreviewHelpButtonProps = {
   onClick: () => void;
@@ -18,16 +18,13 @@ export default function PreviewHelpButton({
 
   className = "",
 }: PreviewHelpButtonProps) {
-  const [hasBeenClicked, setHasBeenClicked] = useState(false);
+  const currentResetKey = resetKey ?? "__default-preview-button";
+  const [clickedResetKey, setClickedResetKey] = useState<string | null>(null);
 
-  useEffect(() => {
-    setHasBeenClicked(false);
-  }, [resetKey]);
-
-  const shouldShowPulse = shouldPulse && !hasBeenClicked;
+  const shouldShowPulse = shouldPulse && clickedResetKey !== currentResetKey;
 
   function handleClick() {
-    setHasBeenClicked(true);
+    setClickedResetKey(currentResetKey);
     onClick();
   }
 

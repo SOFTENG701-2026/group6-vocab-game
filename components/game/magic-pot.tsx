@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import React, { useState, useCallback, useRef } from "react";
 import { ingredients, type Ingredient } from "@/data/ingredients";
 
@@ -211,9 +212,11 @@ export default function MagicPot({ className, onDrop }: { className?: string; on
               className="absolute top-0 w-12 h-12 pointer-events-none z-10 animate-[dropIn_0.7s_cubic-bezier(0.45,0,0.55,1)_forwards]"
               style={{ left: `${item.x}%`, transform: "translateX(-50%)" }}
             >
-              <img
+              <Image
                 src={item.ingredient.imageSrc}
                 alt={item.ingredient.imageAlt}
+                width={48}
+                height={48}
                 className="w-full h-full object-contain drop-shadow-lg"
               />
             </div>
@@ -240,5 +243,4 @@ export default function MagicPot({ className, onDrop }: { className?: string; on
       </div>
   );    
 }
-
 
