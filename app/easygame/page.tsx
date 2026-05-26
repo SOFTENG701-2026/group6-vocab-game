@@ -424,7 +424,7 @@ export default function EasyGamePage() {
             {shapeOptions.map((ingredient) => (
               <ShapeOptionCard
                 key={ingredient.id}
-                label={ingredient.name}
+                label={ingredient.shapeId}
                 imageSrc={ingredient.imageSrc}
                 isBotSelected={ingredient.id === activeIngredient?.id}
               />
