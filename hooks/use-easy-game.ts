@@ -215,12 +215,11 @@ export function useEasyGame() {
         setIsSpeaking(false);
         setTimeout(() => {
           setIsShapeReviewing(true);
-          const shape = activeIngredient.shape;
           const shapeName = activeIngredient.shapeId;
-          setCurrentSpeech(`Yay! Your buddy found the shape! It's ${shape}! ${shapeName}! ${shapeName}! Now let's try the next one!`);
+          setCurrentSpeech(`Yay! Your buddy found the shape! It's ${shapeName}! Now let's try the next one!`);
           setIsSpeaking(true);
           speak(
-            `Yay! Your buddy found the shape! It's ${shape}! ${shapeName}! ${shapeName}! Now let's try the next one!`,
+            `Yay! Your buddy found the shape! It's ${shapeName}! Now let's try the next one!`,
             () => {
               setIsSpeaking(false);
               setIsShapeReviewing(false);
