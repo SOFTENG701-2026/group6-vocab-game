@@ -4,6 +4,6 @@ export type MinigameId = "easy-game" | "ingredient-match" | "letter-spelling";
 
 export const minigamesByDifficulty: Record<Difficulty, MinigameId[]> = {
   easy: ["easy-game"],
-  medium: ["ingredient-match"],
+  medium: ["letter-spelling"],
   hard: ["ingredient-match", "letter-spelling"],
 };
