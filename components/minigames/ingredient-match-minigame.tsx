@@ -9,10 +9,9 @@ import { useIngredientMatchGame } from "./use-ingredient-match-game";
 type IngredientMatchMinigameProps = {
   ingredient: Ingredient;
   onComplete?: () => void;
-  onDropToPot?: () => void;
 };
 
-export default function IngredientMatchMinigame({ ingredient, onComplete, onDropToPot }: IngredientMatchMinigameProps) {
+export default function IngredientMatchMinigame({ ingredient, onComplete }: IngredientMatchMinigameProps) {
   const {
     containerRef,
     ingredientRef,
@@ -39,7 +38,7 @@ export default function IngredientMatchMinigame({ ingredient, onComplete, onDrop
     >
       <ArrowLayer arrows={completedArrows} />
 
-      <div className='relative z-10 flex h-full min-h-105 items-center justify-between gap-8'>
+      <div className='relative z-10 flex h-full min-h-105 items-center justify-between gap-8 select-none'>
         <MatchOptionColumn
           type='color'
           options={visibleColorOptions}
@@ -56,7 +55,6 @@ export default function IngredientMatchMinigame({ ingredient, onComplete, onDrop
           isColorMatched={isColorMatched}
           isShapeMatched={isShapeMatched}
           onClick={handleIngredientClick}
-          onDropToPot={onDropToPot}
         />
 
         <MatchOptionColumn

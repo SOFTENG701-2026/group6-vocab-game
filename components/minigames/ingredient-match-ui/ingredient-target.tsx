@@ -43,7 +43,7 @@ export default function IngredientTarget({
           <span
             aria-hidden='true'
             className={`
-            pointer-events-none absolute -inset-0 w-1/2
+            pointer-events-none absolute inset-0 w-1/2
             rounded-l-4xl
             border-y-4 border-l-4 border-green-500
             transition-opacity duration-300 ease-out

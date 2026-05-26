@@ -6,20 +6,7 @@ type ArrowLayerProps = {
 
 export default function ArrowLayer({ arrows }: ArrowLayerProps) {
   return (
-    <svg className='pointer-events-none absolute inset-0 h-full w-full'>
-      <defs>
-        <marker
-          id='arrowhead'
-          markerWidth='10'
-          markerHeight='10'
-          refX='8'
-          refY='3'
-          orient='auto'
-        >
-          <path d='M0,0 L0,6 L9,3 z' fill='currentColor' />
-        </marker>
-      </defs>
-
+    <svg className='pointer-events-none absolute inset-0 h-full w-full z-0'>
       {arrows.map((arrow) => (
         <line
           key={arrow.id}
@@ -30,7 +17,6 @@ export default function ArrowLayer({ arrows }: ArrowLayerProps) {
           stroke={arrow.isCorrect ? "#22C55E" : "#FB923C"}
           strokeWidth='5'
           strokeLinecap='round'
-          markerEnd='url(#arrowhead)'
         />
       ))}
     </svg>
