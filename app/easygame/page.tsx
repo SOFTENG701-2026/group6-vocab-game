@@ -196,7 +196,7 @@ export default function EasyGamePage() {
     goHome,
   } = useEasyGame();
 
-  // 颜色选对后自动触发 handleAddAndSay，无需手动点击
+  // Automatically trigger handleAddAndSay when the color is selected
   useEffect(() => {
     const isReadyToSay = selectedColorId && !isWrongColor && !isRoundComplete && !isVoiceListening && !isWaitingForVoiceToFinish;
     if (!isReadyToSay) return;
