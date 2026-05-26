@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useEffect } from "react";
 import { Mic, Ear, XCircle } from "lucide-react";
 import { ingredients } from "@/data/ingredients";
 import MonsterBubble from "@/components/easygame/monster-bubble";
@@ -194,6 +195,14 @@ export default function EasyGamePage() {
     handleAddAndSay,
     goHome,
   } = useEasyGame();
+
+  // 颜色选对后自动触发 handleAddAndSay，无需手动点击
+  useEffect(() => {
+    const isReadyToSay = selectedColorId && !isWrongColor && !isRoundComplete && !isVoiceListening && !isWaitingForVoiceToFinish;
+    if (!isReadyToSay) return;
+    const timer = setTimeout(() => handleAddAndSay(), 1000);
+    return () => clearTimeout(timer);
+  }, [selectedColorId, isWrongColor, isRoundComplete, isVoiceListening, isWaitingForVoiceToFinish, handleAddAndSay]);
 
   if (isGameComplete) {
     return (
