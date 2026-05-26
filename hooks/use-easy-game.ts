@@ -102,7 +102,7 @@ export function useEasyGame() {
     setIsDropped(true);
     setIsPotGuideVisible(false);
     setIsDraggingIngredient(false);
-    say(`What did we put in the pot?`);
+    say(`What did we put in the pot? Let's choose one from the list!`);
   }
 
   function handleRecallSelect(ingredientId: string) {

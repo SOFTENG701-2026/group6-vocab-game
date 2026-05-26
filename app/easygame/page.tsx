@@ -346,7 +346,12 @@ export default function EasyGamePage() {
 
       {/* Recall section: shown after drop, before recall complete */}
       <div className={`px-6 pb-4 transition-all duration-500 ${isDropped && !isRecallComplete ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 translate-y-4 pointer-events-none h-0 overflow-hidden"}`}>
-        <div className="bg-white/80 rounded-3xl px-6 py-8">
+        <div className="relative bg-white/80 rounded-3xl px-6 py-8">
+          {isDropped && !isRecallComplete && !recallWrongId && !recallCorrectSelected && (
+            <div className="absolute -top-9 left-1/2 -translate-x-1/2 flex flex-col items-center gap-0.5 pointer-events-none">
+              <span className="text-7xl animate-bounce">👇</span>
+            </div>
+          )}
           <div className="flex justify-center gap-10">
             {shapeOptions.map((ing) => {
               const isCorrect = ing.id === activeIngredient?.id;
