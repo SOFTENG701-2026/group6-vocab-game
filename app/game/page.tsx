@@ -22,7 +22,7 @@ export default function GamePage() {
   const futureIngredients = ingredients.slice(activeIngredientIndex + 1);
   const [activeMinigameIndex, setActiveMinigameIndex] = useState(0);
   const [isShowingCompletion, setIsShowingCompletion] = useState(false);
-  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(true);
   //derived state
   const { difficulty } = useGameSetup();
   const isIngredientListEmpty = activeIngredientIndex === ingredients.length;
