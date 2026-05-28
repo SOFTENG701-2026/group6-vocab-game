@@ -38,7 +38,7 @@ export default function PreviewHelpButton({
       title={label}
       onClick={handleClick}
       className={`
-        group relative z-20
+        group relative 
         flex h-12 w-12 items-center justify-center
         rounded-full border-4 border-purple-500
         bg-white text-purple-600 shadow-lg
