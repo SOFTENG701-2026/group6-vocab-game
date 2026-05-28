@@ -220,6 +220,10 @@ export function NarrativeProvider({ children }: { children: ReactNode }) {
       if (step.type === "wait") {
         await wait(step.durationMs);
       }
+
+      if (step.type === "listening") {
+        await wait(step.durationMs);
+      }
     }
 
     if (currentRunNumber !== runIdRef.current) {

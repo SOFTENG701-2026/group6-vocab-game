@@ -75,3 +75,38 @@ body {
 .animate-tutorial-attention-shake {
   animation: tutorial-attention-shake 0.7s ease-in-out infinite;
 }
+
+@keyframes listening-wave {
+  0%,
+  100% {
+    transform: scaleY(0.65);
+    opacity: 0.65;
+  }
+
+  50% {
+    transform: scaleY(1.35);
+    opacity: 1;
+  }
+}
+
+.animate-listening-wave {
+  animation: listening-wave 700ms ease-in-out infinite;
+  transform-origin: bottom;
+}
+
+@keyframes mic-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgb(125 59 237 / 0.35);
+  }
+
+  50% {
+    transform: scale(1.06);
+    box-shadow: 0 0 0 10px rgb(125 59 237 / 0);
+  }
+}
+
+.animate-mic-pulse {
+  animation: mic-pulse 1.2s ease-in-out infinite;
+}

@@ -1,19 +1,10 @@
 import type { NarrativeEvent } from "./narrative-events";
 
 export type NarrationStep =
-  | {
-      type: "asset-audio";
-      text: string;
-      audioSrc: string;
-    }
-  | {
-      type: "tts";
-      text: string;
-    }
-  | {
-      type: "wait";
-      durationMs: number;
-    };
+  | { type: "asset-audio"; text: string; audioSrc: string }
+  | { type: "tts"; text: string }
+  | { type: "wait"; durationMs: number } // Simulate natural pause in speach
+  | { type: "listening"; durationMs: number }; // Simulate listening after speech
 
 export type NarrationScript = {
   id: string;
@@ -160,7 +151,7 @@ export function createCorrectLetterCaughtScript(letter: string): NarrationScript
 
       {
         // Duration of how long the dialogue box is shown
-        type: "wait",
+        type: "listening",
         durationMs: 4000,
       },
     ],
