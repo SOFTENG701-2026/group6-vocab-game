@@ -50,8 +50,8 @@ export default function AchievementRow({ achievement, onClaim, onView }: Achieve
           className='
             font-pixel
             text-center text-4xl font-black uppercase tracking-wider
-            text-purple-500
-            drop-shadow-[4px_4px_0px_white]
+            text-[#b95efe]
+            [text-shadow:-2px_3px_0_#3f3a35,-6px_5px_0_rgba(0,0,0,0.25)]
           '
         >
           {title}
