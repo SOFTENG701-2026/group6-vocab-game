@@ -110,3 +110,37 @@ body {
 .animate-mic-pulse {
   animation: mic-pulse 1.2s ease-in-out infinite;
 }
+
+@keyframes lock-shake {
+  0% {
+    transform: translateX(0);
+  }
+
+  20% {
+    transform: translateX(-4px) rotate(-8deg);
+  }
+
+  40% {
+    transform: translateX(4px) rotate(8deg);
+  }
+
+  60% {
+    transform: translateX(-3px) rotate(-6deg);
+  }
+
+  80% {
+    transform: translateX(3px) rotate(6deg);
+  }
+
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.animate-lock-shake {
+  animation: lock-shake 0.4s ease-in-out;
+}
+
+.font-pixel {
+  font-family: var(--font-press-start-2p), monospace;
+}
