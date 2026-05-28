@@ -172,6 +172,7 @@ export function createCorrectLetterCaughtScript(letter: string): NarrationScript
 export function createWrongLetterCaughtScript(letter: string, expectedLetter: string): NarrationScript {
   return {
     id: `wrong-letter-caught-${letter}-expected-${expectedLetter}`,
+    displayText: `Almost! That was not the letter we needed. Listen carefully. We are looking for this letter: ${expectedLetter}`,
     blocking: true,
     steps: [
       {
