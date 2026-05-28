@@ -178,12 +178,12 @@ export function createWrongLetterCaughtScript(letter: string, expectedLetter: st
       {
         type: "asset-audio",
         text: "Almost! That was not the letter we needed.",
-        audioSrc: "/audio/narrator/wrong-letter-caught.mp3",
+        audioSrc: "/audio/narrator/wrong-letter-caught.mp3", // FILE MISSING
       },
       {
         type: "asset-audio",
         text: "Listen carefully. We are looking for this letter.",
-        audioSrc: "/audio/narrator/listen-carefully-letter.mp3",
+        audioSrc: "/audio/narrator/listen-carefully-letter.mp3", // FILE MISSING
       },
       {
         type: "asset-audio",
