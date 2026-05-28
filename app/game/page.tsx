@@ -13,7 +13,6 @@ import BlockSpellingMinigame from "@/components/minigames/block-spelling-minigam
 import IngredientPotDropArea from "@/components/game/shared-pot-drop-area";
 import IngredientMatchPreviewModal from "@/components/modals/previews/ingredient-match-preview-modal";
 import BlockSpellingPreviewModal from "@/components/modals/previews/block-spelling-preview-modal";
-import PreviewHelpButton from "@/components/game/preview-help-button";
 import MinigamePreviewFrame from "@/components/game/layout-minigame-preview";
 
 export default function GamePage() {
