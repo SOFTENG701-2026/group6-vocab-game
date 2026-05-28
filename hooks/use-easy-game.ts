@@ -102,7 +102,7 @@ export function useEasyGame() {
     setIsDropped(true);
     setIsPotGuideVisible(false);
     setIsDraggingIngredient(false);
-    say(`What did we put in the pot?`);
+    say(`What did we put in the pot? Let's choose one from the list!`);
   }
 
   function handleRecallSelect(ingredientId: string) {
@@ -201,6 +201,24 @@ export function useEasyGame() {
     setIsWaitingForVoiceToFinish(true);
     setIsVoiceListening(true);
 
+    function startShapeReview() {
+      setIsShapeReviewing(true);
+      const shapeName = activeIngredient.shapeId;
+      const msg = `Yay! Your buddy found the shape! It's ${shapeName}! Now let's try the next one!`;
+      setCurrentSpeech(msg);
+      setIsSpeaking(true);
+      speak(msg, () => {
+        setIsSpeaking(false);
+        setIsShapeReviewing(false);
+        advanceRound(700);
+      });
+    }
+
+    function onGreetingDone() {
+      setIsSpeaking(false);
+      setTimeout(startShapeReview, 500);
+    }
+
     if (listenTimeoutRef.current) clearTimeout(listenTimeoutRef.current);
     listenTimeoutRef.current = setTimeout(() => {
       setIsVoiceListening(false);
@@ -209,26 +227,10 @@ export function useEasyGame() {
       setIsPotGuideVisible(false);
       setIsDraggingIngredient(false);
       setIsAmazingEffect(false);
-      setCurrentSpeech(`Great job! ${activeIngredient.name}! ${toSpelling(activeIngredient.name)}!`);
+      const greetMsg = `Great job! ${activeIngredient.name}! ${toSpelling(activeIngredient.name)}!`;
+      setCurrentSpeech(greetMsg);
       setIsSpeaking(true);
-      speak(`Great job! ${activeIngredient.name}! ${toSpelling(activeIngredient.name)}!`, () => {
-        setIsSpeaking(false);
-        setTimeout(() => {
-          setIsShapeReviewing(true);
-          const shape = activeIngredient.shape;
-          const shapeName = activeIngredient.shapeId;
-          setCurrentSpeech(`Yay! Your buddy found the shape! It's ${shape}! ${shapeName}! ${shapeName}! Now let's try the next one!`);
-          setIsSpeaking(true);
-          speak(
-            `Yay! Your buddy found the shape! It's ${shape}! ${shapeName}! ${shapeName}! Now let's try the next one!`,
-            () => {
-              setIsSpeaking(false);
-              setIsShapeReviewing(false);
-              advanceRound(700);
-            }
-          );
-        }, 500);
-      });
+      speak(greetMsg, onGreetingDone);
       listenTimeoutRef.current = null;
     }, 2500);
   }

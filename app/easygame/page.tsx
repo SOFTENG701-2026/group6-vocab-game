@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useEffect } from "react";
 import { Mic, Ear, XCircle } from "lucide-react";
 import { ingredients } from "@/data/ingredients";
 import MonsterBubble from "@/components/easygame/monster-bubble";
@@ -195,6 +196,14 @@ export default function EasyGamePage() {
     goHome,
   } = useEasyGame();
 
+  // Automatically trigger handleAddAndSay when the color is selected
+  useEffect(() => {
+    const isReadyToSay = selectedColorId && !isWrongColor && !isRoundComplete && !isVoiceListening && !isWaitingForVoiceToFinish;
+    if (!isReadyToSay) return;
+    const timer = setTimeout(() => handleAddAndSay(), 1000);
+    return () => clearTimeout(timer);
+  }, [selectedColorId, isWrongColor, isRoundComplete, isVoiceListening, isWaitingForVoiceToFinish, handleAddAndSay]);
+
   if (isGameComplete) {
     return (
       <main className="h-full flex items-center justify-center bg-gradient-to-b from-teal-300 to-yellow-200">
@@ -346,7 +355,12 @@ export default function EasyGamePage() {
 
       {/* Recall section: shown after drop, before recall complete */}
       <div className={`px-6 pb-4 transition-all duration-500 ${isDropped && !isRecallComplete ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 translate-y-4 pointer-events-none h-0 overflow-hidden"}`}>
-        <div className="bg-white/80 rounded-3xl px-6 py-8">
+        <div className="relative bg-white/80 rounded-3xl px-6 py-8">
+          {isDropped && !isRecallComplete && !recallWrongId && !recallCorrectSelected && (
+            <div className="absolute -top-9 left-1/2 -translate-x-1/2 flex flex-col items-center gap-0.5 pointer-events-none">
+              <span className="text-7xl animate-bounce">👇</span>
+            </div>
+          )}
           <div className="flex justify-center gap-10">
             {shapeOptions.map((ing) => {
               const isCorrect = ing.id === activeIngredient?.id;
@@ -419,7 +433,7 @@ export default function EasyGamePage() {
             {shapeOptions.map((ingredient) => (
               <ShapeOptionCard
                 key={ingredient.id}
-                label={ingredient.name}
+                label={ingredient.shapeId}
                 imageSrc={ingredient.imageSrc}
                 isBotSelected={ingredient.id === activeIngredient?.id}
               />

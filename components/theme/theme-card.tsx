@@ -3,24 +3,27 @@
 import { ArrowRight } from "lucide-react";
 import type { GameTheme } from "@/domain/themes/theme-options";
 
-type ThemeCardProps = {
+type ThemeCardProps = Readonly<{
   theme: GameTheme;
   isActive?: boolean;
   onPlay: (themeId: string) => void;
-};
+}>;
 
 export default function ThemeCard({ theme, isActive = false, onPlay }: ThemeCardProps) {
   const disabled = !theme.available;
 
   return (
-    <article
+    <button
+      type="button"
+      disabled={disabled}
+      onClick={() => onPlay(theme.id)}
       className={`
-        shrink-0 overflow-hidden rounded-[2.5rem] bg-white
+        shrink-0 overflow-hidden rounded-[2.5rem] bg-white text-left
         shadow-[0_20px_40px_rgba(0,0,0,0.12)]
         transition-all duration-300
         ${isActive ? "w-[30rem]" : "w-[25rem]"}
         ${isActive ? "scale-100 opacity-100" : "scale-90 opacity-50"}
-        ${disabled ? "grayscale" : ""}
+        ${disabled ? "grayscale cursor-not-allowed" : "cursor-pointer hover:shadow-[0_24px_48px_rgba(0,0,0,0.18)]"}
       `}
     >
       <div
@@ -59,27 +62,20 @@ export default function ThemeCard({ theme, isActive = false, onPlay }: ThemeCard
           <span className="invisible h-2 w-2 rounded-full bg-(--color-primary-hover)" />
         </div>
 
-        <button
-          type="button"
-          disabled={disabled}
-          onClick={() => onPlay(theme.id)}
+        <div
           className={`
             flex w-full items-center justify-center gap-2
-            rounded-2xl font-extrabold text-white transition-all
+            rounded-2xl font-extrabold text-white pointer-events-none
             ${isActive ? "px-5 py-4 text-xl" : "px-4 py-3.5 text-[1.05rem]"}
-            ${
-              disabled
-                ? "cursor-not-allowed bg-gray-400"
-                : "bg-(--color-primary) hover:bg-(--color-primary-hover) active:scale-[0.98]"
-            }
+            ${disabled ? "bg-gray-400" : "bg-(--color-primary)"}
           `}
         >
           {disabled ? "Coming Soon" : "Let's Play"}
           {!disabled && (
             <ArrowRight className={isActive ? "h-6 w-6" : "h-5 w-5"} strokeWidth={3} />
           )}
-        </button>
+        </div>
       </div>
-    </article>
+    </button>
   );
 }
