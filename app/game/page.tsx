@@ -1,13 +1,14 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
-import Button from "@/components/button";
-import MinigameFallback from "@/components/minigames/minigame-fallback-ui";
-import IngredientMatchMinigame from "@/components/minigames/ingredient-match-minigame";
+import { useEffect, useState } from "react";
 import { ingredients } from "@/data/ingredients";
 import { minigamesByDifficulty, type MinigameId } from "@/domain/minigame-type";
 import { useGameSetup } from "@/context/game-setup-context";
+import { useGamePause } from "@/context/game-pause-context";
+import Button from "@/components/button";
+import IngredientMatchMinigame from "@/components/minigames/ingredient-match-minigame";
+import MinigameFallback from "@/components/minigames/minigame-fallback-ui";
 import FutureIngredientStack from "@/components/game/future-ingredient-stack";
 import BlockSpellingMinigame from "@/components/minigames/block-spelling-minigame";
 import IngredientPotDropArea from "@/components/game/shared-pot-drop-area";
@@ -22,6 +23,8 @@ export default function GamePage() {
   const [activeMinigameIndex, setActiveMinigameIndex] = useState(0);
   const [isShowingCompletion, setIsShowingCompletion] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(true);
+  const { pauseGame, resumeGame } = useGamePause();
+
   //derived state
   const { difficulty } = useGameSetup();
   const isIngredientListEmpty = activeIngredientIndex === ingredients.length;
@@ -29,6 +32,19 @@ export default function GamePage() {
   const activeMinigameId = activeMinigames[activeMinigameIndex];
   const isLastMinigame = activeMinigameIndex === activeMinigames.length - 1;
   const canDropIngredientToPot = isShowingCompletion && isLastMinigame && activeIngredient !== null;
+
+  // Handle game pausing and resuming when the preview modal is open
+  useEffect(() => {
+    if (isPreviewOpen) {
+      pauseGame("preview");
+    } else {
+      resumeGame("preview");
+    }
+
+    return () => {
+      resumeGame("preview");
+    };
+  }, [isPreviewOpen, pauseGame, resumeGame]);
 
   function handleMinigameComplete() {
     if (isShowingCompletion) return;

@@ -7,6 +7,7 @@ import {
   type NarrativeProgress,
 } from "@/domain/narrator/narrative-milestones";
 import { findNarrativeRule } from "@/domain/narrator/narrative-rules";
+import { useGamePause } from "@/context/game-pause-context";
 import type { NarrativeEvent } from "@/domain/narrator/narrative-events";
 import type { NarrationScript, NarrationStep } from "@/domain/narrator/narrative-scripts";
 
@@ -83,7 +84,6 @@ type NarrativeContextValue = {
   isPlaying: boolean;
   shouldBlockInteraction: boolean;
   dispatchNarrativeEvent: (event: NarrativeEvent) => void;
-  skipCurrentNarration: () => void;
 };
 
 const NarrativeContext = createContext<NarrativeContextValue | null>(null);
@@ -94,19 +94,37 @@ function wait(durationMs: number) {
   });
 }
 
-function playAudio(src: string) {
+function playAudio(src: string, fallbackDurationMs = 1600) {
   return new Promise<void>((resolve) => {
     const audio = new Audio(src);
 
-    audio.onended = () => resolve();
+    audio.preload = "auto";
 
-    audio.onerror = () => {
-      console.warn(`Audio failed to load: ${src}`);
+    let hasResolved = false;
+
+    function resolveOnce() {
+      if (hasResolved) return;
+      hasResolved = true;
       resolve();
+    }
+
+    audio.onended = () => {
+      resolveOnce();
     };
 
-    audio.play().catch(() => {
-      resolve();
+    audio.onerror = () => {
+      console.warn(`Narrator audio failed to load: ${src}. Check that this file exists inside /public${src}`);
+
+      window.setTimeout(resolveOnce, fallbackDurationMs);
+    };
+
+    audio.play().catch((error) => {
+      console.warn(
+        `Narrator audio could not play: ${src}. This may be caused by a missing file, unsupported format, or browser autoplay restrictions.`,
+        error,
+      );
+
+      window.setTimeout(resolveOnce, fallbackDurationMs);
     });
   });
 }
@@ -152,6 +170,7 @@ function playAudio(src: string) {
 
 export function NarrativeProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(narrativeReducer, initialState);
+  const { pauseGame, resumeGame } = useGamePause();
 
   const progressRef = useRef(state.progress);
   const isPlayingRef = useRef(false);
@@ -172,13 +191,15 @@ export function NarrativeProvider({ children }: { children: ReactNode }) {
   }, []);
 
   async function runScript(script: NarrationScript) {
-    const runId = crypto.randomUUID();
-    runIdRef.current += 1;
-
-    const currentRunNumber = runIdRef.current;
+    const currentRunNumber = runIdRef.current + 1;
+    runIdRef.current = currentRunNumber;
 
     isPlayingRef.current = true;
     dispatch({ type: "START_SCRIPT", script });
+
+    if (script.blocking) {
+      pauseGame("narrator");
+    }
 
     for (const step of script.steps) {
       if (currentRunNumber !== runIdRef.current) {
@@ -191,10 +212,10 @@ export function NarrativeProvider({ children }: { children: ReactNode }) {
         await playAudio(step.audioSrc);
       }
 
-      //   if (step.type === "tts") {
-      //     await playTtsAudio(step.text);
-      //   }
-      
+      //TODO: Replace with real TTS provider endpoint.
+      // if (step.type === "tts") {
+      //   await playTtsAudio(step.text);
+      // }
 
       if (step.type === "wait") {
         await wait(step.durationMs);
@@ -205,6 +226,10 @@ export function NarrativeProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    if (script.blocking) {
+      resumeGame("narrator");
+    }
+
     finishScript();
 
     if (script.onFinishedEvent) {
@@ -213,8 +238,6 @@ export function NarrativeProvider({ children }: { children: ReactNode }) {
     }
 
     runNextQueuedScript();
-
-    void runId;
   }
 
   const dispatchNarrativeEvent = useCallback((event: NarrativeEvent) => {
@@ -241,12 +264,6 @@ export function NarrativeProvider({ children }: { children: ReactNode }) {
     void runScript(script);
   }, []);
 
-  const skipCurrentNarration = useCallback(() => {
-    runIdRef.current += 1;
-    queueRef.current = [];
-    finishScript();
-  }, [finishScript]);
-
   const value = useMemo<NarrativeContextValue>(
     () => ({
       progress: state.progress,
@@ -255,16 +272,8 @@ export function NarrativeProvider({ children }: { children: ReactNode }) {
       isPlaying: state.isPlaying,
       shouldBlockInteraction: state.isPlaying && state.currentScript?.blocking === true,
       dispatchNarrativeEvent,
-      skipCurrentNarration,
     }),
-    [
-      state.progress,
-      state.currentScript,
-      state.currentStep,
-      state.isPlaying,
-      dispatchNarrativeEvent,
-      skipCurrentNarration,
-    ],
+    [state.progress, state.currentScript, state.currentStep, state.isPlaying, dispatchNarrativeEvent],
   );
 
   return <NarrativeContext.Provider value={value}>{children}</NarrativeContext.Provider>;

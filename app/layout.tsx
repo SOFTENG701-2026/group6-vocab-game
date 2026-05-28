@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import Navbar from "@/components/navbar";
 import { GameSetupProvider } from "@/context/game-setup-context";
-import "./globals.css";
 import { NarrativeProvider } from "@/context/narrative-context";
+import { GamePauseProvider } from "@/context/game-pause-context";
+import Navbar from "@/components/navbar";
 import NarratorDialogueBox from "@/components/narrator/narrator-dialogue-box";
+import "./globals.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,11 +31,13 @@ export default function RootLayout({
     <html lang='en' className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
       <body className='min-h-screen flex flex-col bg-gradient-to-b from-cyan-300 via-emerald-200 to-yellow-200'>
         <GameSetupProvider>
-          <NarrativeProvider>
-            <Navbar gems={0} />
-            {children}
-            <NarratorDialogueBox />
-          </NarrativeProvider>
+          <GamePauseProvider>
+            <NarrativeProvider>
+              <Navbar gems={0} />
+              {children}
+              <NarratorDialogueBox />
+            </NarrativeProvider>
+          </GamePauseProvider>
         </GameSetupProvider>
       </body>
     </html>

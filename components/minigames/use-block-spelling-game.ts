@@ -1,7 +1,8 @@
 "use client";
 
-import { PlacedLetter, FallingLetter, CatchResult } from "@/domain/block-spelling-game-type";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { PlacedLetter, FallingLetter, CatchResult } from "@/domain/block-spelling-game-type";
+import { useGamePause } from "@/context/game-pause-context";
 import { useNarrative } from "@/context/narrative-context";
 type UseBasketSpellingGameProps = {
   word: string;
@@ -54,6 +55,7 @@ export function useBasketSpellingGame({ word, onComplete }: UseBasketSpellingGam
   const [feedbackMessage, setFeedbackMessage] = useState(`Catch the letters that belong in ${word}.`);
   const [slowUntil, setSlowUntil] = useState<number | null>(null);
   const [isComplete, setIsComplete] = useState(false);
+  const { isGamePaused } = useGamePause();
 
   const placedLettersRef = useRef(placedLetters);
   const basketXRef = useRef(basketX);
@@ -84,12 +86,15 @@ export function useBasketSpellingGame({ word, onComplete }: UseBasketSpellingGam
   }, [isComplete]);
 
   useEffect(() => {
-    shouldPauseRef.current = shouldBlockInteraction;
-  }, [shouldBlockInteraction]);
+    shouldPauseRef.current = isGamePaused;
+  }, [isGamePaused]);
 
-  //Reset pressed keys when shouldBlockInteraction changes
+  /**
+   * Reset pressed keys when game is paused
+   * Prevents "stuck key" bug
+   */
   useEffect(() => {
-    if (!shouldBlockInteraction) return;
+    if (!isGamePaused) return;
 
     pressedKeysRef.current = {
       left: false,

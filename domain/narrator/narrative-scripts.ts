@@ -137,16 +137,17 @@ export function createCorrectLetterCaughtScript(letter: string): NarrationScript
       {
         type: "asset-audio",
         text: "Great job! You caught the letter.",
-        audioSrc: "/audio/narrator/generic-caught-letter-congratulate.mp3",
+        audioSrc: "assets/audio/narrator/generic-caught-letter-congratulate.mp3",
       },
 
       {
         type: "asset-audio",
         text: "Now you try.",
-        audioSrc: "/audio/narrator/generic-now-you-try.mp3",
+        audioSrc: "assets/audio/narrator/generic-now-you-try.mp3",
       },
 
       {
+        // Simulate natural pause in speach.
         type: "wait",
         durationMs: 500,
       },
@@ -154,12 +155,13 @@ export function createCorrectLetterCaughtScript(letter: string): NarrationScript
       {
         type: "asset-audio",
         text: "Can you say the letter: " + letter,
-        audioSrc: `/audio/narrator/prompt-say-letter/prompt-say-${fileName}.mp3`,
+        audioSrc: `assets/audio/narrator/prompt-say-letter/prompt-say-${fileName}.mp3`,
       },
 
       {
+        // Duration of how long the dialogue box is shown
         type: "wait",
-        durationMs: 1500,
+        durationMs: 4000,
       },
     ],
     onFinishedEvent: {
