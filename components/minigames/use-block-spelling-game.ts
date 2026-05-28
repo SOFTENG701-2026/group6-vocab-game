@@ -293,7 +293,7 @@ export function useBasketSpellingGame({ word, onComplete }: UseBasketSpellingGam
 
     let animationFrameId: number;
 
-    function animate() {
+    function animateFallingLetters() {
       setFallingLetters((currentLetters) => {
         const caughtLetters: FallingLetter[] = [];
         const remainingLetters: FallingLetter[] = [];
@@ -332,10 +332,10 @@ export function useBasketSpellingGame({ word, onComplete }: UseBasketSpellingGam
         return remainingLetters;
       });
 
-      animationFrameId = window.requestAnimationFrame(animate);
+      animationFrameId = window.requestAnimationFrame(animateFallingLetters);
     }
 
-    animationFrameId = window.requestAnimationFrame(animate);
+    animationFrameId = window.requestAnimationFrame(animateFallingLetters);
 
     return () => window.cancelAnimationFrame(animationFrameId);
   }, [isComplete, handleLetterCaught]);
