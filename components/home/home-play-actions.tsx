@@ -15,9 +15,6 @@ export default function HomePlayActions() {
   const [playMode, setPlayMode] = useState<PlayMode | null>(null);
 
   function openDifficultyModal(playMode: PlayMode) {
-    /**TODO: if single player allow user to create only one avatar and automatically create avatar for buddy-bot.
-     * else allow user to create two avatars
-     */
     setPlayMode(playMode);
     setIsDifficultyModalOpen(true);
   }
@@ -29,7 +26,6 @@ export default function HomePlayActions() {
     if (difficulty === "easy") {
       router.push("/easygame");
     } else if (difficulty === "medium") {
-      // TODO: route to dedicated medium game page when ready
       router.push("/game");
     } else {
       router.push("/game");
@@ -59,6 +55,7 @@ export default function HomePlayActions() {
       <DifficultyModal
         isOpen={isDifficultyModalOpen}
         onSelectDifficulty={handleDifficultySelect}
+        onClose={() => setIsDifficultyModalOpen(false)}
       />
     </>
   );
