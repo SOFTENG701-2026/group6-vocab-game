@@ -26,7 +26,7 @@ export default function MatchOptionColumn({
   matchedOptionId,
   isTypeMatched,
   onOptionClick
-}: MatchOptionColumnProps) {
+}: Readonly<MatchOptionColumnProps>) {
   return (
     <div className='flex flex-col gap-4'>
       {options.map((option) => {

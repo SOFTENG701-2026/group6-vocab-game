@@ -15,6 +15,14 @@ const COLOR_OPTIONS = [
   { colorId: "orange", label: "Orange" },
 ];
 
+const SHAPE_ICON_SRC: Record<string, string> = {
+  circle: "/ingredients/easygame-shapes/circle-outline.svg",
+  crescent: "/ingredients/easygame-shapes/crescent-outline.svg",
+  triangle: "/ingredients/easygame-shapes/triangle-outline.svg",
+  heart: "/ingredients/easygame-shapes/heart-outline.svg",
+  cone: "/ingredients/easygame-shapes/cone-outline.svg",
+};
+
 const AMAZING_STARS = [
   { left: "18%", delay: "0ms", duration: "900ms" },
   { left: "26%", delay: "120ms", duration: "1100ms" },
@@ -330,23 +338,25 @@ export default function EasyGamePage() {
               draggable={true}
               onDragStart={(e) => { e.dataTransfer.setData("text/plain", "ingredient"); e.dataTransfer.effectAllowed = "move"; handleIngredientDragStart(); }}
               onDragEnd={handleIngredientDragEnd}
-              className={`flex items-center gap-4 bg-white rounded-2xl px-5 pr-12 py-4 shadow w-fit select-none transition-all text-left ${
+              className={`flex flex-col items-center gap-2 bg-white rounded-2xl shadow w-52 h-60 select-none transition-all text-center px-4 ${
                 !isRoundComplete && !isDropped
                   ? "cursor-grab active:cursor-grabbing hover:shadow-lg hover:scale-105"
                   : "cursor-default"
               } ${isWrongColor ? "animate-shake" : ""}`}
               aria-label={activeIngredient?.name ?? "Ingredient"}
             >
-              <Image
-                src={activeIngredient?.imageSrc ?? ""}
-                alt={activeIngredient?.name ?? ""}
-                width={112}
-                height={112}
-                className="w-28 h-28 object-contain"
-                draggable={false}
-              />
-              <div>
-                <p className="text-base font-extrabold text-gray-800">{activeIngredient?.name}</p>
+              <div className="w-full h-[70%] flex items-center justify-center">
+                <Image
+                  src={activeIngredient?.imageSrc ?? ""}
+                  alt={activeIngredient?.name ?? ""}
+                  width={200}
+                  height={200}
+                  className="w-full h-full object-contain"
+                  draggable={false}
+                />
+              </div>
+              <div className="h-[30%] flex items-center justify-center px-2">
+                <p className="text-lg font-extrabold text-gray-800 truncate">{activeIngredient?.name}</p>
               </div>
             </button>
           </div>
@@ -434,7 +444,7 @@ export default function EasyGamePage() {
               <ShapeOptionCard
                 key={ingredient.id}
                 label={ingredient.shapeId}
-                imageSrc={ingredient.imageSrc}
+                imageSrc={SHAPE_ICON_SRC[ingredient.shapeId] ?? ingredient.imageSrc}
                 isBotSelected={ingredient.id === activeIngredient?.id}
               />
             ))}
