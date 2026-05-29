@@ -16,7 +16,7 @@ type BaseSelectionModalProps = {
   title: string;
   titleId: string;
   cardVariant?: CardVariant;
-  buttonText?: string;
+  buttonText?: ReactNode;
   items: SelectionModalItem[];
   onConfirm: (itemId: string) => void;
 };
@@ -27,17 +27,10 @@ export default function BaseSelectionModal({
   titleId,
   items,
   cardVariant = "default",
-  buttonText = "Let's Begin",
+  buttonText,
   onConfirm
 }: BaseSelectionModalProps) {
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
-  const [hoveredCardId, setHoveredCardId] = useState<string | null>(null);
-
-  const activeCardId = hoveredCardId ?? selectedCardId;
-
-  function handleCardSelect(itemId: string) {
-    setSelectedCardId(itemId);
-  }
 
   function handleConfirm(itemId: string) {
     setSelectedCardId(itemId);
@@ -82,13 +75,9 @@ export default function BaseSelectionModal({
               logo={item.logo}
               buttonText={buttonText}
               size={cardVariant}
+              blurEffect={false}
               isSelected={selectedCardId === item.id}
-              isHovered={hoveredCardId === item.id}
-              shouldBlur={activeCardId !== null && activeCardId !== item.id}
-              onSelect={handleCardSelect}
               onButtonClick={handleConfirm}
-              onHoverStart={setHoveredCardId}
-              onHoverEnd={() => setHoveredCardId(null)}
             />
           ))}
         </section>
