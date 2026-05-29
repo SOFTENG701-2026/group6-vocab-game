@@ -14,25 +14,25 @@ export default function ShapeOptionCard({
   return (
     <div
       className={`
-        flex flex-col items-center gap-2 px-4 py-3 rounded-2xl
+        flex flex-col items-center gap-3 px-6 py-4 rounded-3xl
         border-3 transition-all duration-200
         ${isBotSelected
           ? "border-green-500 bg-green-50 scale-105 shadow-lg"
-          : "border-transparent bg-white shadow opacity-50"
+          : "border-transparent bg-white shadow opacity-90"
         }
       `}
     >
-      <div className="w-16 h-16 flex items-center justify-center">
+      <div className="w-20 h-20 flex items-center justify-center">
         <Image
           src={imageSrc}
           alt={label}
-          width={64}
-          height={64}
+          width={80}
+          height={80}
           className="w-full h-full object-contain grayscale"
           draggable={false}
         />
       </div>
-      <span className="text-sm font-extrabold text-gray-700">{label}</span>
+      <span className="text-base font-extrabold text-gray-700">{label}</span>
     </div>
   );
 }

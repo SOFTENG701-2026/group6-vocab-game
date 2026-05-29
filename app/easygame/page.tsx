@@ -173,6 +173,8 @@ function VoiceActionButton({
   );
 }
 
+// Allow this component to be slightly complex due to UI state orchestration.
+/* eslint-disable sonarjs/cognitive-complexity, complexity */
 export default function EasyGamePage() {
   const {
     roundIndex,
@@ -204,13 +206,20 @@ export default function EasyGamePage() {
     goHome,
   } = useEasyGame();
 
+  // Highlight hints when user needs to act
+  const shouldHighlightColor = isDropped && isRecallComplete && !selectedColorId && !isRoundComplete && !isWrongColor;
+  const shouldHighlightShape = isDropped && isRecallComplete && isShapeReviewing;
+  // Highlight the ingredient card when user is prompted to put it into the pot
+  const shouldHighlightPut = Boolean(activeIngredient && !isDropped && !isDraggingIngredient && !isRoundComplete);
+
   // Automatically trigger handleAddAndSay when the color is selected
   useEffect(() => {
-    const isReadyToSay = selectedColorId && !isWrongColor && !isRoundComplete && !isVoiceListening && !isWaitingForVoiceToFinish;
+    // Wait until the "Amazing" speech has finished before auto-triggering the voice action.
+    const isReadyToSay = selectedColorId && !isWrongColor && !isRoundComplete && !isVoiceListening && !isWaitingForVoiceToFinish && !isSpeaking;
     if (!isReadyToSay) return;
     const timer = setTimeout(() => handleAddAndSay(), 1000);
     return () => clearTimeout(timer);
-  }, [selectedColorId, isWrongColor, isRoundComplete, isVoiceListening, isWaitingForVoiceToFinish, handleAddAndSay]);
+  }, [selectedColorId, isWrongColor, isRoundComplete, isVoiceListening, isWaitingForVoiceToFinish, isSpeaking, handleAddAndSay]);
 
   if (isGameComplete) {
     return (
@@ -342,7 +351,7 @@ export default function EasyGamePage() {
                 !isRoundComplete && !isDropped
                   ? "cursor-grab active:cursor-grabbing hover:shadow-lg hover:scale-105"
                   : "cursor-default"
-              } ${isWrongColor ? "animate-shake" : ""}`}
+              } ${isWrongColor ? "animate-shake" : ""} ${shouldHighlightPut ? "ring-4 ring-yellow-300 ring-offset-2 ring-offset-white pulse-ring-yellow" : ""}`}
               aria-label={activeIngredient?.name ?? "Ingredient"}
             >
               <div className="w-full h-[70%] flex items-center justify-center">
@@ -364,13 +373,13 @@ export default function EasyGamePage() {
       </div>
 
       {/* Recall section: shown after drop, before recall complete */}
-      <div className={`px-6 pb-4 transition-all duration-500 ${isDropped && !isRecallComplete ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 translate-y-4 pointer-events-none h-0 overflow-hidden"}`}>
+      <div className={`relative px-6 pb-4 transition-all duration-500 ${isDropped && !isRecallComplete ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 translate-y-4 pointer-events-none h-0 overflow-hidden"}`}>
+        {isDropped && !isRecallComplete && !recallWrongId && !recallCorrectSelected && (
+            <div className="absolute -top-20 left-1/2 -translate-x-1/2 flex flex-col items-center gap-0.5 pointer-events-none z-20">
+            <span className="text-7xl animate-bounce">👇</span>
+          </div>
+        )}
         <div className="relative bg-white/80 rounded-3xl px-6 py-8">
-          {isDropped && !isRecallComplete && !recallWrongId && !recallCorrectSelected && (
-            <div className="absolute -top-9 left-1/2 -translate-x-1/2 flex flex-col items-center gap-0.5 pointer-events-none">
-              <span className="text-7xl animate-bounce">👇</span>
-            </div>
-          )}
           <div className="flex justify-center gap-10">
             {shapeOptions.map((ing) => {
               const isCorrect = ing.id === activeIngredient?.id;
@@ -399,12 +408,13 @@ export default function EasyGamePage() {
       {/* Bottom section: shown only after recall is complete */}
       <div className={`grid grid-cols-2 gap-4 px-6 pb-4 transition-all duration-500 ${isDropped && isRecallComplete ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 translate-y-4 pointer-events-none"}`}>
         {/* Player color picker */}
-        <div className={`bg-white/70 rounded-3xl px-6 py-4 relative ${isWrongColor ? "animate-shake" : ""}`}>
+        <div className={`bg-white/70 rounded-3xl px-6 py-4 relative ${isWrongColor ? "animate-shake" : ""} ${shouldHighlightColor ? "pop-bounce" : ""}`}>
           {isDropped && !isRoundComplete && !selectedColorId && (
-            <div className="absolute -top-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-0.5">
+            <div className="absolute -top-18 left-1/2 -translate-x-1/2 flex flex-col items-center gap-0.5">
               <span className="text-7xl animate-bounce">👇</span>
             </div>
           )}
+          {/* Outline highlight only when color selection is needed (no badge). */}
           <div className="flex items-center gap-2 mb-3">
             <span className="text-xl">👑</span>
             <div>
@@ -426,12 +436,13 @@ export default function EasyGamePage() {
         </div>
 
         {/* Bot shape picker */}
-        <div className="bg-white/70 rounded-3xl px-6 py-4 relative">
+        <div className={`bg-white/70 rounded-3xl px-6 py-4 relative ${shouldHighlightShape ? "pop-bounce" : ""}`}>
           {isShapeReviewing && (
-            <div className="absolute -top-9 left-1/2 -translate-x-1/2 flex flex-col items-center gap-0.5 pointer-events-none">
+            <div className="absolute -top-18 left-1/2 -translate-x-1/2 flex flex-col items-center gap-0.5 pointer-events-none">
               <span className="text-7xl animate-bounce">👇</span>
             </div>
           )}
+          {/* Outline highlight only when shape review is active (no badge). */}
           <div className="flex items-center gap-2 mb-3">
             <span className="text-xl">🐻</span>
             <div>
@@ -491,6 +502,34 @@ export default function EasyGamePage() {
         :global(.animate-firework-pop) {
           animation: fireworkPop 900ms ease-out both;
         }
+
+        /* Pulse ring animations for different ring colors (outer-only, inner content unchanged) */
+        @keyframes ringPulseYellow {
+          0% { box-shadow: 0 0 0 0 rgba(245,158,11,0); }
+          50% { box-shadow: 0 0 0 10px rgba(245,158,11,0.22); }
+          100% { box-shadow: 0 0 0 0 rgba(245,158,11,0); }
+        }
+        @keyframes ringPulsePurple {
+          0% { box-shadow: 0 0 0 0 rgba(168,85,247,0); }
+          50% { box-shadow: 0 0 0 10px rgba(168,85,247,0.18); }
+          100% { box-shadow: 0 0 0 0 rgba(168,85,247,0); }
+        }
+        @keyframes ringPulseGreen {
+          0% { box-shadow: 0 0 0 0 rgba(34,197,94,0); }
+          50% { box-shadow: 0 0 0 10px rgba(34,197,94,0.18); }
+          100% { box-shadow: 0 0 0 0 rgba(34,197,94,0); }
+        }
+
+        :global(.pulse-ring-yellow) { animation: ringPulseYellow 1.8s ease-in-out infinite; }
+        :global(.pulse-ring-purple) { animation: ringPulsePurple 1.8s ease-in-out infinite; }
+        :global(.pulse-ring-green) { animation: ringPulseGreen 1.8s ease-in-out infinite; }
+
+        /* Subtle pop bounce used instead of outer ring for color/shape panels */
+        @keyframes popBounce {
+          0%, 100% { transform: translateY(0) scale(1); }
+          50% { transform: translateY(-6px) scale(1.03); }
+        }
+        :global(.pop-bounce) { animation: popBounce 1.6s ease-in-out infinite; }
       `}</style>
     </main>
   );
