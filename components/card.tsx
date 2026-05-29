@@ -33,7 +33,12 @@ import type { ReactNode } from "react";
 import { ArrowRight } from "lucide-react";
 
 const DEFAULT_CARD_ACTION = (
-  <ArrowRight className='h-10 w-26 text-(--card-header-bg)' strokeWidth={5} />
+  <span className='mx-auto flex h-10 w-46 items-center justify-center overflow-visible text-(--card-header-bg)'>
+    <ArrowRight
+      className='h-10 w-10 shrink-0 origin-center scale-x-[2]'
+      strokeWidth={3}
+    />
+  </span>
 );
 
 export type CardVariant = "default" | "compact";

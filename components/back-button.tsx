@@ -5,6 +5,15 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import Button from "@/components/button";
 
+const BACK_ARROW = (
+  <span className='inline-flex h-5 w-10 shrink-0 items-center overflow-visible'>
+    <ArrowLeft
+      className='h-5 w-5 origin-left scale-x-[2]'
+      strokeWidth={4}
+    />
+  </span>
+);
+
 function BackButtonInner() {
   const router = useRouter();
   const pathname = usePathname();
@@ -22,7 +31,7 @@ function BackButtonInner() {
   if (pathname === "/") {
     return (
       <span className="invisible pointer-events-none">
-        <Button size='small' iconPosition='left' icon={<ArrowLeft className='w-5 h-5' />}>
+        <Button size='small' iconPosition='left' icon={BACK_ARROW}>
           Back
         </Button>
       </span>
@@ -33,7 +42,7 @@ function BackButtonInner() {
     <Button
       size='small'
       iconPosition='left'
-      icon={<ArrowLeft className='w-5 h-5' />}
+      icon={BACK_ARROW}
       onClick={handleBack}
     >
       Back
