@@ -1,10 +1,12 @@
 "use client";
 
 import Image from "next/image";
+import { useEffect } from "react";
 import BaseSelectionModal, {
   SelectionModalItem
 } from "@/components/modals/base-selection-modal";
 import { Difficulty } from "@/domain/game-setup/game-setup-types";
+import { speak } from "@/lib/speak";
 
 type DifficultyModalProps = {
   isOpen: boolean;
@@ -62,6 +64,12 @@ export default function DifficultyModal({
   onSelectDifficulty,
   onClose
 }: Readonly<DifficultyModalProps>) {
+  useEffect(() => {
+    if (!isOpen) return;
+
+    speak("Hi friend! Choose a difficulty level to start playing!");
+  }, [isOpen]);
+
   return (
     <BaseSelectionModal
       isOpen={isOpen}
