@@ -66,7 +66,6 @@ export default function DifficultyModal({
       title='Choose Difficulty'
       titleId='difficulty-modal-title'
       items={difficultyItems}
-      buttonText="Let's Begin"
       //TODO: area for refactor make onConfirm more generic or closer to design context instead of string type.
       onConfirm={(itemId) => onSelectDifficulty(itemId as Difficulty)}
     />

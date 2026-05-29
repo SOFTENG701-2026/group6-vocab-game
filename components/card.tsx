@@ -22,14 +22,19 @@
  *   `isHovered`, and `shouldBlur`. This allows only the active card to appear
  *   clear, while inactive cards remain blurred or faded.
  *
- * - The card becomes clear when blur is disabled, or when it is selected or
- *   hovered and it should not be blurred.
+ * - The card becomes clear when blur is disabled, or when it should not be
+ *   blurred. By default all cards are shown clearly; only inactive cards are
+ *   blurred when another card is hovered or selected.
  */
 
 "use client";
 
 import type { ReactNode } from "react";
-import Button from "@/components/button";
+import { ArrowRight } from "lucide-react";
+
+const DEFAULT_CARD_ACTION = (
+  <ArrowRight className='h-10 w-26 text-(--card-header-bg)' strokeWidth={5} />
+);
 
 export type CardVariant = "default" | "compact";
 
@@ -41,7 +46,7 @@ type CardProps = {
   //optional-params
   disabled?: boolean;
   title?: string;
-  buttonText?: string;
+  buttonText?: ReactNode;
   descriptionTitle?: string;
   descriptionContent?: string;
 
@@ -65,7 +70,7 @@ export default function Card({
   id,
   title,
   logo,
-  buttonText = "LET'S BEGIN",
+  buttonText = DEFAULT_CARD_ACTION,
   disabled = false,
 
   descriptionTitle,
@@ -89,8 +94,7 @@ export default function Card({
   const isClear = getIsClear();
 
   function getIsClear() {
-    // Only remove blur if the effect is disabled or if the card is not hovered or clicked on.
-    return !blurEffect || ((isSelected || isHovered) && !shouldBlur);
+    return !blurEffect || !shouldBlur;
   }
 
   function getCardSizeClasses() {
@@ -137,12 +141,11 @@ export default function Card({
 
   function handleClick() {
     if (disabled) return;
+    if (onButtonClick) {
+      onButtonClick(id);
+      return;
+    }
     onSelect?.(id);
-  }
-
-  function handleButtonClick() {
-    if (disabled) return;
-    onButtonClick?.(id);
   }
   function renderTitle() {
     if (!title) return null;
@@ -196,22 +199,14 @@ export default function Card({
 
     return (
       <div
-        onClick={(event) => event.stopPropagation()}
         className={`
-      flex items-center justify-center px-8
-      ${isCompact ? "pt-2 pb-8" : "py-8"}
-    `}
+          flex items-center justify-center px-8 pointer-events-none
+          ${getButtonSpacingClasses()}
+          ${getButtonVisibilityClasses()}
+        `}
+        aria-hidden='true'
       >
-        <div
-          className={`
-        transition-opacity duration-300
-        ${isClear ? "opacity-100" : "opacity-45"}
-      `}
-        >
-          <Button size='medium' onClick={handleButtonClick}>
-            {buttonText}
-          </Button>
-        </div>
+        {buttonText}
       </div>
     );
   }
