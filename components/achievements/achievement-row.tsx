@@ -42,7 +42,7 @@ export default function AchievementRow({ achievement, onClaim, onView }: Achieve
       '
     >
       <div className='rounded-3xl bg-[#d6d0c2] p-3'>
-        <AchievementBadge badgeSrc={achievement.badgeSrc} isUnlocked={achievement.isUnlocked} />
+        <AchievementBadge name={achievement.name} badgeSrc={achievement.badgeSrc} isUnlocked={achievement.isUnlocked} />
       </div>
 
       <div className='flex flex-1 flex-col gap-5 px-8'>

@@ -139,10 +139,10 @@ export default function AchievementPage() {
   return (
     <main
       className='
-    h-[calc(100vh-42px)]
-    overflow-hidden
-    bg-cover bg-center bg-no-repeat
-  '
+      h-[calc(100vh-42px)]
+      overflow-hidden
+      bg-cover bg-center bg-no-repeat
+    '
       style={{
         backgroundImage: "url('/assets/achievements/page-background.svg')",
       }}
@@ -161,7 +161,7 @@ export default function AchievementPage() {
           className='
         min-h-0 overflow-y-auto
         py-8 pr-10
-        scrollbar-thin
+        scrollbar-auto
         [scrollbar-color:#8b5cf6_transparent]
       '
         >
