@@ -29,7 +29,6 @@ export default function HomePlayActions() {
     if (difficulty === "easy") {
       router.push("/easygame");
     } else if (difficulty === "medium") {
-      // TODO: route to dedicated medium game page when ready
       router.push("/game");
     } else {
       router.push("/game");
@@ -38,28 +37,17 @@ export default function HomePlayActions() {
 
   return (
     <>
-      <Button
-        size='large'
-        icon={<UserRound className='w-6 h-6' />}
-        onClick={() => openDifficultyModal("single")}
-      >
+      <Button size='large' icon={<UserRound className='w-6 h-6' />} onClick={() => openDifficultyModal("single")}>
         Play
       </Button>
 
       <h1 className='text-black text-2xl font-bold'> OR </h1>
 
-      <Button
-        size='large'
-        icon={<UsersRound className='w-6 h-6' />}
-        onClick={() => openDifficultyModal("friend")}
-      >
+      <Button size='large' icon={<UsersRound className='w-6 h-6' />} onClick={() => openDifficultyModal("friend")}>
         Play with a Friend
       </Button>
 
-      <DifficultyModal
-        isOpen={isDifficultyModalOpen}
-        onSelectDifficulty={handleDifficultySelect}
-      />
+      <DifficultyModal isOpen={isDifficultyModalOpen} onSelectDifficulty={handleDifficultySelect} />
     </>
   );
 }

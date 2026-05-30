@@ -144,3 +144,41 @@ body {
 .font-pixel {
   font-family: var(--font-press-start-2p), monospace;
 }
+
+@keyframes fly-gem {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+
+  70% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: translate(var(--gem-end-x), var(--gem-end-y)) scale(0.35);
+    opacity: 0;
+  }
+}
+
+.animate-fly-gem {
+  animation: fly-gem 1.5s cubic-bezier(0.1, 0, 0.1, 1) forwards;
+}
+
+@keyframes gem-count-bump {
+  0% {
+    transform: scale(1);
+  }
+
+  45% {
+    transform: scale(1.25) rotate(-3deg);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+.animate-gem-count-bump {
+  animation: gem-count-bump 0.3s ease-out;
+}

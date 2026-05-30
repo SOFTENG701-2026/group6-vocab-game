@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Eye, Gift, Lock } from "lucide-react";
+import { useCurrency } from "@/context/currency-context";
 import AchievementBadge from "./achievement-badge";
 import AchievementProgressBar from "./achievement-progress-bar";
 import { canClaimAchievement, getAchievementTitle } from "@/lib/achievement-utils";
@@ -13,12 +14,13 @@ type AchievementRowProps = {
 
 export default function AchievementRow({ achievement, onClaim, onView }: AchievementRowProps) {
   const [isLockShaking, setIsLockShaking] = useState(false);
+  const { claimGems } = useCurrency();
 
   const isClaimable = canClaimAchievement(achievement);
 
   const title = getAchievementTitle(achievement);
 
-  function handleClaimClick() {
+  function handleClaimClick(event: React.MouseEvent<HTMLButtonElement>) {
     if (!achievement.isUnlocked) {
       setIsLockShaking(true);
 
@@ -32,7 +34,9 @@ export default function AchievementRow({ achievement, onClaim, onView }: Achieve
     if (!isClaimable) return;
 
     onClaim(achievement.id);
+    claimGems(50, event.currentTarget);
   }
+  
   return (
     <div
       className='

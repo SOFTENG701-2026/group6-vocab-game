@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Press_Start_2P } from "next/font/google";
+import { CurrencyProvider } from "@/context/currency-context";
+import { GamePauseProvider } from "@/context/game-pause-context";
 import { GameSetupProvider } from "@/context/game-setup-context";
 import { NarrativeProvider } from "@/context/narrative-context";
-import { GamePauseProvider } from "@/context/game-pause-context";
 import Navbar from "@/components/navbar";
 import NarratorDialogueBox from "@/components/narrator/narrator-dialogue-box";
 import "./globals.css";
@@ -38,13 +39,15 @@ export default function RootLayout({
     <html lang='en' className={`${geistSans.variable} ${geistMono.variable} ${pressStart2P.variable} antialiased`}>
       <body className='min-h-screen flex flex-col bg-gradient-to-b from-cyan-300 via-emerald-200 to-yellow-200'>
         <GameSetupProvider>
-          <GamePauseProvider>
-            <NarrativeProvider>
-              <Navbar gems={0} />
-              {children}
-              <NarratorDialogueBox />
-            </NarrativeProvider>
-          </GamePauseProvider>
+          <CurrencyProvider>
+            <GamePauseProvider>
+              <NarrativeProvider>
+                <Navbar gems={0} />
+                {children}
+                <NarratorDialogueBox />
+              </NarrativeProvider>
+            </GamePauseProvider>
+          </CurrencyProvider>
         </GameSetupProvider>
       </body>
     </html>
