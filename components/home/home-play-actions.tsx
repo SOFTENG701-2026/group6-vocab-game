@@ -144,7 +144,7 @@ function KidAndRobotIllustration() {
 export default function HomePlayActions() {
   const router = useRouter();
 
-  const { setDifficulty } = useGameSetup();
+  const { setDifficulty, setMode } = useGameSetup();
 
   const [isDifficultyModalOpen, setIsDifficultyModalOpen] =
     useState(false);
@@ -152,8 +152,9 @@ export default function HomePlayActions() {
   const [playMode, setPlayMode] =
     useState<PlayMode | null>(null);
 
-  function openDifficultyModal(playMode: PlayMode) {
-    setPlayMode(playMode);
+  function openDifficultyModal(nextPlayMode: PlayMode) {
+    setPlayMode(nextPlayMode);
+    setMode(nextPlayMode);
     setIsDifficultyModalOpen(true);
   }
 

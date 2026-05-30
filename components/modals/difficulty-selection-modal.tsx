@@ -67,7 +67,7 @@ export default function DifficultyModal({
   useEffect(() => {
     if (!isOpen) return;
 
-    speak("Hi friend! Choose a difficulty level to start playing!");
+    speak("Choose a level to play.");
   }, [isOpen]);
 
   return (

@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect } from "react";
 import { Mic, Ear, XCircle } from "lucide-react";
 import { ingredients } from "@/data/ingredients";
+import { useGameSetup } from "@/context/game-setup-context";
 import MonsterBubble from "@/components/easygame/monster-bubble";
 import ColorOptionCard from "@/components/easygame/color-option-card";
 import ShapeOptionCard from "@/components/easygame/shape-option-card";
@@ -33,9 +34,16 @@ const AMAZING_STARS = [
   { left: "82%", delay: "140ms", duration: "950ms" },
 ];
 
-function getBtnClass(isRoundComplete: boolean, isWrongColor: boolean, selectedColorId: string | null): string {
+function getBtnClass(
+  isFriendMode: boolean,
+  isShapeReviewing: boolean,
+  isRoundComplete: boolean,
+  isWrongFeedback: boolean,
+  selectedColorId: string | null,
+): string {
   if (isRoundComplete) return "bg-green-500 scale-105";
-  if (isWrongColor) return "bg-red-500";
+  if (isWrongFeedback) return "bg-red-500";
+  if (isFriendMode && isShapeReviewing) return "bg-green-500";
   if (selectedColorId) return "bg-purple-600";
   return "bg-gray-300 cursor-not-allowed";
 }
@@ -47,37 +55,48 @@ function getProgressDotClass(idx: number, roundIndex: number): string {
 }
 
 function getVoiceButtonText(
+  isFriendMode: boolean,
+  isShapeReviewing: boolean,
   isRoundComplete: boolean,
-  isWrongColor: boolean,
+  isWrongFeedback: boolean,
   isVoiceListening: boolean,
   isWaitingForVoiceToFinish: boolean,
   selectedColorId: string | null,
 ): string {
   if (isRoundComplete) return "Well done! ✨";
-  if (isWrongColor) return "Try again";
+  if (isWrongFeedback) return "Try again";
+  if (isFriendMode && isShapeReviewing) return "Pick shape";
   if (isVoiceListening || isWaitingForVoiceToFinish) return "";
   return "say it";
 }
 
 function VoiceActionButton({
+  isFriendMode,
+  isShapeReviewing,
   selectedColorId,
   isRoundComplete,
   isWrongColor,
+  isWrongShape,
   isVoiceListening,
   isWaitingForVoiceToFinish,
   onClick,
 }: Readonly<{
+  isFriendMode: boolean;
+  isShapeReviewing: boolean;
   selectedColorId: string | null;
   isRoundComplete: boolean;
   isWrongColor: boolean;
+  isWrongShape: boolean;
   isVoiceListening: boolean;
   isWaitingForVoiceToFinish: boolean;
   onClick: () => void;
 }>) {
   const isCorrectSelection = Boolean(selectedColorId && !isWrongColor);
+  const isWrongFeedback = isWrongColor || isWrongShape;
   const isWellDone = isRoundComplete;
-  const isAnimated = Boolean(isCorrectSelection && !isVoiceListening && !isWaitingForVoiceToFinish && !isRoundComplete);
+  const isAnimated = Boolean(isCorrectSelection && !isFriendMode && !isWrongFeedback && !isVoiceListening && !isWaitingForVoiceToFinish && !isRoundComplete);
   const isListening = isVoiceListening || isWaitingForVoiceToFinish;
+  const isShapePrompt = isFriendMode && isShapeReviewing && isCorrectSelection && !isRoundComplete;
   let buttonMotionClass = "";
   if (isWellDone) {
     buttonMotionClass = "animate-well-done-bounce";
@@ -85,7 +104,7 @@ function VoiceActionButton({
     buttonMotionClass = "animate-bounce";
   }
   let buttonIcon = <Mic className="w-8 h-8 text-white stroke-2" />;
-  if (isWrongColor) {
+  if (isWrongFeedback) {
     buttonIcon = <XCircle className="w-8 h-8 text-white stroke-2" />;
   } else if (isListening) {
     buttonIcon = (
@@ -108,13 +127,13 @@ function VoiceActionButton({
       <button
         type="button"
         onClick={onClick}
-        disabled={!isCorrectSelection || isRoundComplete || isVoiceListening || isWaitingForVoiceToFinish || isWrongColor}
+        disabled={!isCorrectSelection || isRoundComplete || isVoiceListening || isWaitingForVoiceToFinish || isWrongFeedback || isShapePrompt}
         className={`
           flex items-center gap-2 px-8 py-4 rounded-full
           font-extrabold text-xl text-white transition-all shadow-lg
-          ${getBtnClass(isRoundComplete, isWrongColor, selectedColorId)}
+          ${getBtnClass(isFriendMode, isShapeReviewing, isRoundComplete, isWrongFeedback, selectedColorId)}
           ${buttonMotionClass}
-          ${isWrongColor ? "animate-shake" : ""}
+          ${isWrongFeedback ? "animate-shake" : ""}
         `}
       >
         <span className={`flex items-center justify-center h-14 w-14 rounded-full ${isAnimated || isListening ? "animate-pulse" : ""}`}>
@@ -122,7 +141,7 @@ function VoiceActionButton({
         </span>
         {!isListening && (
           <span className={`text-lg font-extrabold text-white ${isAnimated ? "animate-pulse" : ""}`}>
-            {getVoiceButtonText(isRoundComplete, isWrongColor, isVoiceListening, isWaitingForVoiceToFinish, selectedColorId)}
+            {getVoiceButtonText(isFriendMode, isShapeReviewing, isRoundComplete, isWrongFeedback, isVoiceListening, isWaitingForVoiceToFinish, selectedColorId)}
           </span>
         )}
       </button>
@@ -176,6 +195,7 @@ function VoiceActionButton({
 // Allow this component to be slightly complex due to UI state orchestration.
 /* eslint-disable sonarjs/cognitive-complexity, complexity */
 export default function EasyGamePage() {
+  const { playMode } = useGameSetup();
   const {
     roundIndex,
     isGameComplete,
@@ -197,14 +217,18 @@ export default function EasyGamePage() {
     isRecallComplete,
     recallWrongId,
     recallCorrectSelected,
+    isRecallLocked,
     isShapeReviewing,
+    selectedShapeId,
+    isWrongShape,
     handleDrop,
     handleRecallSelect,
     handleIngredientDragStart,
     handleIngredientDragEnd,
+    handleSelectShape,
     handleAddAndSay,
     goHome,
-  } = useEasyGame();
+  } = useEasyGame(playMode);
 
   // Highlight hints when user needs to act
   const shouldHighlightColor = isDropped && isRecallComplete && !selectedColorId && !isRoundComplete && !isWrongColor;
@@ -215,11 +239,11 @@ export default function EasyGamePage() {
   // Automatically trigger handleAddAndSay when the color is selected
   useEffect(() => {
     // Wait until the "Amazing" speech has finished before auto-triggering the voice action.
-    const isReadyToSay = selectedColorId && !isWrongColor && !isRoundComplete && !isVoiceListening && !isWaitingForVoiceToFinish && !isSpeaking;
+    const isReadyToSay = selectedColorId && !isWrongColor && !isRoundComplete && !isShapeReviewing && !isVoiceListening && !isWaitingForVoiceToFinish && !isSpeaking;
     if (!isReadyToSay) return;
     const timer = setTimeout(() => handleAddAndSay(), 1000);
     return () => clearTimeout(timer);
-  }, [selectedColorId, isWrongColor, isRoundComplete, isVoiceListening, isWaitingForVoiceToFinish, isSpeaking, handleAddAndSay]);
+  }, [selectedColorId, isWrongColor, isRoundComplete, isShapeReviewing, isVoiceListening, isWaitingForVoiceToFinish, isSpeaking, handleAddAndSay]);
 
   if (isGameComplete) {
     return (
@@ -327,9 +351,12 @@ export default function EasyGamePage() {
 
           {/* Submit button */}
           <VoiceActionButton
+            isFriendMode={playMode === "friend"}
+            isShapeReviewing={isShapeReviewing}
             selectedColorId={selectedColorId}
             isRoundComplete={isRoundComplete}
             isWrongColor={isWrongColor}
+            isWrongShape={isWrongShape}
             isVoiceListening={isVoiceListening}
             isWaitingForVoiceToFinish={isWaitingForVoiceToFinish}
             onClick={handleAddAndSay}
@@ -388,11 +415,13 @@ export default function EasyGamePage() {
                 <button
                   key={ing.id}
                   type="button"
+                  disabled={isRecallLocked}
                   onClick={() => handleRecallSelect(ing.id)}
                   className={`flex flex-col items-center gap-2 px-10 py-6 rounded-2xl border-3 transition-all duration-300 shadow
                     ${isWrong ? "border-red-400 bg-red-50" : ""}
                     ${isCorrect && (recallWrongId !== null || recallCorrectSelected) ? "border-green-400 bg-green-50 scale-110 ring-4 ring-green-300" : ""}
                     ${!isWrong && !(isCorrect && (recallWrongId !== null || recallCorrectSelected)) ? "border-transparent bg-white hover:border-purple-300 hover:scale-105" : ""}
+                    ${isRecallLocked ? "cursor-not-allowed opacity-70" : ""}
                   `}
                 >
                   {/* <Image src={ing.imageSrc} alt={ing.name} width={64} height={64} className="w-16 h-16 object-contain" draggable={false} />
@@ -436,7 +465,7 @@ export default function EasyGamePage() {
         </div>
 
         {/* Bot shape picker */}
-        <div className={`bg-white/70 rounded-3xl px-6 py-4 relative ${shouldHighlightShape ? "pop-bounce" : ""}`}>
+        <div className={`bg-white/70 rounded-3xl px-6 py-4 relative ${isWrongShape ? "animate-shake" : ""} ${shouldHighlightShape ? "pop-bounce" : ""}`}>
           {isShapeReviewing && (
             <div className="absolute -top-18 left-1/2 -translate-x-1/2 flex flex-col items-center gap-0.5 pointer-events-none">
               <span className="text-7xl animate-bounce">👇</span>
@@ -446,8 +475,12 @@ export default function EasyGamePage() {
           <div className="flex items-center gap-2 mb-3">
             <span className="text-xl">🐻</span>
             <div>
-              <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">Helper Bot</p>
-              <p className="text-base font-extrabold text-green-700">Bot picks a shape!</p>
+              <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">
+                {playMode === "friend" ? "Player 2" : "Helper Bot"}
+              </p>
+              <p className="text-base font-extrabold text-green-700">
+                {playMode === "friend" ? "Pick a shape!" : "Bot picks a shape!"}
+              </p>
             </div>
           </div>
           <div className="flex justify-center gap-4">
@@ -456,7 +489,11 @@ export default function EasyGamePage() {
                 key={ingredient.id}
                 label={ingredient.shapeId}
                 imageSrc={SHAPE_ICON_SRC[ingredient.shapeId] ?? ingredient.imageSrc}
-                isBotSelected={ingredient.id === activeIngredient?.id}
+                isBotSelected={playMode !== "friend" && ingredient.id === activeIngredient?.id}
+                isInteractive={playMode === "friend" && isShapeReviewing}
+                isSelected={selectedShapeId === ingredient.id}
+                isWrong={isWrongShape && selectedShapeId === ingredient.id}
+                onSelect={() => handleSelectShape(ingredient.id)}
               />
             ))}
           </div>
