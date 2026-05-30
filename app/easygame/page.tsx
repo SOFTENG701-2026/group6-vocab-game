@@ -235,6 +235,7 @@ export default function EasyGamePage() {
   const shouldHighlightShape = isDropped && isRecallComplete && isShapeReviewing;
   // Highlight the ingredient card when user is prompted to put it into the pot
   const shouldHighlightPut = Boolean(activeIngredient && !isDropped && !isDraggingIngredient && !isRoundComplete);
+  const isColorPickerLocked = Boolean(selectedColorId && !isWrongColor);
 
   // Automatically trigger handleAddAndSay when the color is selected
   useEffect(() => {
@@ -458,6 +459,7 @@ export default function EasyGamePage() {
                 {...opt}
                 isSelected={selectedColorId === opt.colorId}
                 isWrong={isWrongColor && selectedColorId === opt.colorId}
+                disabled={isColorPickerLocked}
                 onSelect={handlePickColor}
               />
             ))}
