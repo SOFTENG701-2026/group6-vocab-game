@@ -30,14 +30,29 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { ArrowRight } from "lucide-react";
 
 const DEFAULT_CARD_ACTION = (
-  <span className='mx-auto flex h-10 w-46 items-center justify-center overflow-visible text-(--card-header-bg)'>
-    <ArrowRight
-      className='h-10 w-10 shrink-0 origin-center scale-x-[2]'
-      strokeWidth={3}
-    />
+  <span className='mx-auto flex h-14 w-14 items-center justify-center rounded-full border-[3px] border-[#e7dfff] bg-white text-[#b89cff] shadow-[0_1px_0_rgba(0,0,0,0.04)] transition-colors duration-150 group-hover:border-[#7c3aed] group-hover:bg-[#f4efff] group-hover:text-(--color-primary-hover) group-hover:shadow-[0_1px_0_rgba(124,58,237,0.12)]'>
+    <svg
+      viewBox='0 0 24 24'
+      fill='none'
+      aria-hidden='true'
+      className='h-8 w-8 shrink-0 translate-x-[1px]'
+    >
+      <path
+        d='M5 12H17.2'
+        stroke='currentColor'
+        strokeWidth='4.2'
+        strokeLinecap='round'
+      />
+      <path
+        d='M13.5 6.8L19.2 12L13.5 17.2'
+        stroke='currentColor'
+        strokeWidth='4.2'
+        strokeLinecap='round'
+        strokeLinejoin='round'
+      />
+    </svg>
   </span>
 );
 
@@ -93,7 +108,7 @@ export default function Card({
   onButtonClick,
   onHoverStart,
   onHoverEnd
-}: CardProps) {
+}: Readonly<CardProps>) {
   const isCompact = size === "compact";
   const hasDescription = Boolean(descriptionTitle || descriptionContent);
   const isClear = getIsClear();
@@ -158,7 +173,8 @@ export default function Card({
     return (
       <h2
         className={`
-          text-sm font-extrabold uppercase tracking-[0.18em]
+          ${title.includes("⭐") ? "text-4xl sm:text-5xl leading-none" : "text-sm uppercase tracking-[0.18em]"}
+          font-extrabold
           transition-colors duration-300
           ${getTitleSpacingClasses()}
           ${getTitleColorClasses()}
@@ -217,7 +233,8 @@ export default function Card({
   }
 
   return (
-    <article
+    <button
+      type='button'
       onClick={handleClick}
       onMouseEnter={() => onHoverStart?.(id)}
       onMouseLeave={onHoverEnd}
@@ -236,6 +253,7 @@ export default function Card({
         hover:shadow-[0_24px_45px_rgba(0,0,0,0.2)]
         ${getCardSizeClasses()}
       `}
+      disabled={disabled}
     >
       <div
         className={`
@@ -258,6 +276,6 @@ export default function Card({
       {renderDescription()}
 
       {renderButton()}
-    </article>
+    </button>
   );
 }

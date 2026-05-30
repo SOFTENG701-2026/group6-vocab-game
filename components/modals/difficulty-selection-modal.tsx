@@ -1,20 +1,23 @@
 "use client";
 
 import Image from "next/image";
+import { useEffect } from "react";
 import BaseSelectionModal, {
   SelectionModalItem
 } from "@/components/modals/base-selection-modal";
 import { Difficulty } from "@/domain/game-setup/game-setup-types";
+import { speak } from "@/lib/speak";
 
 type DifficultyModalProps = {
   isOpen: boolean;
   onSelectDifficulty: (difficulty: Difficulty) => void;
+  onClose?: () => void;
 };
 
 const difficultyItems: SelectionModalItem[] = [
   {
     id: "easy",
-    title: "Easy",
+    title: "⭐",
     logo: (
       <Image
         src='/difficulty/matching-easy.png'
@@ -28,7 +31,7 @@ const difficultyItems: SelectionModalItem[] = [
   },
   {
     id: "medium",
-    title: "Medium",
+    title: "⭐⭐",
     logo: (
       <Image
         src='/difficulty/abc-hard.png'
@@ -42,7 +45,7 @@ const difficultyItems: SelectionModalItem[] = [
   },
   {
     id: "hard",
-    title: "Hard",
+    title: "⭐⭐⭐",
     logo: (
       <Image
         src='/difficulty/spelling.svg'
@@ -58,15 +61,22 @@ const difficultyItems: SelectionModalItem[] = [
 
 export default function DifficultyModal({
   isOpen,
-  onSelectDifficulty
-}: DifficultyModalProps) {
+  onSelectDifficulty,
+  onClose
+}: Readonly<DifficultyModalProps>) {
+  useEffect(() => {
+    if (!isOpen) return;
+
+    speak("Choose a level to play.");
+  }, [isOpen]);
+
   return (
     <BaseSelectionModal
       isOpen={isOpen}
-      title='Choose Difficulty'
+      title='Choose Level'
       titleId='difficulty-modal-title'
       items={difficultyItems}
-      //TODO: area for refactor make onConfirm more generic or closer to design context instead of string type.
+      onClose={onClose}
       onConfirm={(itemId) => onSelectDifficulty(itemId as Difficulty)}
     />
   );
