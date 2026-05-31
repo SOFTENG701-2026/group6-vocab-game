@@ -13,7 +13,7 @@ type AchievementRowProps = {
 };
 
 export default function AchievementRow({ achievement, onClaim, onView }: AchievementRowProps) {
-  const [isLockShaking, setIsLockShaking] = useState(false);
+  const [isClaimIconShaking, setIsClaimIconShaking] = useState(false);
   const { claimGems } = useCurrency();
 
   const isClaimable = canClaimAchievement(achievement);
@@ -21,11 +21,11 @@ export default function AchievementRow({ achievement, onClaim, onView }: Achieve
   const title = getAchievementTitle(achievement);
 
   function handleClaimClick(event: React.MouseEvent<HTMLButtonElement>) {
-    if (!achievement.isUnlocked) {
-      setIsLockShaking(true);
+    if (!achievement.isUnlocked || !isClaimable) {
+      setIsClaimIconShaking(true);
 
       window.setTimeout(() => {
-        setIsLockShaking(false);
+        setIsClaimIconShaking(false);
       }, 400);
 
       return;
@@ -36,7 +36,7 @@ export default function AchievementRow({ achievement, onClaim, onView }: Achieve
     onClaim(achievement.id);
     claimGems(50, event.currentTarget);
   }
-  
+
   return (
     <div
       className='
@@ -67,7 +67,6 @@ export default function AchievementRow({ achievement, onClaim, onView }: Achieve
           <button
             type='button'
             onClick={handleClaimClick}
-            disabled={achievement.isUnlocked && !isClaimable}
             className={`
               group flex items-center justify-center rounded-lg py-3
               text-2xl font-black uppercase text-white
@@ -77,7 +76,7 @@ export default function AchievementRow({ achievement, onClaim, onView }: Achieve
                   ? "bg-yellow-950/20 text-white/70 hover:bg-yellow-950/30"
                   : isClaimable
                     ? "bg-emerald-500 hover:bg-emerald-600"
-                    : "cursor-not-allowed bg-yellow-950/20 text-gray-500"
+                    : "cursor-not-allowed bg-yellow-950/20 text-gray-500 hover:bg-yellow-950/30"
               }
             `}
           >
@@ -87,17 +86,18 @@ export default function AchievementRow({ achievement, onClaim, onView }: Achieve
                 strokeWidth={2}
                 className={`
                   transition-transform duration-200
-                  ${isLockShaking ? "animate-lock-shake" : ""}
+                  ${isClaimIconShaking ? "animate-lock-shake" : ""}
                 `}
               />
             ) : (
               <Gift
                 size={34}
                 strokeWidth={2}
-                className='
+                className={`
                   transition-transform duration-200
-                  group-hover:scale-125 group-hover:-rotate-6
-                '
+                  ${isClaimable ? "group-hover:scale-125 group-hover:-rotate-6" : ""}
+                  ${isClaimIconShaking ? "animate-lock-shake" : ""}
+                `}
               />
             )}
           </button>
