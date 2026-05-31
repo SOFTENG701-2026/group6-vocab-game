@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Mic, Ear, XCircle } from "lucide-react";
 import { ingredients } from "@/data/ingredients";
 import { useGameSetup } from "@/context/game-setup-context";
@@ -33,6 +33,17 @@ const AMAZING_STARS = [
   { left: "74%", delay: "260ms", duration: "1080ms" },
   { left: "82%", delay: "140ms", duration: "950ms" },
 ];
+
+type AutoDemoCardState = {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+  dx: number;
+  dy: number;
+  potLeft: number;
+  potTop: number;
+};
 
 function getBtnClass(
   isFriendMode: boolean,
@@ -196,22 +207,30 @@ function VoiceActionButton({
 /* eslint-disable sonarjs/cognitive-complexity, complexity */
 export default function EasyGamePage() {
   const { playMode } = useGameSetup();
+  const topSectionRef = useRef<HTMLDivElement | null>(null);
+  const potButtonRef = useRef<HTMLButtonElement | null>(null);
+  const ingredientCardRef = useRef<HTMLButtonElement | null>(null);
+  const autoDemoFinishTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const potJumpTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [autoDemoCardState, setAutoDemoCardState] = useState<AutoDemoCardState | null>(null);
+  const [isClickDemoPlaying, setIsClickDemoPlaying] = useState(false);
+  const [isPotJumping, setIsPotJumping] = useState(false);
+  const [showInitialHint, setShowInitialHint] = useState(true);
   const {
     roundIndex,
     isGameComplete,
     activeIngredient,
     shapeOptions,
     selectedColorId,
-    handlePickColor,
     isRoundComplete,
     isDragOver,
-    setIsDragOver,
     isDraggingIngredient,
     isDropped,
     currentSpeech,
     isSpeaking,
     isVoiceListening,
     isWaitingForVoiceToFinish,
+    
     isAmazingEffect,
     isWrongColor,
     isRecallComplete,
@@ -223,12 +242,26 @@ export default function EasyGamePage() {
     isWrongShape,
     handleDrop,
     handleRecallSelect,
-    handleIngredientDragStart,
-    handleIngredientDragEnd,
+    
+    handlePickColor,
     handleSelectShape,
-    handleAddAndSay,
     goHome,
+    handleAddAndSay,
   } = useEasyGame(playMode);
+
+  useEffect(() => {
+    // Keep the initial hint visible until the user clicks the card.
+    return () => {
+      if (autoDemoFinishTimeoutRef.current) {
+        clearTimeout(autoDemoFinishTimeoutRef.current);
+        autoDemoFinishTimeoutRef.current = null;
+      }
+      if (potJumpTimeoutRef.current) {
+        clearTimeout(potJumpTimeoutRef.current);
+        potJumpTimeoutRef.current = null;
+      }
+    };
+  }, []);
 
   // Highlight hints when user needs to act
   const shouldHighlightColor = isDropped && isRecallComplete && !selectedColorId && !isRoundComplete && !isWrongColor;
@@ -236,6 +269,63 @@ export default function EasyGamePage() {
   // Highlight the ingredient card when user is prompted to put it into the pot
   const shouldHighlightPut = Boolean(activeIngredient && !isDropped && !isDraggingIngredient && !isRoundComplete);
   const isColorPickerLocked = Boolean(selectedColorId && !isWrongColor);
+  const autoDemoCurve = autoDemoCardState
+    ? `path("M 0 0 Q ${Math.round(autoDemoCardState.dx * 0.22)} ${Math.round(-Math.max(120, Math.abs(autoDemoCardState.dy) * 0.2 + 100))}, ${Math.round(autoDemoCardState.dx)} ${Math.round(autoDemoCardState.dy)}")`
+    : "";
+
+  // autoplay/replay removed; kept click-driven demo only
+
+  // Play a click-driven demo: animate the card into the pot and then call handleDrop()
+  function playClickDemo() {
+    if (!activeIngredient || isDropped || isRoundComplete || isClickDemoPlaying) return;
+
+    const container = topSectionRef.current;
+    const potButton = potButtonRef.current;
+    const ingredientCard = ingredientCardRef.current;
+    if (!container || !potButton || !ingredientCard) return;
+
+    const containerRect = container.getBoundingClientRect();
+    const potRect = potButton.getBoundingClientRect();
+    const cardRect = ingredientCard.getBoundingClientRect();
+
+    const startLeft = cardRect.left - containerRect.left;
+    const startTop = cardRect.top - containerRect.top;
+    const endLeft = potRect.left - containerRect.left + potRect.width / 2 - cardRect.width / 2;
+    const endTop = potRect.top - containerRect.top + potRect.height / 2 - cardRect.height / 2;
+
+    setAutoDemoCardState({
+      left: startLeft,
+      top: startTop,
+      width: cardRect.width,
+      height: cardRect.height,
+      dx: endLeft - startLeft,
+      dy: endTop - startTop,
+      potLeft: potRect.left - containerRect.left + potRect.width * 0.5 - 14,
+      potTop: potRect.top - containerRect.top + potRect.height * 0.08,
+    });
+    setIsClickDemoPlaying(true);
+    setShowInitialHint(false);
+
+    if (autoDemoFinishTimeoutRef.current) {
+      clearTimeout(autoDemoFinishTimeoutRef.current);
+    }
+
+    autoDemoFinishTimeoutRef.current = setTimeout(() => {
+      setAutoDemoCardState(null);
+      setIsClickDemoPlaying(false);
+      autoDemoFinishTimeoutRef.current = null;
+
+      // then trigger the logical drop to advance the round
+        setIsPotJumping(true);
+        // after pot jump animation completes, stop jump and trigger drop
+        if (potJumpTimeoutRef.current) clearTimeout(potJumpTimeoutRef.current);
+        potJumpTimeoutRef.current = setTimeout(() => {
+          setIsPotJumping(false);
+          potJumpTimeoutRef.current = null;
+          handleDrop();
+        }, 760);
+    }, 2000);
+  }
 
   // Automatically trigger handleAddAndSay when the color is selected
   useEffect(() => {
@@ -288,7 +378,54 @@ export default function EasyGamePage() {
       )}
 
       {/* Top section */}
-      <div className="grid grid-cols-[1fr_auto_1fr] gap-4 px-6 pt-4 min-h-0">
+      <div ref={topSectionRef} className="relative grid grid-cols-[1fr_auto_1fr] gap-4 px-6 pt-4 min-h-0">
+
+        {isClickDemoPlaying && autoDemoCardState && activeIngredient && (
+          <div className="pointer-events-none absolute inset-0 z-40">
+            <div
+              className="absolute animate-auto-demo-glide"
+              style={{
+                left: autoDemoCardState.left,
+                top: autoDemoCardState.top,
+                width: autoDemoCardState.width,
+                height: autoDemoCardState.height,
+                transformOrigin: "center center",
+                offsetPath: autoDemoCurve,
+                offsetRotate: "auto",
+                offsetAnchor: "50% 50%",
+                offsetDistance: "0%",
+              }}
+            >
+              <div className="relative flex flex-col items-center gap-2 bg-white/80 rounded-2xl shadow-xl w-full h-full select-none text-center px-4 border-2 border-dashed border-sky-300/80 ring-4 ring-sky-200/50 backdrop-blur-[1px]">
+                <div className="w-full h-[70%] flex items-center justify-center">
+                  <Image
+                    src={activeIngredient.imageSrc}
+                    alt={activeIngredient.name}
+                    width={200}
+                    height={200}
+                    className="w-full h-full object-contain"
+                    draggable={false}
+                  />
+                </div>
+                <div className="h-[30%] flex items-center justify-center px-2">
+                  <p className="text-lg font-extrabold text-gray-800 truncate">{activeIngredient.name}</p>
+                </div>
+              </div>
+            </div>
+
+            <div
+              className="absolute animate-pot-pulse pointer-events-none"
+              style={{
+                left: autoDemoCardState.potLeft,
+                top: autoDemoCardState.potTop,
+                width: 80,
+                height: 80,
+              }}
+            >
+              <div className="h-full w-full rounded-full bg-pink-200/45 blur-xl" />
+            </div>
+          </div>
+        )}
 
         {/* Left: Monster */}
         <div className="flex items-start justify-start pt-4">
@@ -320,26 +457,20 @@ export default function EasyGamePage() {
 
           {/* Pot (drop target) */}
           <div className="relative flex items-center justify-center">
-            {isDraggingIngredient && !isDropped && !isRoundComplete && (
-              <div className="absolute left-[-4.5rem] top-1/2 -translate-y-1/2 pointer-events-none animate-bounce">
-                <span className="text-7xl drop-shadow-lg">👉</span>
-              </div>
-            )}
+            {/* drag hints removed; click-only interaction */}
 
             <button
               type="button"
+              ref={potButtonRef}
               className={`relative transition-all duration-200 ${isDragOver || isDraggingIngredient ? "scale-110 animate-bounce" : ""}`}
-              onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
-              onDragLeave={() => setIsDragOver(false)}
-              onDrop={(e) => { e.preventDefault(); setIsDragOver(false); handleDrop(); }}
               aria-label="Magic soup pot"
             >
-              <Image
+                <Image
                 src="/assets/pot/pot.svg"
                 alt="Magic soup pot"
                 width={300}
                 height={300}
-                className={`relative z-10 h-[50vh] w-auto drop-shadow-xl transition-all ${isDragOver ? "drop-shadow-2xl brightness-110" : ""} ${isDropped ? "saturate-150" : ""}`}
+                className={`relative z-10 h-[50vh] w-auto drop-shadow-xl transition-all ${isDragOver ? "drop-shadow-2xl brightness-110" : ""} ${isDropped ? "saturate-150" : ""} ${isPotJumping ? "animate-pot-jump" : ""}`}
                 draggable={false}
               />
               {isRoundComplete && (
@@ -366,20 +497,19 @@ export default function EasyGamePage() {
 
         {/* Right: Draggable ingredient card */}
         <div className="flex flex-col gap-3 py-4 min-h-0 items-center">
-          <div className="flex items-center gap-5">
-            {!isDraggingIngredient && !isDropped && !isRoundComplete && (
+            <div className="flex items-center gap-5">
+            {showInitialHint && !isDropped && !isRoundComplete && !isClickDemoPlaying && activeIngredient && (
               <span className="text-7xl animate-bounce">👉</span>
             )}
             <button
               type="button"
-              draggable={true}
-              onDragStart={(e) => { e.dataTransfer.setData("text/plain", "ingredient"); e.dataTransfer.effectAllowed = "move"; handleIngredientDragStart(); }}
-              onDragEnd={handleIngredientDragEnd}
+              ref={ingredientCardRef}
+              onClick={() => { playClickDemo(); }}
               className={`flex flex-col items-center gap-2 bg-white rounded-2xl shadow w-52 h-60 select-none transition-all text-center px-4 ${
                 !isRoundComplete && !isDropped
-                  ? "cursor-grab active:cursor-grabbing hover:shadow-lg hover:scale-105"
+                  ? "cursor-pointer hover:shadow-lg hover:scale-105"
                   : "cursor-default"
-              } ${isWrongColor ? "animate-shake" : ""} ${shouldHighlightPut ? "ring-4 ring-yellow-300 ring-offset-2 ring-offset-white pulse-ring-yellow" : ""}`}
+              } ${isWrongColor ? "animate-shake" : ""} ${shouldHighlightPut ? "ring-4 ring-yellow-300 ring-offset-2 ring-offset-white pulse-ring-yellow" : ""} ${isClickDemoPlaying ? "pointer-events-none opacity-0" : "opacity-100"}`}
               aria-label={activeIngredient?.name ?? "Ingredient"}
             >
               <div className="w-full h-[70%] flex items-center justify-center">
@@ -460,7 +590,9 @@ export default function EasyGamePage() {
                 isSelected={selectedColorId === opt.colorId}
                 isWrong={isWrongColor && selectedColorId === opt.colorId}
                 disabled={isColorPickerLocked}
-                onSelect={handlePickColor}
+                onSelect={(colorId) => {
+                  handlePickColor(colorId);
+                }}
               />
             ))}
           </div>
@@ -495,7 +627,9 @@ export default function EasyGamePage() {
                 isInteractive={playMode === "friend" && isShapeReviewing}
                 isSelected={selectedShapeId === ingredient.id}
                 isWrong={isWrongShape && selectedShapeId === ingredient.id}
-                onSelect={() => handleSelectShape(ingredient.id)}
+                onSelect={() => {
+                  handleSelectShape(ingredient.id);
+                }}
               />
             ))}
           </div>
@@ -540,6 +674,86 @@ export default function EasyGamePage() {
 
         :global(.animate-firework-pop) {
           animation: fireworkPop 900ms ease-out both;
+        }
+
+        @keyframes autoDemoGlide {
+          0% {
+            offset-distance: 0%;
+            transform: scale(0.96) rotate(-6deg);
+            opacity: 1;
+          }
+          50% {
+            offset-distance: 58%;
+            transform: scale(1.12) rotate(6deg);
+            opacity: 1;
+          }
+          80% {
+            offset-distance: 90%;
+            transform: scale(0.98) rotate(2deg);
+            opacity: 1;
+          }
+          100% {
+            offset-distance: 100%;
+            transform: scale(0.86) rotate(10deg);
+            opacity: 0;
+          }
+        }
+
+        :global(.animate-auto-demo-glide) {
+          animation: autoDemoGlide 2.2s cubic-bezier(0.34, 1.2, 0.64, 1) forwards;
+          will-change: offset-distance, opacity, transform;
+          transform: translateZ(0);
+        }
+
+        @keyframes autoDemoPulse {
+          0% {
+            transform: scale(0.8);
+            opacity: 0;
+          }
+          35% {
+            transform: scale(1);
+            opacity: 1;
+          }
+          100% {
+            transform: scale(1.25);
+            opacity: 0;
+          }
+        }
+
+        :global(.animate-auto-demo-pulse) {
+          animation: autoDemoPulse 1.8s ease-out both;
+        }
+
+        @keyframes potPulseOnce {
+          0% {
+            transform: scale(1);
+            filter: brightness(1);
+          }
+          35% {
+            transform: scale(1.1);
+            filter: brightness(1.15);
+          }
+          100% {
+            transform: scale(1);
+            filter: brightness(1);
+          }
+        }
+
+        :global(.animate-pot-pulse) {
+          animation: potPulseOnce 1.8s ease-out both;
+        }
+
+        @keyframes potJump {
+          0% { transform: translateY(0) scale(1); filter: brightness(1); }
+          18% { transform: translateY(-28px) scale(1.06); filter: brightness(1.12); }
+          38% { transform: translateY(0) scale(0.98); filter: brightness(0.98); }
+          58% { transform: translateY(-16px) scale(1.04); filter: brightness(1.06); }
+          78% { transform: translateY(0) scale(1); filter: brightness(1); }
+          100% { transform: translateY(0) scale(1); filter: brightness(1); }
+        }
+
+        :global(.animate-pot-jump) {
+          animation: potJump 760ms cubic-bezier(0.22, 1, 0.36, 1) both;
         }
 
         /* Pulse ring animations for different ring colors (outer-only, inner content unchanged) */
