@@ -23,8 +23,8 @@ export default function ShapeOptionCard({
 
   if (isWrong) {
     stateClassName = "border-red-400 bg-red-50 animate-shake";
-  } else if (isInteractive && isSelected) {
-    stateClassName = "border-green-500 bg-green-50 scale-105 shadow-lg";
+  } else if (isSelected) {
+    stateClassName = "border-purple-500 bg-purple-50 scale-105 shadow-lg";
   } else if (isBotSelected) {
     stateClassName = "border-green-500 bg-green-50 scale-105 shadow-lg";
   }
