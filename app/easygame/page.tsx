@@ -327,12 +327,11 @@ export default function EasyGamePage() {
     }, 2000);
   }
 
-  // Automatically trigger handleAddAndSay when the color is selected
+  // Automatically trigger handleAddAndSay when the "Amazing" speech has finished
   useEffect(() => {
-    // Wait until the "Amazing" speech has finished before auto-triggering the voice action.
     const isReadyToSay = selectedColorId && !isWrongColor && !isRoundComplete && !isShapeReviewing && !isVoiceListening && !isWaitingForVoiceToFinish && !isSpeaking;
     if (!isReadyToSay) return;
-    const timer = setTimeout(() => handleAddAndSay(), 1000);
+    const timer = setTimeout(() => handleAddAndSay(), 0);
     return () => clearTimeout(timer);
   }, [selectedColorId, isWrongColor, isRoundComplete, isShapeReviewing, isVoiceListening, isWaitingForVoiceToFinish, isSpeaking, handleAddAndSay]);
 
