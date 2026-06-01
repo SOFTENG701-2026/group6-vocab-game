@@ -167,6 +167,8 @@ export default function HomePlayActions() {
 
     if (difficulty === "easy") {
       router.push("/easygame");
+    } else if (difficulty === "medium") {
+      router.push("/game");
     } else {
       router.push("/game");
     }

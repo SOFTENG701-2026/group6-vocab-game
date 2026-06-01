@@ -1,4 +1,5 @@
 import Button from "@/components/button";
+import { X, RotateCcw } from "lucide-react";
 
 type BasePreviewTutorialModalProps = {
   isOpen: boolean;
@@ -53,11 +54,22 @@ export default function BasePreviewTutorialModal({
     >
       <div
         className='
+          relative
           grid w-full max-w-6xl
           grid-cols-[1fr_260px] gap-5
           rounded-4xl bg-white p-5 shadow-2xl
         '
       >
+        <Button
+          onClick={onClose}
+          icon={<X className='w-8 h-8' />}
+          className='
+            absolute -right-4 -top-2 z-10 flex h-10 w-10 items-center justify-center text-3xl 
+            rounded-full! border-0! bg-red-500! p-0! text-white!  hover:bg-red-600!
+            hover:scale-110 
+          '
+        />
+
         {children}
 
         <aside
@@ -74,7 +86,9 @@ export default function BasePreviewTutorialModal({
           </div>
 
           <div
-            className={`flex flex-col items-center gap-4 ${shouldEmphasiseInput ? "animate-tutorial-attention-shake" : ""}`}
+            className={`flex flex-col items-center gap-4 ${
+              shouldEmphasiseInput ? "animate-tutorial-attention-shake" : ""
+            }`}
           >
             {inputPreview ? (
               inputPreview
@@ -99,13 +113,11 @@ export default function BasePreviewTutorialModal({
           </div>
 
           <div className='flex w-full gap-3'>
-            <Button onClick={onReplay} className='flex-1'>
-              Replay
-            </Button>
-
-            <Button onClick={onClose} className='flex-1'>
-              Close
-            </Button>
+            <Button
+              onClick={onReplay}
+              icon={<RotateCcw className='w-8 h-8' />}
+              className='flex-1 bg-green-500 border-green-600! hover:scale-110'
+            />
           </div>
         </aside>
       </div>

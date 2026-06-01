@@ -1,8 +1,9 @@
 "use client";
 
-import { PlacedLetter, FallingLetter, CatchResult } from "@/domain/block-spelling-game-type";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-
+import { PlacedLetter, FallingLetter, CatchResult } from "@/domain/block-spelling-game-type";
+import { useGamePause } from "@/context/game-pause-context";
+import { useNarrative } from "@/context/narrative-context";
 type UseBasketSpellingGameProps = {
   word: string;
   onComplete: () => void;
@@ -38,6 +39,8 @@ function normaliseWord(word: string) {
 }
 
 export function useBasketSpellingGame({ word, onComplete }: UseBasketSpellingGameProps) {
+  const { dispatchNarrativeEvent, shouldBlockInteraction } = useNarrative();
+
   const targetLetters = useMemo(() => normaliseWord(word).split(""), [word]);
 
   const [placedLetters, setPlacedLetters] = useState<PlacedLetter[]>(() =>
@@ -52,11 +55,13 @@ export function useBasketSpellingGame({ word, onComplete }: UseBasketSpellingGam
   const [feedbackMessage, setFeedbackMessage] = useState(`Catch the letters that belong in ${word}.`);
   const [slowUntil, setSlowUntil] = useState<number | null>(null);
   const [isComplete, setIsComplete] = useState(false);
+  const { isGamePaused } = useGamePause();
 
   const placedLettersRef = useRef(placedLetters);
   const basketXRef = useRef(basketX);
   const slowUntilRef = useRef(slowUntil);
   const isCompleteRef = useRef(isComplete);
+  const shouldPauseRef = useRef(false);
 
   const pressedKeysRef = useRef({
     left: false,
@@ -79,6 +84,23 @@ export function useBasketSpellingGame({ word, onComplete }: UseBasketSpellingGam
   useEffect(() => {
     isCompleteRef.current = isComplete;
   }, [isComplete]);
+
+  useEffect(() => {
+    shouldPauseRef.current = isGamePaused;
+  }, [isGamePaused]);
+
+  /**
+   * Reset pressed keys when game is paused
+   * Prevents "stuck key" bug
+   */
+  useEffect(() => {
+    if (!isGamePaused) return;
+
+    pressedKeysRef.current = {
+      left: false,
+      right: false,
+    };
+  }, [shouldBlockInteraction]);
 
   function getNeededLetters() {
     return placedLettersRef.current.filter((slot) => !slot.isFilled).map((slot) => slot.letter);
@@ -149,6 +171,7 @@ export function useBasketSpellingGame({ word, onComplete }: UseBasketSpellingGam
 
   const spawnLetter = useCallback(() => {
     if (isCompleteRef.current) return;
+    if (shouldPauseRef.current) return; // Don't spawn letters when narrating
 
     setFallingLetters((currentLetters) => {
       if (currentLetters.length >= MAX_FALLING_LETTERS) {
@@ -199,6 +222,11 @@ export function useBasketSpellingGame({ word, onComplete }: UseBasketSpellingGam
       setFallingLetters((currentLetters) => currentLetters.filter((letter) => letter.id !== caughtLetter.id));
 
       if (result.type === "correct") {
+        //Plays the narrative event for the correct letter caught
+        dispatchNarrativeEvent({
+          type: "CORRECT_LETTER_CAUGHT",
+          letter: caughtLetter.letter,
+        });
         setPlacedLetters((currentLetters) => {
           const updatedLetters = [...currentLetters];
 
@@ -234,7 +262,7 @@ export function useBasketSpellingGame({ word, onComplete }: UseBasketSpellingGam
       slowBasketTemporarily();
       setFeedbackMessage(`${caughtLetter.letter} is not in ${word}. Try another letter.`);
     },
-    [onComplete, word],
+    [dispatchNarrativeEvent, onComplete, word],
   );
 
   /** Reset state when active ingredient changes*/
@@ -293,7 +321,13 @@ export function useBasketSpellingGame({ word, onComplete }: UseBasketSpellingGam
 
     let animationFrameId: number;
 
-    function animate() {
+    function animateFallingLetters() {
+      // Freeze the falling letter in place when narrative event is ongoing.
+      if (shouldPauseRef.current) {
+        animationFrameId = window.requestAnimationFrame(animateFallingLetters);
+        return;
+      }
+
       setFallingLetters((currentLetters) => {
         const caughtLetters: FallingLetter[] = [];
         const remainingLetters: FallingLetter[] = [];
@@ -332,10 +366,10 @@ export function useBasketSpellingGame({ word, onComplete }: UseBasketSpellingGam
         return remainingLetters;
       });
 
-      animationFrameId = window.requestAnimationFrame(animate);
+      animationFrameId = window.requestAnimationFrame(animateFallingLetters);
     }
 
-    animationFrameId = window.requestAnimationFrame(animate);
+    animationFrameId = window.requestAnimationFrame(animateFallingLetters);
 
     return () => window.cancelAnimationFrame(animationFrameId);
   }, [isComplete, handleLetterCaught]);
@@ -343,6 +377,9 @@ export function useBasketSpellingGame({ word, onComplete }: UseBasketSpellingGam
   //Keyboard event A and D or left arrow and right arrow to move the basket
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
+      //Prevent moving the basket while narrative event is ongoing
+      if (shouldPauseRef.current) return;
+
       if (event.key === "ArrowLeft" || event.key.toLowerCase() === "a") {
         pressedKeysRef.current.left = true;
       }
@@ -353,6 +390,9 @@ export function useBasketSpellingGame({ word, onComplete }: UseBasketSpellingGam
     }
 
     function handleKeyUp(event: KeyboardEvent) {
+      //Prevent moving the basket while narrative event is ongoing
+      if (shouldPauseRef.current) return;
+
       if (event.key === "ArrowLeft" || event.key.toLowerCase() === "a") {
         pressedKeysRef.current.left = false;
       }
@@ -376,8 +416,8 @@ export function useBasketSpellingGame({ word, onComplete }: UseBasketSpellingGam
     let animationFrameId: number;
 
     function animateBasketMovement() {
-      //Only move the basket when the word is not complete
-      if (!isCompleteRef.current) {
+      //Only move the basket when the word is not complete or there is no narrative event ongoing
+      if (!isCompleteRef.current && !shouldPauseRef.current) {
         const isMovingLeft = pressedKeysRef.current.left;
         const isMovingRight = pressedKeysRef.current.right;
 
