@@ -181,7 +181,7 @@ export function createWrongLetterCaughtScript(letter: string, expectedLetter: st
       {
         type: "asset-audio",
         text: expectedLetter,
-        audioSrc: `/audio/narrator/prompt-say-letter/${expectedLetter.toLowerCase()}-sound.mp3`, // FILE MISSING
+        audioSrc: `/audio/narrator/letter-sound/${expectedLetter.toLowerCase()}-sound.mp3`, // FILE MISSING
       },
     ],
   };
