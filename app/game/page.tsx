@@ -159,7 +159,7 @@ export default function GamePage() {
           <section className='h-full flex flex-col gap-3 overflow-hidden'>
             <MinigamePreviewFrame
               onPreviewClick={() => setIsPreviewOpen(true)}
-              resetKey={`$activeIngredient?.id}-${activeMinigameId}`}
+              resetKey={`${activeIngredient?.id}-${activeMinigameId}`}
             >
               {activeIngredient ? renderActiveMinigame(activeMinigameId) : <MinigameFallback />}
             </MinigamePreviewFrame>

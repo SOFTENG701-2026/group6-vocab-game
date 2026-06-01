@@ -3,22 +3,27 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { ingredients } from "@/data/ingredients";
+import type { PlayMode } from "@/domain/game-setup/game-setup-types";
 import { speak } from "@/lib/speak";
 
 function toSpelling(name: string) {
   return name.toUpperCase().split("").join(" ");
 }
 
-export function useEasyGame() {
+export function useEasyGame(playMode: PlayMode = "single") {
   const router = useRouter();
+  const isFriendMode = playMode === "friend";
   const [roundIndex, setRoundIndex] = useState(0);
   const [selectedColorId, setSelectedColorId] = useState<string | null>(null);
+  const [selectedShapeId, setSelectedShapeId] = useState<string | null>(null);
   const [isWrongColor, setIsWrongColor] = useState(false);
+  const [isWrongShape, setIsWrongShape] = useState(false);
   const [isRoundComplete, setIsRoundComplete] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
   const [isDraggingIngredient, setIsDraggingIngredient] = useState(false);
   const [isDropped, setIsDropped] = useState(false);
   const [isRecallComplete, setIsRecallComplete] = useState(false);
+  const [isRecallLocked, setIsRecallLocked] = useState(false);
   const [recallWrongId, setRecallWrongId] = useState<string | null>(null);
   const [recallCorrectSelected, setRecallCorrectSelected] = useState(false);
   const [isShapeReviewing, setIsShapeReviewing] = useState(false);
@@ -83,10 +88,13 @@ export function useEasyGame() {
     setTimeout(() => {
       setRoundIndex((prev) => prev + 1);
       setSelectedColorId(null);
+      setSelectedShapeId(null);
       setIsWrongColor(false);
+      setIsWrongShape(false);
       setIsRoundComplete(false);
       setIsDropped(false);
       setIsRecallComplete(false);
+      setIsRecallLocked(false);
       setRecallWrongId(null);
       setRecallCorrectSelected(false);
       setIsShapeReviewing(false);
@@ -102,11 +110,13 @@ export function useEasyGame() {
     setIsDropped(true);
     setIsPotGuideVisible(false);
     setIsDraggingIngredient(false);
-    say(`What did we put in the pot?`);
+    say(`What did we put in the pot? Let's choose one from the list!`);
   }
 
   function handleRecallSelect(ingredientId: string) {
-    if (!activeIngredient || isRecallComplete) return;
+    if (!activeIngredient || isRecallComplete || isRecallLocked) return;
+
+    setIsRecallLocked(true);
 
     if (ingredientId === activeIngredient.id) {
       setRecallCorrectSelected(true);
@@ -166,14 +176,18 @@ export function useEasyGame() {
       return;
     }
 
+    triggerAmazingEffect();
+
+    say(`Amazing! Let's say it together: ${activeIngredient.name} !`);
+  }
+
+  function triggerAmazingEffect() {
     setIsAmazingEffect(true);
     if (amazingTimeoutRef.current) clearTimeout(amazingTimeoutRef.current);
     amazingTimeoutRef.current = setTimeout(() => {
       setIsAmazingEffect(false);
       amazingTimeoutRef.current = null;
     }, 2000);
-
-    say(`Amazing! Let's say it together: ${activeIngredient.name} !`);
   }
 
   function handleAddAndSay() {
@@ -201,36 +215,88 @@ export function useEasyGame() {
     setIsWaitingForVoiceToFinish(true);
     setIsVoiceListening(true);
 
+    function startShapeReview() {
+      setIsShapeReviewing(true);
+
+      if (isFriendMode) {
+        return;
+      }
+
+      const shapeName = activeIngredient.shapeId;
+      const msg = `Yay! Your buddy found the shape! It's ${shapeName}! Now let's try the next one!`;
+      setCurrentSpeech(msg);
+      setIsSpeaking(true);
+      speak(msg, () => {
+        setIsSpeaking(false);
+        setIsShapeReviewing(false);
+        advanceRound(700);
+      });
+    }
+
+    function onGreetingDone() {
+      setIsSpeaking(false);
+      startShapeReview();
+    }
+
     if (listenTimeoutRef.current) clearTimeout(listenTimeoutRef.current);
     listenTimeoutRef.current = setTimeout(() => {
       setIsVoiceListening(false);
       setIsWaitingForVoiceToFinish(false);
-      setIsRoundComplete(true);
       setIsPotGuideVisible(false);
       setIsDraggingIngredient(false);
       setIsAmazingEffect(false);
-      setCurrentSpeech(`Great job! ${activeIngredient.name}! ${toSpelling(activeIngredient.name)}!`);
+
+      if (isFriendMode) {
+        setIsShapeReviewing(true);
+        const promptMsg = `Great job! Player 2, can you find the ${activeIngredient.shape} shape?`;
+        setCurrentSpeech(promptMsg);
+        setIsSpeaking(true);
+        speak(promptMsg, () => {
+          setIsSpeaking(false);
+          onGreetingDone();
+        });
+        listenTimeoutRef.current = null;
+        return;
+      }
+
+      setIsRoundComplete(true);
+      const greetMsg = `Great job! ${activeIngredient.name}! ${toSpelling(activeIngredient.name)}!`;
+      setCurrentSpeech(greetMsg);
       setIsSpeaking(true);
-      speak(`Great job! ${activeIngredient.name}! ${toSpelling(activeIngredient.name)}!`, () => {
-        setIsSpeaking(false);
-        setTimeout(() => {
-          setIsShapeReviewing(true);
-          const shape = activeIngredient.shape;
-          const shapeName = activeIngredient.shapeId;
-          setCurrentSpeech(`Yay! Your buddy found the shape! It's ${shape}! ${shapeName}! ${shapeName}! Now let's try the next one!`);
-          setIsSpeaking(true);
-          speak(
-            `Yay! Your buddy found the shape! It's ${shape}! ${shapeName}! ${shapeName}! Now let's try the next one!`,
-            () => {
-              setIsSpeaking(false);
-              setIsShapeReviewing(false);
-              advanceRound(700);
-            }
-          );
-        }, 500);
-      });
+      speak(greetMsg, onGreetingDone);
       listenTimeoutRef.current = null;
     }, 2500);
+  }
+
+  function handleSelectShape(selectedIngredientId: string) {
+    if (!isFriendMode || isRoundComplete || !isShapeReviewing || !activeIngredient) return;
+
+    setSelectedShapeId(selectedIngredientId);
+
+    if (selectedIngredientId !== activeIngredient.id) {
+      setIsWrongShape(true);
+      say(`Almost there! ${activeIngredient.name} is a ${activeIngredient.shape} shape!`, () => {
+        setTimeout(() => {
+          setIsWrongShape(false);
+          setSelectedShapeId(null);
+        }, 400);
+      });
+      return;
+    }
+
+    setIsWrongShape(false);
+    setIsRoundComplete(true);
+    setIsShapeReviewing(false);
+    if (isFriendMode) {
+      triggerAmazingEffect();
+    }
+    const successMsg = isFriendMode
+      ? `Great job! ${activeIngredient.name}! ${toSpelling(activeIngredient.name)}!`
+      : `Great job! ${activeIngredient.name} is a ${activeIngredient.shape} shape!`;
+
+    say(successMsg, () => {
+      advanceRound(700);
+    });
   }
 
   function goHome() {
@@ -258,13 +324,17 @@ export function useEasyGame() {
     isRecallComplete,
     recallWrongId,
     recallCorrectSelected,
+    isRecallLocked,
     isShapeReviewing,
+    selectedShapeId,
+    isWrongShape,
     handleDrop,
     handleRecallSelect,
     handleIngredientDragStart,
     handleIngredientDragEnd,
     handleIngredientClick,
     handlePickColor,
+    handleSelectShape,
     goHome,
     handleAddAndSay,
   };

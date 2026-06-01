@@ -22,14 +22,39 @@
  *   `isHovered`, and `shouldBlur`. This allows only the active card to appear
  *   clear, while inactive cards remain blurred or faded.
  *
- * - The card becomes clear when blur is disabled, or when it is selected or
- *   hovered and it should not be blurred.
+ * - The card becomes clear when blur is disabled, or when it should not be
+ *   blurred. By default all cards are shown clearly; only inactive cards are
+ *   blurred when another card is hovered or selected.
  */
 
 "use client";
 
 import type { ReactNode } from "react";
-import Button from "@/components/button";
+
+const DEFAULT_CARD_ACTION = (
+  <span className='mx-auto flex h-14 w-14 items-center justify-center rounded-full border-[3px] border-[#e7dfff] bg-white text-[#b89cff] shadow-[0_1px_0_rgba(0,0,0,0.04)] transition-colors duration-150 group-hover:border-[#7c3aed] group-hover:bg-[#f4efff] group-hover:text-(--color-primary-hover) group-hover:shadow-[0_1px_0_rgba(124,58,237,0.12)]'>
+    <svg
+      viewBox='0 0 24 24'
+      fill='none'
+      aria-hidden='true'
+      className='h-8 w-8 shrink-0 translate-x-[1px]'
+    >
+      <path
+        d='M5 12H17.2'
+        stroke='currentColor'
+        strokeWidth='4.2'
+        strokeLinecap='round'
+      />
+      <path
+        d='M13.5 6.8L19.2 12L13.5 17.2'
+        stroke='currentColor'
+        strokeWidth='4.2'
+        strokeLinecap='round'
+        strokeLinejoin='round'
+      />
+    </svg>
+  </span>
+);
 
 export type CardVariant = "default" | "compact";
 
@@ -41,7 +66,7 @@ type CardProps = {
   //optional-params
   disabled?: boolean;
   title?: string;
-  buttonText?: string;
+  buttonText?: ReactNode;
   descriptionTitle?: string;
   descriptionContent?: string;
 
@@ -65,7 +90,7 @@ export default function Card({
   id,
   title,
   logo,
-  buttonText = "LET'S BEGIN",
+  buttonText = DEFAULT_CARD_ACTION,
   disabled = false,
 
   descriptionTitle,
@@ -83,14 +108,13 @@ export default function Card({
   onButtonClick,
   onHoverStart,
   onHoverEnd
-}: CardProps) {
+}: Readonly<CardProps>) {
   const isCompact = size === "compact";
   const hasDescription = Boolean(descriptionTitle || descriptionContent);
   const isClear = getIsClear();
 
   function getIsClear() {
-    // Only remove blur if the effect is disabled or if the card is not hovered or clicked on.
-    return !blurEffect || ((isSelected || isHovered) && !shouldBlur);
+    return !blurEffect || !shouldBlur;
   }
 
   function getCardSizeClasses() {
@@ -137,12 +161,11 @@ export default function Card({
 
   function handleClick() {
     if (disabled) return;
+    if (onButtonClick) {
+      onButtonClick(id);
+      return;
+    }
     onSelect?.(id);
-  }
-
-  function handleButtonClick() {
-    if (disabled) return;
-    onButtonClick?.(id);
   }
   function renderTitle() {
     if (!title) return null;
@@ -150,7 +173,8 @@ export default function Card({
     return (
       <h2
         className={`
-          text-sm font-extrabold uppercase tracking-[0.18em]
+          ${title.includes("⭐") ? "text-4xl sm:text-5xl leading-none" : "text-sm uppercase tracking-[0.18em]"}
+          font-extrabold
           transition-colors duration-300
           ${getTitleSpacingClasses()}
           ${getTitleColorClasses()}
@@ -196,28 +220,21 @@ export default function Card({
 
     return (
       <div
-        onClick={(event) => event.stopPropagation()}
         className={`
-      flex items-center justify-center px-8
-      ${isCompact ? "pt-2 pb-8" : "py-8"}
-    `}
+          flex items-center justify-center px-8 pointer-events-none
+          ${getButtonSpacingClasses()}
+          ${getButtonVisibilityClasses()}
+        `}
+        aria-hidden='true'
       >
-        <div
-          className={`
-        transition-opacity duration-300
-        ${isClear ? "opacity-100" : "opacity-45"}
-      `}
-        >
-          <Button size='medium' onClick={handleButtonClick}>
-            {buttonText}
-          </Button>
-        </div>
+        {buttonText}
       </div>
     );
   }
 
   return (
-    <article
+    <button
+      type='button'
       onClick={handleClick}
       onMouseEnter={() => onHoverStart?.(id)}
       onMouseLeave={onHoverEnd}
@@ -236,6 +253,7 @@ export default function Card({
         hover:shadow-[0_24px_45px_rgba(0,0,0,0.2)]
         ${getCardSizeClasses()}
       `}
+      disabled={disabled}
     >
       <div
         className={`
@@ -258,6 +276,6 @@ export default function Card({
       {renderDescription()}
 
       {renderButton()}
-    </article>
+    </button>
   );
 }

@@ -55,7 +55,7 @@ export default function LetterSpellingMinigame({ ingredient, onComplete }: Lette
         basketX={spellingGame.basketX}
         isBasketSlowed={spellingGame.isBasketSlowed}
       />
-      a{spellingGame.isComplete && <p className='text-xl font-extrabold text-green-600'>Great spelling!</p>}
+      {spellingGame.isComplete && <p className='text-xl font-extrabold text-green-600'>Great spelling!</p>}
     </section>
   );
 }
