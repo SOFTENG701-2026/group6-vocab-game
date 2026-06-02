@@ -1,36 +1,93 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Magic Soup Buddies
+
+An interactive vocabulary learning game built for young learners. Players choose a theme, pick a difficulty, and practice words through drag-and-drop, recall, color and shape matching, spelling minigames, and voice-guided narration.
+
+## Features
+
+- **Theme selection** — Browse vocabulary themes in a carousel. *Fruits & Vegetables* is currently playable; *Transport* and *Garden* are coming soon.
+- **Play modes** — Single player (with a buddy bot) or two-player local play.
+- **Difficulty levels**
+  - **Easy** — Guided soup-making flow: drag ingredients into the pot, recall what was added, pick the correct color, review shapes, and practice saying the word.
+  - **Medium** — Letter-spelling minigame.
+  - **Hard** — Ingredient matching and letter-spelling minigames.
+- **Narrator & speech** — A monster companion and narrator provide spoken feedback using the Web Speech API and pre-recorded audio cues.
+- **Achievements & shop** — Track progress and browse in-game rewards.
+- **Accessible UI** — Large touch targets, visual hints (finger prompts, progress indicators), and kid-friendly illustrations.
+
+## Tech Stack
+
+- [Next.js 16](https://nextjs.org/) (App Router)
+- [React 19](https://react.dev/)
+- [TypeScript](https://www.typescriptlang.org/)
+- [Tailwind CSS 4](https://tailwindcss.com/)
+- [Lucide React](https://lucide.dev/) for icons
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 20+
+- npm (or yarn / pnpm / bun)
+
+### Install dependencies
+
+```bash
+npm install
+```
+
+### Run the development server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Other scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build   # Production build
+npm run start   # Start production server
+npm run lint    # Run ESLint
+```
 
-## Learn More
+## User Flow
 
-To learn more about Next.js, take a look at the following resources:
+1. **`/`** — Choose a vocabulary theme.
+2. **`/home?theme=…`** — Select 1-player or 2-player mode, then pick a difficulty.
+3. **`/easygame`** — Play the easy-mode soup game.
+4. **`/game`** — Play medium/hard minigames (ingredient match, block spelling).
+5. **`/achievements`** — View achievement progress.
+6. **`/shop`** — Browse shop items.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Project Structure
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+app/              # Next.js routes and pages
+components/       # Reusable UI (cards, modals, minigames, narrator, etc.)
+context/          # React context (game setup, currency, pause, narrative)
+domain/           # Game rules, types, themes, avatars, narrator scripts
+hooks/            # Custom hooks (e.g. useEasyGame)
+lib/              # Utilities (speech, game helpers, shop data)
+data/             # Static ingredient and game data
+public/           # Images, audio, SVG assets
+```
 
-## Deploy on Vercel
+## Key Modules
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+| Module | Purpose |
+|--------|---------|
+| `hooks/use-easy-game.ts` | State and flow for the easy game (drag, recall, color, shape, speech) |
+| `domain/themes/theme-options.ts` | Available vocabulary themes |
+| `domain/minigame-type.ts` | Minigame mapping per difficulty |
+| `components/modals/` | Difficulty, ingredient, and preview modals |
+| `context/game-setup-context.tsx` | Play mode, difficulty, and player setup |
+| `lib/speak.ts` | Web Speech API wrapper |
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Browser Notes
+
+Speech and audio features work best in modern Chromium-based browsers. Some browsers require a user interaction (click or tap) before playing speech on the theme selection screen.
+
+## License
+
+Private — CS701 Group 6 project.
