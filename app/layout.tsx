@@ -37,12 +37,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang='en' className={`${geistSans.variable} ${geistMono.variable} ${pressStart2P.variable} antialiased`}>
-      <body className='min-h-screen flex flex-col bg-gradient-to-b from-cyan-300 via-emerald-200 to-yellow-200'>
+      <body className='min-h-screen flex flex-col bg-linear-to-b from-cyan-300 via-emerald-200 to-yellow-200'>
         <GameSetupProvider>
           <CurrencyProvider>
             <GamePauseProvider>
               <NarrativeProvider>
-                <Navbar gems={0} />
+                <Navbar />
                 {children}
                 <NarratorDialogueBox />
               </NarrativeProvider>

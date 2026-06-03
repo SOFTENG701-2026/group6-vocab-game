@@ -85,7 +85,7 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
     >
       {children}
 
-      <div className='pointer-events-none fixed inset-0 z-[9999]'>
+      <div className='pointer-events-none fixed inset-0 z-9999'>
         {flyingGems.map((gem) => (
           <span
             key={gem.id}
