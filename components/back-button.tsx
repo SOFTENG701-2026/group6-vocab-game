@@ -8,10 +8,7 @@ import { useGameSetup } from "@/context/game-setup-context";
 
 const BACK_ARROW = (
   <span className='inline-flex h-5 w-10 shrink-0 items-center overflow-visible'>
-    <ArrowLeft
-      className='h-5 w-5 origin-left scale-x-[2]'
-      strokeWidth={4}
-    />
+    <ArrowLeft className='h-5 w-5 origin-left scale-x-[2]' strokeWidth={4} />
   </span>
 );
 
@@ -47,7 +44,7 @@ function BackButtonInner() {
         router.push("/game");
         return;
       }
-
+      // TODO: BUG when you navigate to the game or easygame page and return to theme page. Then clicking Achievements page and then back button it returns you to the game instead of the Theme page, ideally we should clear out the difficulty if the player goes back to lobby.
       router.push(`/home?theme=${theme}`);
       return;
     }
@@ -58,7 +55,7 @@ function BackButtonInner() {
 
   if (pathname === "/") {
     return (
-      <span className="invisible pointer-events-none">
+      <span className='invisible pointer-events-none'>
         <Button size='small' iconPosition='left' icon={BACK_ARROW}>
           Back
         </Button>
@@ -67,12 +64,7 @@ function BackButtonInner() {
   }
 
   return (
-    <Button
-      size='small'
-      iconPosition='left'
-      icon={BACK_ARROW}
-      onClick={handleBack}
-    >
+    <Button size='small' iconPosition='left' icon={BACK_ARROW} onClick={handleBack}>
       Back
     </Button>
   );
