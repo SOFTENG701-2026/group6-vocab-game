@@ -7,14 +7,21 @@ import {
   type NarrativeProgress,
 } from "@/domain/narrator/narrative-milestones";
 import { findNarrativeRule } from "@/domain/narrator/narrative-rules";
+import { DEFAULT_NARRATIVE_PRESENTATION, type NarrativePresentation } from "@/domain/narrator/narrative-presentation";
 import { useGamePause } from "@/context/game-pause-context";
 import type { NarrativeEvent } from "@/domain/narrator/narrative-events";
 import type { NarrationScript, NarrationStep } from "@/domain/narrator/narrative-scripts";
+
+type QueuedNarration = {
+  script: NarrationScript;
+  presentation: NarrativePresentation;
+};
 
 type NarrativeState = {
   progress: NarrativeProgress;
   currentScript: NarrationScript | null;
   currentStep: NarrationStep | null;
+  presentation: NarrativePresentation;
   isPlaying: boolean;
 };
 
@@ -26,6 +33,7 @@ type NarrativeAction =
   | {
       type: "START_SCRIPT";
       script: NarrationScript;
+      presentation: NarrativePresentation;
     }
   | {
       type: "START_STEP";
@@ -39,6 +47,7 @@ const initialState: NarrativeState = {
   progress: initialNarrativeProgress,
   currentScript: null,
   currentStep: null,
+  presentation: { type: "hidden" },
   isPlaying: false,
 };
 
@@ -55,6 +64,7 @@ function narrativeReducer(state: NarrativeState, action: NarrativeAction): Narra
         ...state,
         currentScript: action.script,
         currentStep: action.script.steps[0] ?? null,
+        presentation: action.presentation,
         isPlaying: true,
       };
 
@@ -69,6 +79,7 @@ function narrativeReducer(state: NarrativeState, action: NarrativeAction): Narra
         ...state,
         currentScript: null,
         currentStep: null,
+        presentation: { type: "hidden" },
         isPlaying: false,
       };
 
@@ -81,6 +92,7 @@ type NarrativeContextValue = {
   progress: NarrativeProgress;
   currentScript: NarrationScript | null;
   currentStep: NarrationStep | null;
+  presentation: NarrativePresentation;
   isPlaying: boolean;
   shouldBlockInteraction: boolean;
   dispatchNarrativeEvent: (event: NarrativeEvent) => void;
@@ -174,7 +186,7 @@ export function NarrativeProvider({ children }: { children: ReactNode }) {
 
   const progressRef = useRef(state.progress);
   const isPlayingRef = useRef(false);
-  const queueRef = useRef<NarrationScript[]>([]);
+  const queueRef = useRef<QueuedNarration[]>([]);
   const runIdRef = useRef(0);
 
   const finishScript = useCallback(() => {
@@ -183,19 +195,19 @@ export function NarrativeProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const runNextQueuedScript = useCallback(() => {
-    const nextScript = queueRef.current.shift();
+    const nextNarration = queueRef.current.shift();
 
-    if (!nextScript) return;
+    if (!nextNarration) return;
 
-    void runScript(nextScript);
+    void runScript(nextNarration);
   }, []);
 
-  async function runScript(script: NarrationScript) {
+  async function runScript({ script, presentation }: QueuedNarration) {
     const currentRunNumber = runIdRef.current + 1;
     runIdRef.current = currentRunNumber;
 
     isPlayingRef.current = true;
-    dispatch({ type: "START_SCRIPT", script });
+    dispatch({ type: "START_SCRIPT", script, presentation });
 
     if (script.blocking) {
       pauseGame("narrator");
@@ -254,6 +266,9 @@ export function NarrativeProvider({ children }: { children: ReactNode }) {
 
     if (!script) return;
 
+    const presentation = rule.getPresentation?.(event, currentProgress) ?? DEFAULT_NARRATIVE_PRESENTATION;
+    const narration: QueuedNarration = { script, presentation };
+
     if (rule.markCompleted) {
       const nextProgress = addMilestones(currentProgress, rule.markCompleted);
       progressRef.current = nextProgress;
@@ -261,11 +276,11 @@ export function NarrativeProvider({ children }: { children: ReactNode }) {
     }
 
     if (isPlayingRef.current) {
-      queueRef.current.push(script);
+      queueRef.current.push(narration);
       return;
     }
 
-    void runScript(script);
+    void runScript(narration);
   }, []);
 
   const value = useMemo<NarrativeContextValue>(
@@ -273,11 +288,19 @@ export function NarrativeProvider({ children }: { children: ReactNode }) {
       progress: state.progress,
       currentScript: state.currentScript,
       currentStep: state.currentStep,
+      presentation: state.presentation,
       isPlaying: state.isPlaying,
       shouldBlockInteraction: state.isPlaying && state.currentScript?.blocking === true,
       dispatchNarrativeEvent,
     }),
-    [state.progress, state.currentScript, state.currentStep, state.isPlaying, dispatchNarrativeEvent],
+    [
+      state.progress,
+      state.currentScript,
+      state.currentStep,
+      state.presentation,
+      state.isPlaying,
+      dispatchNarrativeEvent,
+    ],
   );
 
   return <NarrativeContext.Provider value={value}>{children}</NarrativeContext.Provider>;

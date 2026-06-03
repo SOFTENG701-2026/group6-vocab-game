@@ -1,6 +1,7 @@
 import type { NarrativeEvent } from "./narrative-events";
 import type { NarrativeMilestone, NarrativeProgress } from "./narrative-milestones";
 import { hasMilestone } from "./narrative-milestones";
+import { NarrativePresentation } from "./narrative-presentation";
 import {
   createCorrectLetterCaughtScript,
   createWrongLetterCaughtScript,
@@ -11,7 +12,13 @@ import {
 export type NarrativeRule = {
   id: string;
   when: (event: NarrativeEvent, progress: NarrativeProgress) => boolean;
+
+  // Controls what is said / played.
   getScript: (event: NarrativeEvent, progress: NarrativeProgress) => NarrationScript | null;
+
+  // Controls how it appears visually.
+  getPresentation?: (event: NarrativeEvent, progress: NarrativeProgress) => NarrativePresentation;
+
   markCompleted?: NarrativeMilestone[];
 };
 
@@ -23,6 +30,8 @@ export const narrativeRules: NarrativeRule[] = [
     getScript: () => narrationScripts.gameStartedIntro,
 
     markCompleted: ["game_started_intro_seen"],
+
+    getPresentation: () => ({ type: "hidden" }),
   },
 
   {
@@ -40,6 +49,15 @@ export const narrativeRules: NarrativeRule[] = [
       if (event.type !== "CORRECT_LETTER_CAUGHT") return null;
 
       return createCorrectLetterCaughtScript(event.letter);
+    },
+
+    getPresentation: (event) => {
+      if (event.type !== "CORRECT_LETTER_CAUGHT") return { type: "dialogue" };
+
+      return {
+        type: "caught-letter-dialogue",
+        letter: event.letter,
+      };
     },
   },
 
