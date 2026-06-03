@@ -1,77 +1,34 @@
 "use client";
 
 import { Mic } from "lucide-react";
+import ListeningWave from "./listening-wave";
 
 type ListeningPromptProps = {
   isListening: boolean;
 };
 
 export default function ListeningPrompt({ isListening }: ListeningPromptProps) {
-  const iconColorClass = isListening ? "text-green-400" : "text-white";
-  const waveColorClass = isListening ? "bg-green-400" : "bg-white/90";
-  const buttonColorClass = isListening ? "bg-white" : "bg-(--color-primary)";
-
   return (
     <div
       aria-hidden={!isListening}
-      className='pointer-events-none fixed inset-0 z-10000 flex items-center justify-center'
+      className='w-[min(84vw,22rem)] rounded-[2rem] border-4 border-(--card-border) bg-(--card-body-bg) p-4 shadow-[0_18px_35px_rgba(0,0,0,0.22)]'
     >
-      <div
-        className={`
-          flex h-56 w-56 flex-col items-center justify-center gap-5
-          rounded-full ${buttonColorClass} shadow-2xl
-          transition-all duration-500 ease-out
-          ${isListening ? "scale-100 opacity-100 animate-mic-pulse" : "scale-90 opacity-35"}
-        `}
-      >
-        <Mic
-          size={72}
-          strokeWidth={2.8}
-          className={`
-            transition-all duration-500 ease-out
-            ${iconColorClass}
-            ${isListening ? "scale-110" : "scale-100"}
-          `}
-        />
+      <div className='rounded-[1.5rem] bg-(--card-header-bg) px-5 py-5'>
+        <div className='flex min-h-32 items-center justify-center rounded-[1.25rem] bg-(--card-body-bg) px-5 py-5'>
+          <Mic
+            size={72}
+            strokeWidth={2.6}
+            className={`
+              transition-all duration-300
+              ${isListening ? "text-(--color-primary) scale-105" : "text-(--color-primary)"}
+            `}
+          />
+        </div>
 
-        <div
-          className={`
-            flex h-10 items-end gap-2 transition-opacity duration-500
-            ${isListening ? "opacity-100" : "opacity-70"}
-          `}
-        >
-          <span
-            className={`
-              w-2 rounded-full transition-colors duration-500
-              ${waveColorClass}
-              ${isListening ? "animate-listening-wave" : ""}
-            `}
-            style={{ height: 12, animationDelay: "0ms" }}
-          />
-          <span
-            className={`
-              w-2 rounded-full transition-colors duration-500
-              ${waveColorClass}
-              ${isListening ? "animate-listening-wave" : ""}
-            `}
-            style={{ height: 24, animationDelay: "120ms" }}
-          />
-          <span
-            className={`
-              w-2 rounded-full transition-colors duration-500
-              ${waveColorClass}
-              ${isListening ? "animate-listening-wave" : ""}
-            `}
-            style={{ height: 16, animationDelay: "240ms" }}
-          />
-          <span
-            className={`
-              w-2 rounded-full transition-colors duration-500
-              ${waveColorClass}
-              ${isListening ? "animate-listening-wave" : ""}
-            `}
-            style={{ height: 30, animationDelay: "360ms" }}
-          />
+        <div className='mt-4 flex items-center justify-center gap-4 rounded-[1.25rem] bg-(--button-bg) px-4 py-4'>
+          <Mic size={28} strokeWidth={2.8} className='text-(--color-on-primary)' aria-hidden='true' />
+
+          <ListeningWave isListening={isListening} />
         </div>
       </div>
     </div>
