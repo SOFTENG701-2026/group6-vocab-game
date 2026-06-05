@@ -110,7 +110,10 @@ export function useEasyGame(playMode: PlayMode = "single") {
     setIsDropped(true);
     setIsPotGuideVisible(false);
     setIsDraggingIngredient(false);
-    say(`What did we put in the pot? Let's choose one from the list!`);
+    // Wait for the bubbling sound effect to finish before speaking
+    setTimeout(() => {
+      say(`What did we put in the pot? Let's choose one from the list!`);
+    }, 2000);
   }
 
   function handleRecallSelect(ingredientId: string) {

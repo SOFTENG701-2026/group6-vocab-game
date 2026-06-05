@@ -9,6 +9,7 @@ import MonsterBubble from "@/components/easygame/monster-bubble";
 import ColorOptionCard from "@/components/easygame/color-option-card";
 import ShapeOptionCard from "@/components/easygame/shape-option-card";
 import { useEasyGame } from "@/hooks/use-easy-game";
+import { playSparkleChime, playBubblingSfx } from "@/lib/sfx";
 
 const COLOR_OPTIONS = [
   { colorId: "red", label: "Red" },
@@ -32,6 +33,34 @@ const AMAZING_STARS = [
   { left: "62%", delay: "180ms", duration: "980ms" },
   { left: "74%", delay: "260ms", duration: "1080ms" },
   { left: "82%", delay: "140ms", duration: "950ms" },
+];
+
+const POT_BUBBLES = [
+  { left: "28%", delay: "0ms",   duration: "1100ms", color: "#f87171" },
+  { left: "42%", delay: "180ms", duration: "1300ms", color: "#fbbf24" },
+  { left: "55%", delay: "80ms",  duration: "1000ms", color: "#34d399" },
+  { left: "35%", delay: "320ms", duration: "1200ms", color: "#60a5fa" },
+  { left: "62%", delay: "240ms", duration: "950ms",  color: "#a78bfa" },
+  { left: "48%", delay: "140ms", duration: "1150ms", color: "#f472b6" },
+  { left: "30%", delay: "420ms", duration: "1050ms", color: "#fb923c" },
+  { left: "58%", delay: "60ms",  duration: "1250ms", color: "#4ade80" },
+  { left: "44%", delay: "360ms", duration: "1080ms", color: "#38bdf8" },
+  { left: "38%", delay: "500ms", duration: "1180ms", color: "#e879f9" },
+];
+
+const RECALL_STARS = [
+  { left: "8%",  delay: "0ms",   duration: "1800ms", emoji: "⭐" },
+  { left: "20%", delay: "120ms", duration: "2000ms", emoji: "✨" },
+  { left: "32%", delay: "220ms", duration: "1900ms", emoji: "🌟" },
+  { left: "44%", delay: "40ms",  duration: "2100ms", emoji: "⭐" },
+  { left: "56%", delay: "160ms", duration: "1850ms", emoji: "✨" },
+  { left: "68%", delay: "280ms", duration: "2050ms", emoji: "🌟" },
+  { left: "80%", delay: "80ms",  duration: "1950ms", emoji: "⭐" },
+  { left: "92%", delay: "200ms", duration: "1800ms", emoji: "✨" },
+  { left: "14%", delay: "340ms", duration: "2000ms", emoji: "🌟" },
+  { left: "50%", delay: "0ms",   duration: "2200ms", emoji: "⭐" },
+  { left: "74%", delay: "300ms", duration: "1900ms", emoji: "✨" },
+  { left: "38%", delay: "140ms", duration: "2100ms", emoji: "🌟" },
 ];
 
 type AutoDemoCardState = {
@@ -212,7 +241,11 @@ export default function EasyGamePage() {
   const ingredientCardRef = useRef<HTMLButtonElement | null>(null);
   const autoDemoFinishTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const potJumpTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const recallStarsTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const potBubblesTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [autoDemoCardState, setAutoDemoCardState] = useState<AutoDemoCardState | null>(null);
+  const [showRecallStars, setShowRecallStars] = useState(false);
+  const [showPotBubbles, setShowPotBubbles] = useState(false);
   const [isClickDemoPlaying, setIsClickDemoPlaying] = useState(false);
   const [isPotJumping, setIsPotJumping] = useState(false);
   const [showInitialHint, setShowInitialHint] = useState(true);
@@ -260,8 +293,38 @@ export default function EasyGamePage() {
         clearTimeout(potJumpTimeoutRef.current);
         potJumpTimeoutRef.current = null;
       }
+      if (recallStarsTimeoutRef.current) {
+        clearTimeout(recallStarsTimeoutRef.current);
+        recallStarsTimeoutRef.current = null;
+      }
+      if (potBubblesTimeoutRef.current) {
+        clearTimeout(potBubblesTimeoutRef.current);
+        potBubblesTimeoutRef.current = null;
+      }
     };
   }, []);
+
+  useEffect(() => {
+    if (!isDropped) return;
+    setShowPotBubbles(true);
+    playBubblingSfx();
+    if (potBubblesTimeoutRef.current) clearTimeout(potBubblesTimeoutRef.current);
+    potBubblesTimeoutRef.current = setTimeout(() => {
+      setShowPotBubbles(false);
+      potBubblesTimeoutRef.current = null;
+    }, 2000);
+  }, [isDropped]);
+
+  useEffect(() => {
+    if (!recallCorrectSelected) return;
+    setShowRecallStars(true);
+    playSparkleChime();
+    if (recallStarsTimeoutRef.current) clearTimeout(recallStarsTimeoutRef.current);
+    recallStarsTimeoutRef.current = setTimeout(() => {
+      setShowRecallStars(false);
+      recallStarsTimeoutRef.current = null;
+    }, 2800);
+  }, [recallCorrectSelected]);
 
   // Highlight hints when user needs to act
   const shouldHighlightColor = isDropped && isRecallComplete && !selectedColorId && !isRoundComplete && !isWrongColor;
@@ -367,10 +430,10 @@ export default function EasyGamePage() {
             </span>
           ))}
 
-          <span className="absolute left-[40%] top-[22%] text-5xl animate-firework-pop" style={{ animationDelay: "80ms" }}>
+          <span className="absolute left-[40%] top-[22%] text-8xl animate-firework-pop" style={{ animationDelay: "80ms" }}>
             🎆
           </span>
-          <span className="absolute left-[57%] top-[24%] text-4xl animate-firework-pop" style={{ animationDelay: "220ms" }}>
+          <span className="absolute left-[57%] top-[24%] text-6xl animate-firework-pop" style={{ animationDelay: "220ms" }}>
             🎇
           </span>
         </div>
@@ -458,6 +521,20 @@ export default function EasyGamePage() {
           <div className="relative flex items-center justify-center">
             {/* drag hints removed; click-only interaction */}
 
+            {showRecallStars && (
+              <div className="pointer-events-none absolute inset-x-0 top-0 z-20 h-full overflow-visible">
+                {RECALL_STARS.map((star) => (
+                  <span
+                    key={`recall-${star.left}-${star.delay}`}
+                    className="absolute text-7xl animate-star-fall"
+                    style={{ left: star.left, top: "5%", animationDelay: star.delay, animationDuration: star.duration }}
+                  >
+                    {star.emoji}
+                  </span>
+                ))}
+              </div>
+            )}
+
             <button
               type="button"
               ref={potButtonRef}
@@ -475,6 +552,25 @@ export default function EasyGamePage() {
               {isRoundComplete && (
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/4 pointer-events-none -z-10">
                   <span className="text-4xl md:text-5xl opacity-90 animate-bounce drop-shadow-lg">✨</span>
+                </div>
+              )}
+              {showPotBubbles && (
+                <div className="pointer-events-none absolute inset-x-0 bottom-[45%] z-20 h-[40%] overflow-visible">
+                  {POT_BUBBLES.map((b) => (
+                    <span
+                      key={`bubble-${b.left}-${b.delay}`}
+                      className="absolute rounded-full opacity-85 animate-bubble-rise"
+                      style={{
+                        left: b.left,
+                        bottom: 0,
+                        width: 40 + Math.random() * 30,
+                        height: 40 + Math.random() * 30,
+                        backgroundColor: b.color,
+                        animationDelay: b.delay,
+                        animationDuration: b.duration,
+                      }}
+                    />
+                  ))}
                 </div>
               )}
             </button>
@@ -636,6 +732,30 @@ export default function EasyGamePage() {
       </div>
 
       <style jsx>{`
+        @keyframes bubbleRise {
+          0% {
+            transform: translateY(0) scale(0.5);
+            opacity: 0;
+          }
+          15% {
+            opacity: 0.9;
+            transform: translateY(-12px) scale(1);
+          }
+          70% {
+            opacity: 0.7;
+          }
+          100% {
+            transform: translateY(-160px) scale(1.2);
+            opacity: 0;
+          }
+        }
+
+        :global(.animate-bubble-rise) {
+          animation-name: bubbleRise;
+          animation-timing-function: ease-out;
+          animation-fill-mode: both;
+        }
+
         @keyframes starFall {
           0% {
             transform: translateY(-20px) scale(0.6) rotate(0deg);
